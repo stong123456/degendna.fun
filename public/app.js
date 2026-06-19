@@ -105,7 +105,7 @@ function renderLeaderboard() {
   const board = $("#leaderboard-list");
   const items = JSON.parse(localStorage.getItem("onchainMirrorLeaderboard") || "[]");
   if (!items.length) {
-    board.innerHTML = `<div class="empty">还没有检测记录。先照一个钱包，本机榜单就会开始变得刻薄。</div>`;
+    board.innerHTML = `<div class="empty">还没有本机预览记录。正式公开榜会在 X 授权后写入服务端榜单。</div>`;
     return;
   }
 
@@ -251,11 +251,21 @@ function drawWrappedText(ctx, textValue, x, y, maxWidth, lineHeight, maxLines = 
   if (line && lines < maxLines) ctx.fillText(line, x, y);
 }
 
-function drawShareCanvas(report) {
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = src;
+  });
+}
+
+async function drawShareCanvas(report) {
   const canvas = $("#card-canvas");
   const ctx = canvas.getContext("2d");
   const w = canvas.width;
   const h = canvas.height;
+  const avatar = await loadImage("/assets/stone-avatar.png");
 
   const bg = ctx.createLinearGradient(0, 0, w, h);
   bg.addColorStop(0, "#3a140d");
@@ -354,7 +364,24 @@ function drawShareCanvas(report) {
 
   ctx.fillStyle = "#a99f91";
   ctx.font = "700 26px Microsoft YaHei, sans-serif";
-  ctx.fillText(report.siteHost, 92, 1510);
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(126, 1498, 34, 0, Math.PI * 2);
+  ctx.clip();
+  ctx.drawImage(avatar, 92, 1464, 68, 68);
+  ctx.restore();
+  ctx.strokeStyle = "#b8ff5c";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(126, 1498, 34, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.fillStyle = "#f7f1e8";
+  ctx.font = "800 28px Microsoft YaHei, sans-serif";
+  ctx.fillText("@Stone141319", 176, 1490);
+  ctx.fillStyle = "#a99f91";
+  ctx.font = "700 22px Microsoft YaHei, sans-serif";
+  ctx.fillText(report.siteHost, 176, 1524);
   ctx.textAlign = "right";
   ctx.fillText("不签名 · 只看公开数据", 1110, 1510);
   ctx.textAlign = "left";
@@ -363,7 +390,7 @@ function drawShareCanvas(report) {
 
 async function downloadCard() {
   if (!state.currentReport) return;
-  const canvas = drawShareCanvas(state.currentReport);
+  const canvas = await drawShareCanvas(state.currentReport);
   const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png", 0.96));
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -373,14 +400,52 @@ async function downloadCard() {
   URL.revokeObjectURL(url);
 }
 
-function shareToX() {
+function buildShareText(report) {
+  return `我的链上人格：${report.personality}
+Degen 指数 ${report.scores.degen}/100，钻石手 ${report.scores.diamond}/100。
+${report.verdict}
+
+你敢测吗？`;
+}
+
+function openXIntent(report) {
   if (!state.currentReport) return;
-  const report = state.currentReport;
-  const textValue = `我的链上人格：${report.personality}\nDegen 指数 ${report.scores.degen}/100，钻石手 ${report.scores.diamond}/100。\n${report.verdict}\n\n你敢测吗？`;
   const url = new URL("https://twitter.com/intent/tweet");
-  url.searchParams.set("text", textValue);
+  url.searchParams.set("text", buildShareText(report));
   url.searchParams.set("url", report.siteUrl || location.href);
   window.open(url.toString(), "_blank", "noopener,noreferrer");
+}
+
+async function shareCard() {
+  if (!state.currentReport) return;
+  const report = state.currentReport;
+  const canvas = await drawShareCanvas(report);
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png", 0.96));
+  const filename = `degendna-${report.address.slice(2, 8)}.png`;
+  const file = new File([blob], filename, { type: "image/png" });
+  const shareData = {
+    title: `链上照妖镜：${report.personality}`,
+    text: buildShareText(report),
+    url: report.siteUrl || location.href,
+    files: [file]
+  };
+
+  if (navigator.canShare?.({ files: [file] }) && navigator.share) {
+    try {
+      await navigator.share(shareData);
+      return;
+    } catch (error) {
+      if (error?.name === "AbortError") return;
+    }
+  }
+
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = objectUrl;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(objectUrl);
+  openXIntent(report);
 }
 
 async function handlePk(event) {
@@ -414,8 +479,7 @@ async function handlePk(event) {
 
 form.addEventListener("submit", handleScan);
 $("#pk-form").addEventListener("submit", handlePk);
-$("#download-card").addEventListener("click", downloadCard);
-$("#share-x").addEventListener("click", shareToX);
+$("#share-card-button").addEventListener("click", shareCard);
 $("#unlock-follow").addEventListener("click", () => {
   state.unlocked = true;
   localStorage.setItem("onchainMirrorFollowUnlocked", "1");
@@ -426,6 +490,10 @@ $("#unlock-follow").addEventListener("click", () => {
 $("#clear-board").addEventListener("click", () => {
   localStorage.removeItem("onchainMirrorLeaderboard");
   renderLeaderboard();
+});
+$("#x-login-teaser").addEventListener("click", () => {
+  setStatus("X 授权上榜需要先在 X Developer Portal 配置 OAuth App：callback 用 https://degendna.fun/api/auth/x/callback。配置好 Client ID/Secret 后就能接入。");
+  setTimeout(clearStatus, 5200);
 });
 
 $$("[data-sample]").forEach((button) => {

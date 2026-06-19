@@ -110,6 +110,10 @@ button {
   flex-wrap: wrap;
 }
 
+.share-actions .primary-button {
+  width: 100%;
+}
+
 .ghost-button,
 .primary-button,
 .quick-row button {
@@ -518,6 +522,27 @@ input:focus {
   margin-top: 16px;
 }
 
+.auth-teaser {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 14px;
+  border: 1px solid rgba(184, 255, 92, 0.2);
+  border-radius: var(--radius);
+  padding: 12px;
+  background: rgba(184, 255, 92, 0.06);
+}
+
+.auth-teaser span {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.auth-teaser .primary-button {
+  flex: 0 0 auto;
+}
+
 .chain-row,
 .token-row,
 .board-row {
@@ -606,6 +631,7 @@ input:focus {
 .share-card-foot {
   position: relative;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 16px;
@@ -684,6 +710,22 @@ input:focus {
 
 .share-card-foot {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-owner {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: 9px;
+  color: var(--ink);
+}
+
+.card-owner img {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(184, 255, 92, 0.45);
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .mini-panel {
@@ -817,6 +859,11 @@ dd {
   .metric-strip,
   .report-split {
     grid-template-columns: 1fr;
+  }
+
+  .auth-teaser {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .diagnosis-heading {

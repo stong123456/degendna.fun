@@ -22,7 +22,7 @@
         </a>
         <nav class="nav-actions" aria-label="工具入口">
           <button class="ghost-button" data-scroll="#pk-panel" type="button">钱包 PK</button>
-          <button class="ghost-button" data-scroll="#leaderboard" type="button">本机榜单</button>
+          <button class="ghost-button" data-scroll="#leaderboard" type="button">X 排行榜</button>
           <a class="ghost-button link-button" href="https://degendna.fun" target="_blank" rel="noreferrer">degendna.fun</a>
         </nav>
       </header>
@@ -33,7 +33,7 @@
             <img src="/assets/stone-avatar.png" alt="Stone141319 头像" />
             <div>
               <h2>先关注 Stone，再照钱包</h2>
-              <p>完成关注任务后解锁链上人格报告。第一版不强制登录 X，用本机确认解锁；后续可以接 X OAuth 做硬校验。</p>
+              <p>关注后就能照钱包；想进公开排行榜、显示 X 头像和名字，再用 X 授权登录。</p>
             </div>
           </div>
           <div class="gate-actions">
@@ -170,13 +170,15 @@
                   <blockquote id="card-verdict">你不是没有判断力，你只是太容易相信下一根阳线。</blockquote>
                 </div>
                 <div class="share-card-foot">
+                  <span class="card-owner">
+                    <img src="/assets/stone-avatar.png" alt="@Stone141319" />
+                    <b>@Stone141319</b>
+                  </span>
                   <span id="card-site">degendna.fun</span>
-                  <span>不签名 · 只看公开数据</span>
                 </div>
               </div>
               <div class="share-actions">
-                <button id="download-card" class="primary-button" type="button">下载晒图</button>
-                <button id="share-x" class="ghost-button" type="button">发到 X</button>
+                <button id="share-card-button" class="primary-button" type="button">生成晒图并发到 X</button>
               </div>
             </section>
 
@@ -208,10 +210,14 @@
         <section id="leaderboard" class="leaderboard">
           <div class="section-title-row">
             <div>
-              <h2>本机人格榜</h2>
-              <p>先用 localStorage 做冷启动，后续接 Supabase 就能变成公开 KOL 榜。</p>
+              <h2>X 授权排行榜</h2>
+              <p>普通检测不需要登录；只有自愿上榜的钱包才需要 X 授权，用头像、昵称和钱包人格一起卷。</p>
             </div>
-            <button id="clear-board" class="ghost-button" type="button">清空</button>
+            <button id="clear-board" class="ghost-button" type="button">清空本机预览</button>
+          </div>
+          <div class="auth-teaser">
+            <span>上榜后会显示：X 头像 / 昵称 / @handle / 钱包人格 / Degen 指数 / 钻石手指数</span>
+            <button id="x-login-teaser" class="primary-button" type="button">X 授权上榜</button>
           </div>
           <div id="leaderboard-list" class="leaderboard-list"></div>
         </section>
