@@ -1901,6 +1901,10 @@ ${verdict}
 degendna.fun`;
 }
 
+function trimSentenceEnd(text) {
+  return String(text || "").replace(/[。.!！?？]+$/u, "");
+}
+
 function buildReportModes(context) {
   const modes = {};
   for (const mode of ["normal", "roast", "abstract", "kol"]) {
@@ -1917,8 +1921,8 @@ function buildReportModes(context) {
       holdingBehavior: holdingSummary(context.metrics, context.address, context.lang, mode),
       lossBlackBox: pickLocalized(
         context.lang,
-        `你的主要亏损来源不是市场，而是${modeContext.lossCause}。`,
-        `Your main leak is not the market; it is that ${modeContext.lossCause}.`
+        `你的主要亏损来源不是市场，而是${trimSentenceEnd(modeContext.lossCause)}。`,
+        `Your main leak is not the market; it is that ${trimSentenceEnd(modeContext.lossCause)}.`
       ),
       alphaRadar: buildModeAlphaRadar(mode, modeContext),
       fate90Days: buildModeFate(context.metrics, context.scores, context.address, context.lang, mode),
