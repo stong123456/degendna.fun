@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const publicDir = resolve(__dirname, "public");
 const port = Number(process.env.PORT || 8787);
+const host = process.env.HOST || (process.env.NODE_ENV === "production" ? "0.0.0.0" : "127.0.0.1");
 
 const SITE_URL = process.env.PUBLIC_SITE_URL || "https://degendna.fun";
 const SITE_HOST = process.env.PUBLIC_SITE_HOST || "degendna.fun";
@@ -965,6 +966,7 @@ const server = createServer(async (req, res) => {
   await serveStatic(req, res, url.pathname);
 });
 
-server.listen(port, "127.0.0.1", () => {
-  console.log(`链上照妖镜 running at http://127.0.0.1:${port}`);
+server.listen(port, host, () => {
+  const shownHost = host === "0.0.0.0" ? "127.0.0.1" : host;
+  console.log(`链上照妖镜 running at http://${shownHost}:${port}`);
 });
