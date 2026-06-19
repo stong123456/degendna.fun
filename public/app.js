@@ -10,7 +10,7 @@ const I18N = {
       aria: "关注任务",
       avatarAlt: "Stone141319 头像",
       title: "先关注石头，再照钱包",
-      copy: "关注后就能照钱包；想进公开排行榜、显示 X 头像和名字，再用 X 授权登录。",
+      copy: "关注后就能照钱包；填 @X 用户名会显示头像和名字，并自动加入公开排行榜。",
       follow: "关注石头 @Stone141319",
       unlock: "我已关注，解锁工具",
       unlocked: "已解锁",
@@ -30,7 +30,12 @@ const I18N = {
       unlockedNote: "已解锁。不连接钱包，不要签名，不碰私钥。只读取公开链上数据。",
       lockedNote: "先关注石头并确认后解锁。全程不连接钱包、不签名。",
       invalid: "请输入有效的 EVM 钱包地址。",
+      xLabel: "X 用户名（可选，上榜用）",
+      xPlaceholder: "@Stone141319",
+      xHelp: "填 @用户名后会读取 X 头像，自动加入公开排行榜。",
+      invalidX: "请输入有效的 @X 用户名，最多 15 位字母、数字或下划线。",
       loading: "正在读取 Ethereum / Base / Arbitrum / Optimism / Polygon / BNB Chain 公开链上数据...",
+      loadingProfile: "正在读取 X 头像和用户名...",
       failed: "生成失败，请稍后再试。",
       mustFollow: "先完成关注石头的任务，再生成链上人格报告。"
     },
@@ -92,22 +97,24 @@ const I18N = {
       failed: "PK 失败。"
     },
     board: {
-      title: "X 授权排行榜",
-      copy: "普通检测不需要登录；只有自愿上榜的钱包才需要 X 授权，用头像、昵称和钱包人格一起卷。",
-      clear: "清空本机预览",
-      teaser: "上榜后会显示：X 头像 / 昵称 / @handle / 钱包人格 / Degen 指数 / 钻石手指数",
-      auth: "X 授权上榜",
-      empty: "还没有本机预览记录。正式公开榜会在 X 授权后写入服务端榜单。",
+      title: "X 用户名排行榜",
+      copy: "填 @X 用户名生成报告后，头像、名字、钱包人格和综合评分会自动上榜。",
+      refresh: "刷新榜单",
+      teaser: "上榜后会显示：X 头像 / @handle / 钱包人格 / Degen 指数 / 钻石手指数 / 综合处刑分",
+      empty: "还没有公开记录。填 @X 用户名生成报告，第一张链上精神病历就会自动上榜。",
       retest: "重测",
       diamond: "钻石手",
+      composite: "综合处刑分",
+      submitted: "已自动加入排行榜。",
+      submitFailed: "排行榜提交失败，但报告已生成。",
+      loading: "正在读取公开排行榜...",
       rankAria: "排行榜分类",
       rankDegen: "本周最高 Degen 指数",
       rankDiamond: "本周最强钻石手",
       rankAirdrop: "本周最像空投猎人",
       rankTop: "本周最惨接盘侠",
       rankCivil: "本周最像链上公务员",
-      rankUninstall: "本周最有可能卸载钱包",
-      authHint: "X 授权上榜需要先在 X Developer Portal 配置 OAuth App：callback 用 https://degendna.fun/api/auth/x/callback。配置好 Client ID/Secret 后就能接入。"
+      rankUninstall: "本周最有可能卸载钱包"
     },
     report: {
       strategyPrefix: "",
@@ -118,6 +125,9 @@ const I18N = {
     },
     share: {
       titlePrefix: "链上照妖镜：",
+      preparing: "正在生成晒图...",
+      imageCopied: "已打开 X 发帖页，晒图已复制到剪贴板，直接粘贴即可。",
+      imageDownloaded: "已打开 X 发帖页，浏览器不支持复制图片，PNG 已自动下载。",
       text: (report) => `我的链上 Degen 基因检测结果出来了：${report.personality}
 Degen 指数 ${report.scores.degen}/100，钻石手 ${report.scores.diamond}/100。
 ${report.verdict}
@@ -136,7 +146,7 @@ ${report.verdict}
       aria: "Follow gate",
       avatarAlt: "Stone141319 avatar",
       title: "Follow Stone to unlock the mirror",
-      copy: "Following unlocks wallet scans. X login is only needed if you want to enter the public leaderboard with avatar and name.",
+      copy: "Following unlocks scans. Add an @X handle to show avatar/name and enter the public leaderboard.",
       follow: "Follow @Stone141319",
       unlock: "I followed, unlock",
       unlocked: "Unlocked",
@@ -156,7 +166,12 @@ ${report.verdict}
       unlockedNote: "Unlocked. No wallet connection, no signature, no private keys. Public onchain data only.",
       lockedNote: "Follow @Stone141319 and confirm to unlock. No wallet connection or signature required.",
       invalid: "Enter a valid EVM wallet address.",
+      xLabel: "X handle (optional, for ranking)",
+      xPlaceholder: "@Stone141319",
+      xHelp: "Add an @handle to fetch the X avatar and enter the public leaderboard.",
+      invalidX: "Enter a valid @X handle, up to 15 letters, numbers, or underscores.",
       loading: "Reading public onchain data from Ethereum / Base / Arbitrum / Optimism / Polygon / BNB Chain...",
+      loadingProfile: "Reading X avatar and username...",
       failed: "Generation failed. Try again later.",
       mustFollow: "Follow @Stone141319 first, then generate your Degen DNA report."
     },
@@ -218,22 +233,24 @@ ${report.verdict}
       failed: "PK failed."
     },
     board: {
-      title: "X-Verified Leaderboard",
-      copy: "Scanning does not require login. Only wallets that choose to rank publicly need X auth for avatar, name, and handle.",
-      clear: "Clear local preview",
-      teaser: "Leaderboard identity: X avatar / name / @handle / wallet type / Degen Index / Diamond Hands",
-      auth: "Login with X to rank",
-      empty: "No local preview records yet. The public board will write to the server after X auth.",
+      title: "X Handle Leaderboard",
+      copy: "Add an @X handle before generating a report, and the avatar, name, wallet type, and composite score rank automatically.",
+      refresh: "Refresh board",
+      teaser: "Leaderboard identity: X avatar / @handle / wallet type / Degen Index / Diamond Hands / Composite Score",
+      empty: "No public records yet. Add an @X handle and generate the first onchain medical file.",
       retest: "Retest",
       diamond: "Diamond",
+      composite: "Composite",
+      submitted: "Added to the leaderboard.",
+      submitFailed: "Leaderboard submission failed, but the report is ready.",
+      loading: "Loading public leaderboard...",
       rankAria: "Leaderboard categories",
       rankDegen: "Highest Degen Index this week",
       rankDiamond: "Strongest Diamond Hands",
       rankAirdrop: "Most Airdrop Hunter",
       rankTop: "Most Tragic Top Buyer",
       rankCivil: "Most Onchain Civil Servant",
-      rankUninstall: "Most Likely to Uninstall Wallet",
-      authHint: "X leaderboard login needs an OAuth app first. Callback: https://degendna.fun/api/auth/x/callback. Add Client ID/Secret and this button can go live."
+      rankUninstall: "Most Likely to Uninstall Wallet"
     },
     report: {
       strategyPrefix: "",
@@ -244,6 +261,9 @@ ${report.verdict}
     },
     share: {
       titlePrefix: "Degen DNA: ",
+      preparing: "Creating share card...",
+      imageCopied: "X composer opened. The card image is copied, paste it into the post.",
+      imageDownloaded: "X composer opened. This browser cannot copy images, so the PNG was downloaded.",
       text: (report) => `My Degen DNA: ${report.scores.degen}/100
 Type: ${report.personality}
 Diamond Hands: ${report.scores.diamond}/100
@@ -256,6 +276,7 @@ Dare to test yours?`
 
 const state = {
   currentReport: null,
+  xProfile: null,
   unlocked: localStorage.getItem("onchainMirrorFollowUnlocked") === "1",
   lang: localStorage.getItem("onchainMirrorLang") === "en" ? "en" : "zh",
   reportMode: localStorage.getItem("onchainMirrorReportMode") || "abstract"
@@ -273,6 +294,7 @@ const $$ = (selector) => [...document.querySelectorAll(selector)];
 
 const form = $("#scan-form");
 const addressInput = $("#wallet-address");
+const xInput = $("#x-username");
 const statusLine = $("#status");
 const reportView = $("#report-view");
 const followGate = $("#follow-gate");
@@ -359,6 +381,15 @@ function isAddress(value) {
   return /^0x[a-fA-F0-9]{40}$/.test(String(value || "").trim());
 }
 
+function normalizeXUsername(value) {
+  const username = String(value || "")
+    .trim()
+    .replace(/^https?:\/\/(www\.)?(x|twitter)\.com\//i, "")
+    .replace(/^@/, "")
+    .split(/[/?#]/)[0];
+  return /^[A-Za-z0-9_]{1,15}$/.test(username) ? username : "";
+}
+
 function shortHash(hash) {
   return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
 }
@@ -396,29 +427,47 @@ async function analyze(address) {
   return payload;
 }
 
-function saveToLeaderboard(report) {
-  const key = "onchainMirrorLeaderboard";
-  const current = JSON.parse(localStorage.getItem(key) || "[]");
-  const next = [
-    {
-      address: report.address,
-      shortAddress: report.shortAddress,
-      personality: report.personality,
-      personalityId: report.personalityId,
-      language: state.lang,
-      degen: report.scores.degen,
-      diamond: report.scores.diamond,
-      generatedAt: report.generatedAt
-    },
-    ...current.filter((item) => item.address.toLowerCase() !== report.address.toLowerCase())
-  ].slice(0, 12);
-  localStorage.setItem(key, JSON.stringify(next));
-  renderLeaderboard();
+async function fetchXProfile(username) {
+  const response = await fetch(`/api/x-profile?username=${encodeURIComponent(username)}&lang=${state.lang}`);
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error || t("form.invalidX"));
+  return payload;
 }
 
-function renderLeaderboard() {
+async function saveToLeaderboard(report) {
+  if (!report.xProfile?.username) {
+    await renderLeaderboard();
+    return;
+  }
+
+  const response = await fetch(`/api/leaderboard?lang=${state.lang}`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      address: report.address,
+      username: report.xProfile.username,
+      lang: state.lang
+    })
+  });
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error || t("board.submitFailed"));
+  await renderLeaderboard(payload.entries);
+}
+
+async function renderLeaderboard(providedItems = null) {
   const board = $("#leaderboard-list");
-  const items = JSON.parse(localStorage.getItem("onchainMirrorLeaderboard") || "[]");
+  let items = providedItems;
+  if (!items) {
+    board.innerHTML = `<div class="empty">${escapeHtml(t("board.loading"))}</div>`;
+    try {
+      const response = await fetch(`/api/leaderboard?lang=${state.lang}`);
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || t("form.failed"));
+      items = payload.entries || [];
+    } catch {
+      items = [];
+    }
+  }
   if (!items.length) {
     board.innerHTML = `<div class="empty">${escapeHtml(t("board.empty"))}</div>`;
     return;
@@ -426,14 +475,17 @@ function renderLeaderboard() {
 
   renderList(
     board,
-    items.sort((a, b) => b.degen - a.degen),
+    items.sort((a, b) => Number(b.rankScore || 0) - Number(a.rankScore || 0)),
     (item) => `
       <div class="board-row">
-        <div>
-          <b>${escapeHtml(item.personality)}</b>
-          <small>${escapeHtml(item.shortAddress)} · Degen ${item.degen}/100 · ${escapeHtml(t("board.diamond"))} ${item.diamond}/100</small>
+        <div class="board-user">
+          <img src="${escapeHtml(item.avatarUrl || "/assets/stone-avatar.png")}" alt="${escapeHtml(item.handle || "@X")}" referrerpolicy="no-referrer" />
+          <div>
+            <b>${escapeHtml(item.handle || item.name || "@X")} · ${escapeHtml(item.personality)}</b>
+            <small>${escapeHtml(item.shortAddress)} · ${escapeHtml(t("board.composite"))} ${Number(item.rankScore || 0).toFixed(2)}/100 · Degen ${item.degen}/100 · ${escapeHtml(t("board.diamond"))} ${item.diamond}/100</small>
+          </div>
         </div>
-        <button class="ghost-button" type="button" data-board-address="${escapeHtml(item.address)}">${escapeHtml(t("board.retest"))}</button>
+        <button class="ghost-button" type="button" data-board-address="${escapeHtml(item.address)}" data-board-x="${escapeHtml(item.handle || item.username || "")}">${escapeHtml(t("board.retest"))}</button>
       </div>
     `
   );
@@ -471,6 +523,30 @@ function renderModeContent(report = state.currentReport) {
   text("#card-verdict", selected.verdict || report.verdict);
   const tweetText = $("#tweet-text");
   if (tweetText) tweetText.value = selected.tweetText || buildShareText(report);
+}
+
+function identityForReport(report = state.currentReport) {
+  return report?.xProfile || {
+    handle: "@Stone141319",
+    name: "@Stone141319",
+    avatarUrl: "/assets/stone-avatar.png"
+  };
+}
+
+function renderXIdentity(report = state.currentReport) {
+  const profile = report?.xProfile || null;
+  const pill = $("#x-profile-pill");
+  if (pill) pill.hidden = !profile;
+  if (profile) {
+    $("#x-profile-avatar").src = profile.avatarUrl;
+    $("#x-profile-avatar").alt = profile.handle;
+    text("#x-profile-name", `${profile.name || profile.handle} · ${profile.handle}`);
+  }
+
+  const identity = identityForReport(report);
+  $("#card-owner-avatar").src = identity.avatarUrl;
+  $("#card-owner-avatar").alt = identity.handle || "@X";
+  text("#card-owner-name", identity.handle || identity.name || "@X");
 }
 
 function renderReport(report) {
@@ -530,6 +606,7 @@ function renderReport(report) {
   text("#card-diamond", `${report.scores.diamond}/100`);
   text("#card-site", report.siteHost);
   $("#card-tags").innerHTML = report.labels.slice(0, 4).map((label) => `<span>${escapeHtml(label)}</span>`).join("");
+  renderXIdentity(report);
 
   text("#stat-portfolio", report.metrics.portfolioUsdText);
   text("#stat-tx", `${report.metrics.txCount}`);
@@ -537,7 +614,17 @@ function renderReport(report) {
   text("#stat-meme", `${Math.round(report.metrics.memeRatio * 100)}%`);
 
   renderModeContent(report);
-  saveToLeaderboard(report);
+  saveToLeaderboard(report)
+    .then(() => {
+      if (report.xProfile) {
+        setStatus(t("board.submitted"));
+        setTimeout(clearStatus, 1800);
+      }
+    })
+    .catch(() => {
+      setStatus(t("board.submitFailed"), "error");
+      setTimeout(clearStatus, 2400);
+    });
   reportView.scrollIntoView({ block: "start", behavior: "smooth" });
 }
 
@@ -549,10 +636,21 @@ async function handleScan(event) {
     setStatus(t("form.invalid"), "error");
     return;
   }
-  setStatus(t("form.loading"));
+  const rawX = xInput.value.trim();
+  const username = normalizeXUsername(rawX);
+  if (rawX && !username) {
+    setStatus(t("form.invalidX"), "error");
+    return;
+  }
+
+  setStatus(username ? t("form.loadingProfile") : t("form.loading"));
   form.querySelector("button[type='submit']").disabled = true;
   try {
+    const profile = username ? await fetchXProfile(username) : null;
+    state.xProfile = profile;
+    setStatus(t("form.loading"));
     const report = await analyze(address);
+    report.xProfile = profile;
     renderReport(report);
     clearStatus();
   } catch (error) {
@@ -604,6 +702,7 @@ function drawWrappedText(ctx, textValue, x, y, maxWidth, lineHeight, maxLines = 
 function loadImage(src) {
   return new Promise((resolve, reject) => {
     const image = new Image();
+    image.crossOrigin = "anonymous";
     image.onload = () => resolve(image);
     image.onerror = reject;
     image.src = src;
@@ -618,7 +717,9 @@ async function drawShareCanvas(report) {
   const ctx = canvas.getContext("2d");
   const w = canvas.width;
   const h = canvas.height;
-  const avatar = await loadImage("/assets/stone-avatar.png");
+  const identity = identityForReport(report);
+  const avatar = await loadImage(identity.avatarUrl || "/assets/stone-avatar.png")
+    .catch(() => loadImage("/assets/stone-avatar.png"));
 
   const bg = ctx.createLinearGradient(0, 0, w, h);
   bg.addColorStop(0, "#3a140d");
@@ -729,10 +830,10 @@ async function drawShareCanvas(report) {
 
   ctx.fillStyle = "#f7f1e8";
   ctx.font = "800 28px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText("@Stone141319", 176, 1490);
+  ctx.fillText(identity.handle || identity.name || "@X", 176, 1490);
   ctx.fillStyle = "#a99f91";
   ctx.font = "700 22px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(report.siteHost, 176, 1524);
+  ctx.fillText(`${report.siteHost} · @Stone141319`, 176, 1524);
   ctx.textAlign = "right";
   ctx.fillText(tr("card.publicOnly"), 1110, 1510);
   ctx.textAlign = "left";
@@ -743,10 +844,14 @@ async function downloadCard() {
   if (!state.currentReport) return;
   const canvas = await drawShareCanvas(state.currentReport);
   const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png", 0.96));
+  downloadBlob(blob, `degendna-${state.currentReport.address.slice(2, 8)}.png`);
+}
+
+function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `degendna-${state.currentReport.address.slice(2, 8)}.png`;
+  link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -756,17 +861,49 @@ function buildShareText(report) {
   return selected?.tweetText || I18N[state.lang].share.text(report);
 }
 
-function openXIntent(report) {
-  if (!state.currentReport) return;
+function buildXIntentUrl(report) {
   const url = new URL("https://twitter.com/intent/tweet");
   url.searchParams.set("text", buildShareText(report));
   url.searchParams.set("url", report.siteUrl || location.href);
-  window.open(url.toString(), "_blank", "noopener,noreferrer");
+  return url.toString();
+}
+
+function openXIntent(report, popup = null) {
+  if (!state.currentReport) return;
+  const url = buildXIntentUrl(report);
+  if (popup && !popup.closed) {
+    popup.location.href = url;
+    try {
+      popup.opener = null;
+    } catch {
+      // Some browsers disallow writing opener. The composer still opens.
+    }
+    return;
+  }
+  const opened = window.open(url, "_blank", "noopener,noreferrer");
+  if (!opened) window.location.href = url;
+}
+
+async function copyImageToClipboard(blob) {
+  if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") return false;
+  try {
+    const writePromise = navigator.clipboard.write([
+      new ClipboardItem({ "image/png": blob })
+    ]);
+    await Promise.race([
+      writePromise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error("clipboard timeout")), 1500))
+    ]);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function shareCard() {
   if (!state.currentReport) return;
   const report = state.currentReport;
+  setStatus(t("share.preparing"));
   const canvas = await drawShareCanvas(report);
   const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png", 0.96));
   const filename = `degendna-${report.address.slice(2, 8)}.png`;
@@ -787,13 +924,11 @@ async function shareCard() {
     }
   }
 
-  const objectUrl = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = objectUrl;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(objectUrl);
+  const copiedImage = await copyImageToClipboard(blob);
+  if (!copiedImage) downloadBlob(blob, filename);
   openXIntent(report);
+  setStatus(copiedImage ? t("share.imageCopied") : t("share.imageDownloaded"));
+  setTimeout(clearStatus, 5200);
 }
 
 async function copyTweet() {
@@ -856,6 +991,7 @@ async function setLanguage(lang) {
   setStatus(t("form.loading"));
   try {
     const report = await analyze(address);
+    report.xProfile = state.xProfile;
     renderReport(report);
     clearStatus();
   } catch (error) {
@@ -882,13 +1018,8 @@ $("#unlock-follow").addEventListener("click", () => {
   setStatus(state.lang === "zh" ? "已解锁。现在可以生成你的链上人格报告了。" : "Unlocked. You can generate your Degen DNA report now.");
   setTimeout(clearStatus, 1800);
 });
-$("#clear-board").addEventListener("click", () => {
-  localStorage.removeItem("onchainMirrorLeaderboard");
+$("#refresh-board").addEventListener("click", () => {
   renderLeaderboard();
-});
-$("#x-login-teaser").addEventListener("click", () => {
-  setStatus(t("board.authHint"));
-  setTimeout(clearStatus, 5200);
 });
 
 $$("[data-sample], [data-sample-random]").forEach((button) => {
@@ -915,6 +1046,7 @@ document.addEventListener("click", (event) => {
   const button = event.target.closest("[data-board-address]");
   if (!button) return;
   addressInput.value = button.dataset.boardAddress;
+  if (button.dataset.boardX) xInput.value = button.dataset.boardX;
   form.requestSubmit();
 });
 

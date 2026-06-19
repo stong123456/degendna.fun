@@ -8,7 +8,7 @@
       name="description"
       content="输入钱包地址，生成能晒、能比、能自嘲的链上人格报告。"
     />
-    <link rel="stylesheet" href="/styles.css?v=20260619-psychart" />
+    <link rel="stylesheet" href="/styles.css?v=20260619-xrank" />
   </head>
   <body>
     <div class="app-shell">
@@ -38,7 +38,7 @@
             <img src="/assets/stone-avatar.png" alt="Stone141319 头像" data-i18n-alt="gate.avatarAlt" />
             <div>
               <h2 data-i18n="gate.title">先关注石头，再照钱包</h2>
-              <p data-i18n="gate.copy">关注后就能照钱包；想进公开排行榜、显示 X 头像和名字，再用 X 授权登录。</p>
+              <p data-i18n="gate.copy">关注后就能照钱包；填 @X 用户名会显示头像和名字，并自动加入公开排行榜。</p>
             </div>
           </div>
           <div class="gate-actions">
@@ -72,6 +72,18 @@
               />
               <button class="primary-button" type="submit" data-i18n="form.submit">生成报告</button>
             </div>
+            <label class="x-label" for="x-username" data-i18n="form.xLabel">X 用户名（可选，上榜用）</label>
+            <div class="x-input-row">
+              <input
+                id="x-username"
+                name="xUsername"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="@Stone141319"
+                data-i18n-placeholder="form.xPlaceholder"
+              />
+              <span data-i18n="form.xHelp">填 @用户名后会读取 X 头像，自动加入公开排行榜。</span>
+            </div>
             <div class="trust-list" aria-label="安全提示" data-i18n-aria="form.trustAria">
               <span data-i18n="trust.public">只分析公开链上数据</span>
               <span data-i18n="trust.noConnect">不连接钱包</span>
@@ -99,6 +111,10 @@
                 <div>
                   <p id="report-address" class="address-line"></p>
                   <h2 id="personality">钱包人格</h2>
+                  <div id="x-profile-pill" class="x-profile-pill" hidden>
+                    <img id="x-profile-avatar" src="/assets/stone-avatar.png" alt="@X" />
+                    <span id="x-profile-name">@X</span>
+                  </div>
                 </div>
                 <div class="grade-stamp" id="degen-band">正常韭菜</div>
               </div>
@@ -193,10 +209,10 @@
                 </div>
                 <div class="share-card-foot">
                   <span class="card-owner">
-                    <img src="/assets/stone-avatar.png" alt="@Stone141319" />
-                    <b>@Stone141319</b>
+                    <img id="card-owner-avatar" src="/assets/stone-avatar.png" alt="@Stone141319" />
+                    <b id="card-owner-name">@Stone141319</b>
                   </span>
-                  <span id="card-site">degendna.fun</span>
+                  <span><b id="card-site">degendna.fun</b> · <b>@Stone141319</b></span>
                 </div>
               </div>
               <div class="share-actions">
@@ -239,14 +255,13 @@
         <section id="leaderboard" class="leaderboard">
           <div class="section-title-row">
             <div>
-              <h2 data-i18n="board.title">X 授权排行榜</h2>
-              <p data-i18n="board.copy">普通检测不需要登录；只有自愿上榜的钱包才需要 X 授权，用头像、昵称和钱包人格一起卷。</p>
+              <h2 data-i18n="board.title">X 用户名排行榜</h2>
+              <p data-i18n="board.copy">填 @X 用户名生成报告后，头像、名字、钱包人格和综合评分会自动上榜。</p>
             </div>
-            <button id="clear-board" class="ghost-button" type="button" data-i18n="board.clear">清空本机预览</button>
+            <button id="refresh-board" class="ghost-button" type="button" data-i18n="board.refresh">刷新榜单</button>
           </div>
           <div class="auth-teaser">
-            <span data-i18n="board.teaser">上榜后会显示：X 头像 / 昵称 / @handle / 钱包人格 / Degen 指数 / 钻石手指数</span>
-            <button id="x-login-teaser" class="primary-button" type="button" data-i18n="board.auth">X 授权上榜</button>
+            <span data-i18n="board.teaser">上榜后会显示：X 头像 / @handle / 钱包人格 / Degen 指数 / 钻石手指数 / 综合处刑分</span>
           </div>
           <div class="rank-prompts" aria-label="排行榜分类" data-i18n-aria="board.rankAria">
             <span data-i18n="board.rankDegen">本周最高 Degen 指数</span>
@@ -261,6 +276,6 @@
       </main>
     </div>
     <canvas id="card-canvas" width="1200" height="1600" hidden></canvas>
-    <script src="/app.js?v=20260619-psychart" type="module"></script>
+    <script src="/app.js?v=20260619-xrank" type="module"></script>
   </body>
 </html>

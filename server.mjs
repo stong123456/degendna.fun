@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
-import { readFile, stat } from "node:fs/promises";
+import { readFile, stat, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -10,6 +11,8 @@ const host = process.env.HOST || (process.env.NODE_ENV === "production" ? "0.0.0
 
 const SITE_URL = process.env.PUBLIC_SITE_URL || "https://degendna.fun";
 const SITE_HOST = process.env.PUBLIC_SITE_HOST || "degendna.fun";
+const LEADERBOARD_PATH = process.env.LEADERBOARD_PATH || join(tmpdir(), "degendna-leaderboard.json");
+const LEADERBOARD_LIMIT = 100;
 
 const CACHE_TTL_MS = 3 * 60 * 1000;
 const cache = new Map();
@@ -866,6 +869,27 @@ function normalizeAddress(input) {
   return String(input || "").trim();
 }
 
+function normalizeXUsername(input) {
+  const value = String(input || "")
+    .trim()
+    .replace(/^https?:\/\/(www\.)?(x|twitter)\.com\//i, "")
+    .replace(/^@/, "")
+    .split(/[/?#]/)[0];
+  return /^[A-Za-z0-9_]{1,15}$/.test(value) ? value : "";
+}
+
+function buildXProfile(username) {
+  const normalized = normalizeXUsername(username);
+  if (!normalized) return null;
+  return {
+    username: normalized,
+    handle: `@${normalized}`,
+    name: `@${normalized}`,
+    avatarUrl: `https://unavatar.io/x/${encodeURIComponent(normalized)}`,
+    profileUrl: `https://x.com/${encodeURIComponent(normalized)}`
+  };
+}
+
 function shortAddress(address) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
@@ -1367,6 +1391,20 @@ function scoreWallet(metrics) {
     diamond: clamp(diamond),
     airdrop: clamp(airdrop)
   };
+}
+
+function rankScore(metrics, scores, address) {
+  const fingerprint = stableIndex(address, "leaderboard-fingerprint", 1000) / 1000;
+  const raw =
+    scores.degen * 0.44 +
+    scores.diamond * 0.2 +
+    scores.airdrop * 0.18 +
+    Math.min(7, metrics.chainsWithActivity * 1.15) +
+    Math.min(6, Math.log10(metrics.uniqueTokenCount + 1) * 2.4) +
+    Math.min(5, Math.log10(metrics.txCount + 1) * 1.6) +
+    Math.min(4, metrics.memeTokenCount * 0.18) +
+    fingerprint;
+  return Number(Math.max(0, Math.min(100, raw)).toFixed(2));
 }
 
 function choosePersonality(metrics, scores, address) {
@@ -1965,6 +2003,7 @@ function buildReport(address, chains, lang = "zh") {
   const context = { address, lang, metrics, scores, personalityId, personality, lossCause, verdict, labels };
   const modes = buildReportModes(context);
   const defaultMode = "abstract";
+  const compositeRankScore = rankScore(metrics, scores, address);
 
   return {
     generatedAt: new Date().toISOString(),
@@ -1983,6 +2022,7 @@ function buildReport(address, chains, lang = "zh") {
     modes,
     defaultMode,
     degenBand: degenBand(scores.degen, lang),
+    rankScore: compositeRankScore,
     scores,
     metrics: {
       ...metrics,
@@ -2001,7 +2041,7 @@ function buildReport(address, chains, lang = "zh") {
       ok: chain.ok,
       source: chain.source,
       nativeSymbol: chain.nativeSymbol,
-      nativeBalance: Number((chain.nativeBalance || 0).toFixed ? chain.nativeBalance.toFixed(5) : chain.nativeBalance || 0),
+      nativeBalance: Number(safeNumber(chain.nativeBalance, 0).toFixed(5)),
       nativeUsd: chain.nativeUsd || 0,
       txCount: chain.txCount || 0,
       tokenTransferCount: chain.tokenTransferCount || 0,
@@ -2011,6 +2051,75 @@ function buildReport(address, chains, lang = "zh") {
       .flatMap((chain) => chain.errors || (chain.error ? [chain.error] : []))
       .slice(0, 8)
   };
+}
+
+async function readJsonBody(req, maxBytes = 32_768) {
+  let body = "";
+  for await (const chunk of req) {
+    body += chunk;
+    if (body.length > maxBytes) throw new Error("Request body too large.");
+  }
+  if (!body.trim()) return {};
+  return JSON.parse(body);
+}
+
+async function readLeaderboard() {
+  try {
+    const data = await readFile(LEADERBOARD_PATH, "utf8");
+    const parsed = JSON.parse(data);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+async function writeLeaderboard(entries) {
+  await writeFile(LEADERBOARD_PATH, `${JSON.stringify(entries, null, 2)}\n`, "utf8");
+}
+
+function publicLeaderboard(entries) {
+  return entries
+    .slice()
+    .sort((a, b) => safeNumber(b.rankScore) - safeNumber(a.rankScore) || String(b.generatedAt).localeCompare(String(a.generatedAt)))
+    .slice(0, LEADERBOARD_LIMIT);
+}
+
+async function submitLeaderboardEntry({ address, lang, username }) {
+  const normalizedAddress = normalizeAddress(address);
+  const profile = buildXProfile(username);
+  if (!isAddress(normalizedAddress) || !profile) {
+    throw new Error(pickLocalized(lang, "请输入有效的钱包地址和 @X 用户名。", "Enter a valid wallet address and @X username."));
+  }
+
+  const report = await analyzeWallet(normalizedAddress, lang);
+  const entry = {
+    id: `${profile.username.toLowerCase()}:${normalizedAddress.toLowerCase()}`,
+    username: profile.username,
+    handle: profile.handle,
+    name: profile.name,
+    avatarUrl: profile.avatarUrl,
+    profileUrl: profile.profileUrl,
+    address: report.address,
+    shortAddress: report.shortAddress,
+    personality: report.personality,
+    personalityId: report.personalityId,
+    degen: report.scores.degen,
+    diamond: report.scores.diamond,
+    airdrop: report.scores.airdrop,
+    rankScore: report.rankScore,
+    degenBand: report.degenBand,
+    labels: report.labels.slice(0, 4),
+    generatedAt: new Date().toISOString(),
+    language: lang
+  };
+
+  const current = await readLeaderboard();
+  const next = publicLeaderboard([
+    entry,
+    ...current.filter((item) => item.id !== entry.id)
+  ]);
+  await writeLeaderboard(next);
+  return { entry, entries: next, profile };
 }
 
 async function analyzeWallet(address, lang = "zh") {
@@ -2063,6 +2172,35 @@ async function handleApi(req, res, pathname, searchParams) {
       service: "onchain-mirror",
       chains: [...BLOCKSCOUT_CHAINS.map((chain) => chain.name), BNB_CHAIN.name]
     });
+  }
+
+  if (pathname === "/api/x-profile") {
+    const lang = normalizeLang(searchParams.get("lang"));
+    const profile = buildXProfile(searchParams.get("username"));
+    if (!profile) {
+      return json(res, 400, { error: pickLocalized(lang, "请输入有效的 @X 用户名。", "Enter a valid @X username.") });
+    }
+    return json(res, 200, profile);
+  }
+
+  if (pathname === "/api/leaderboard") {
+    const lang = normalizeLang(searchParams.get("lang"));
+    if (req.method === "GET") {
+      return json(res, 200, { entries: publicLeaderboard(await readLeaderboard()) });
+    }
+    if (req.method !== "POST") {
+      return json(res, 405, { error: "Method not allowed" });
+    }
+    try {
+      const body = await readJsonBody(req);
+      return json(res, 200, await submitLeaderboardEntry({
+        address: body.address,
+        username: body.username,
+        lang: normalizeLang(body.lang || lang)
+      }));
+    } catch (error) {
+      return json(res, 400, { error: error.message || pickLocalized(lang, "上榜失败。", "Leaderboard submission failed.") });
+    }
   }
 
   if (pathname === "/api/analyze") {
