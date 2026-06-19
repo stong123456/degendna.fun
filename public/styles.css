@@ -40,6 +40,10 @@ body {
   letter-spacing: 0;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 button,
 input {
   font: inherit;
@@ -145,6 +149,28 @@ button {
   color: var(--green);
 }
 
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  min-width: 94px;
+  justify-content: center;
+  gap: 7px;
+  font-weight: 900;
+}
+
+.lang-toggle i {
+  color: var(--muted-2);
+  font-style: normal;
+}
+
+.lang-toggle [data-lang-option] {
+  color: var(--muted);
+}
+
+.lang-toggle [data-lang-option].active {
+  color: var(--green);
+}
+
 .scanner {
   display: grid;
   grid-template-columns: minmax(0, 0.92fr) minmax(420px, 0.78fr);
@@ -217,7 +243,7 @@ button {
 
 .is-locked .scan-form::after,
 .is-locked .pk-form::after {
-  content: "关注 @Stone141319 后解锁";
+  content: attr(data-lock-text);
   position: absolute;
   inset: 0;
   display: grid;
@@ -237,6 +263,15 @@ button {
   justify-content: center;
 }
 
+.eyebrow {
+  margin-bottom: 12px;
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
 h1,
 h2,
 h3,
@@ -252,7 +287,7 @@ h1 {
   font-weight: 950;
 }
 
-.scanner-copy p {
+.scanner-copy > p:not(.eyebrow) {
   max-width: 680px;
   margin: 0;
   color: var(--muted);

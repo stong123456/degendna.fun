@@ -134,18 +134,291 @@ const METHOD_GROUPS = {
   nft: ["safetransferfrom", "mint", "setapprovalforall"]
 };
 
+const SUPPORTED_LANGS = new Set(["zh", "en"]);
+
 const PERSONALITIES = {
-  civilServant: "链上公务员",
-  conservative: "保守型玩家",
-  normal: "正常韭菜观察样本",
-  memeSoldier: "Meme 冲锋队",
-  topBuyer: "高位接盘艺术家",
-  diamond: "钻石手老登",
-  airdrop: "空投游牧民",
-  nftGhost: "NFT 时代遗民",
-  pressure: "合约压力怪",
-  stable: "稳定币躺平派",
-  collector: "只买不卖型收藏家"
+  civilServant: "civilServant",
+  coldWalletMonk: "coldWalletMonk",
+  conservative: "conservative",
+  riskCommittee: "riskCommittee",
+  normal: "normal",
+  groupChatIndicator: "groupChatIndicator",
+  halfThesisBeliever: "halfThesisBeliever",
+  memeSoldier: "memeSoldier",
+  dogcoinSurgeon: "dogcoinSurgeon",
+  liquidityDiver: "liquidityDiver",
+  topBuyer: "topBuyer",
+  greenCandleRomantic: "greenCandleRomantic",
+  exitLiquidityPoet: "exitLiquidityPoet",
+  diamond: "diamond",
+  timeCapsuleHolder: "timeCapsuleHolder",
+  bagMonk: "bagMonk",
+  airdrop: "airdrop",
+  bridgeNomad: "bridgeNomad",
+  questNPC: "questNPC",
+  nftGhost: "nftGhost",
+  jpgArchaeologist: "jpgArchaeologist",
+  pressure: "pressure",
+  gasArsonist: "gasArsonist",
+  contractButtonMasher: "contractButtonMasher",
+  stable: "stable",
+  stablecoinMonk: "stablecoinMonk",
+  collector: "collector",
+  dustMuseum: "dustMuseum",
+  bluechipTourist: "bluechipTourist",
+  whaleCosplay: "whaleCosplay",
+  yieldFarmGhost: "yieldFarmGhost"
+};
+
+const PERSONALITY_TEXT = {
+  [PERSONALITIES.civilServant]: {
+    zh: "链上公务员",
+    en: "Onchain Civil Servant",
+    verdict: {
+      zh: "你的钱包纪律性很强，强到牛市路过都怕打扰你。",
+      en: "Your wallet is so disciplined that even a bull market would knock before entering."
+    }
+  },
+  [PERSONALITIES.coldWalletMonk]: {
+    zh: "冷钱包修行僧",
+    en: "Cold Wallet Monk",
+    verdict: {
+      zh: "你不是不动，你是在用沉默对抗全网喊单。",
+      en: "You are not inactive. You are using silence as a risk-management strategy."
+    }
+  },
+  [PERSONALITIES.conservative]: {
+    zh: "保守型玩家",
+    en: "Risk Committee Intern",
+    verdict: {
+      zh: "你不是不敢冲，你只是每次冲之前先把自己劝退了。",
+      en: "You do not avoid risk. You simply hold a board meeting before every click."
+    }
+  },
+  [PERSONALITIES.riskCommittee]: {
+    zh: "风险委员会主任",
+    en: "Personal Risk Committee",
+    verdict: {
+      zh: "你买币前像审批预算，卖飞后像写复盘报告。",
+      en: "You buy like a budget approval process and regret like a quarterly report."
+    }
+  },
+  [PERSONALITIES.normal]: {
+    zh: "正常韭菜观察样本",
+    en: "Standard Retail Specimen",
+    verdict: {
+      zh: "你很像一个标准币圈玩家：懂一点，冲一点，嘴硬很多点。",
+      en: "You are a classic crypto user: some research, some impulse, industrial-grade denial."
+    }
+  },
+  [PERSONALITIES.groupChatIndicator]: {
+    zh: "群友反向指标",
+    en: "Group Chat Contra-Signal",
+    verdict: {
+      zh: "你的交易节奏很像群聊情绪温度计，越热越容易伸手。",
+      en: "Your wallet behaves like a group chat thermometer: the hotter it gets, the faster you click."
+    }
+  },
+  [PERSONALITIES.halfThesisBeliever]: {
+    zh: "半信半疑叙事党",
+    en: "Half-Conviction Narrative Trader",
+    verdict: {
+      zh: "你不是没有逻辑，你只是经常把逻辑补在买入之后。",
+      en: "You have a thesis. It just tends to arrive shortly after the entry."
+    }
+  },
+  [PERSONALITIES.memeSoldier]: {
+    zh: "Meme 冲锋队",
+    en: "Meme Frontline Trooper",
+    verdict: {
+      zh: "你这个钱包不像资产组合，更像热点雷达的急诊室。",
+      en: "This wallet is less a portfolio and more an emergency room for trending tickers."
+    }
+  },
+  [PERSONALITIES.dogcoinSurgeon]: {
+    zh: "土狗急诊科主任",
+    en: "Dogcoin ER Director",
+    verdict: {
+      zh: "你不是在买 Meme，你是在给每个新叙事做心肺复苏。",
+      en: "You are not buying memes. You are performing CPR on every new narrative."
+    }
+  },
+  [PERSONALITIES.liquidityDiver]: {
+    zh: "低流动性潜水员",
+    en: "Low-Liquidity Diver",
+    verdict: {
+      zh: "别人看深度，你看名字；别人查池子，你先冲刺。",
+      en: "Others check depth. You check the ticker and dive headfirst."
+    }
+  },
+  [PERSONALITIES.topBuyer]: {
+    zh: "高位接盘艺术家",
+    en: "Top Buyer in Residence",
+    verdict: {
+      zh: "你不是没有判断力，你只是太容易相信下一根阳线。",
+      en: "You do have judgment. It simply melts whenever the next candle turns green."
+    }
+  },
+  [PERSONALITIES.greenCandleRomantic]: {
+    zh: "阳线恋爱脑",
+    en: "Green Candle Romantic",
+    verdict: {
+      zh: "你对阳线的信任，像刚认识三天就想长期持有。",
+      en: "Your trust in green candles looks like proposing after a three-day relationship."
+    }
+  },
+  [PERSONALITIES.exitLiquidityPoet]: {
+    zh: "退出流动性诗人",
+    en: "Exit Liquidity Poet",
+    verdict: {
+      zh: "你总能在别人准备下车时，优雅地走上车门。",
+      en: "You have a gift for entering exactly when other people are looking for the exit."
+    }
+  },
+  [PERSONALITIES.diamond]: {
+    zh: "钻石手老登",
+    en: "Ancient Diamond Hands",
+    verdict: {
+      zh: "你有几个币拿了很久，可能是信仰，也可能是忘记卖了。",
+      en: "You held some assets for ages. It may be conviction. It may also be forgotten tabs."
+    }
+  },
+  [PERSONALITIES.timeCapsuleHolder]: {
+    zh: "时间胶囊持仓员",
+    en: "Time Capsule Holder",
+    verdict: {
+      zh: "你的钱包里有些资产像考古层，打开就是上一轮牛市的空气。",
+      en: "Parts of your wallet feel like an archaeological layer from the previous cycle."
+    }
+  },
+  [PERSONALITIES.bagMonk]: {
+    zh: "套牢修禅大师",
+    en: "Bagholder Zen Master",
+    verdict: {
+      zh: "你把亏损拿成了修行，把不卖解释成了格局。",
+      en: "You turned drawdown into meditation and called not selling a strategy."
+    }
+  },
+  [PERSONALITIES.airdrop]: {
+    zh: "空投游牧民",
+    en: "Airdrop Nomad",
+    verdict: {
+      zh: "你像是在链上迁徙，哪里有任务，哪里就有你的 gas 费。",
+      en: "You migrate across chains like quests are weather patterns and gas is rent."
+    }
+  },
+  [PERSONALITIES.bridgeNomad]: {
+    zh: "跨链摆渡人",
+    en: "Bridge Nomad",
+    verdict: {
+      zh: "你不是在转账，你是在用跨链桥给自己做链上迁徙史。",
+      en: "You are not bridging funds. You are writing a migration diary in transaction hashes."
+    }
+  },
+  [PERSONALITIES.questNPC]: {
+    zh: "任务列表永动机",
+    en: "Quest List Perpetual Machine",
+    verdict: {
+      zh: "你的钱包像任务清单本人，看到交互按钮就觉得不能浪费。",
+      en: "Your wallet treats every interaction button like an unclaimed side quest."
+    }
+  },
+  [PERSONALITIES.nftGhost]: {
+    zh: "NFT 时代遗民",
+    en: "NFT Era Relic",
+    verdict: {
+      zh: "你的链上足迹还停在 JPEG 很贵、群里很吵的那个年代。",
+      en: "Your onchain footprint still remembers when JPEGs were expensive and chats were louder."
+    }
+  },
+  [PERSONALITIES.jpgArchaeologist]: {
+    zh: "JPEG 考古学家",
+    en: "JPEG Archaeologist",
+    verdict: {
+      zh: "你不是收藏 NFT，你是在替上一个周期保存文化遗址。",
+      en: "You are not collecting NFTs. You are preserving cultural ruins from the last cycle."
+    }
+  },
+  [PERSONALITIES.pressure]: {
+    zh: "合约压力怪",
+    en: "Contract Stress Tester",
+    verdict: {
+      zh: "你这个钱包看起来很冷静，实际下手的时候比群里喊单的人还急。",
+      en: "This wallet looks calm until a contract appears. Then it starts stress-testing itself."
+    }
+  },
+  [PERSONALITIES.gasArsonist]: {
+    zh: "Gas 纵火犯",
+    en: "Gas Arsonist",
+    verdict: {
+      zh: "你的手续费记录像火灾现场，链上每一步都带着焦味。",
+      en: "Your fee history looks like a fire scene. Every click smells slightly burnt."
+    }
+  },
+  [PERSONALITIES.contractButtonMasher]: {
+    zh: "合约按钮连点器",
+    en: "Contract Button Masher",
+    verdict: {
+      zh: "你不是在交互协议，你是在跟钱包弹窗打连招。",
+      en: "You are not interacting with protocols. You are combo-clicking wallet popups."
+    }
+  },
+  [PERSONALITIES.stable]: {
+    zh: "稳定币躺平派",
+    en: "Stablecoin Couch Strategist",
+    verdict: {
+      zh: "你把波动留给别人，把安全感留给自己，顺便错过一点刺激。",
+      en: "You outsourced volatility to everyone else and kept the anxiety hedge."
+    }
+  },
+  [PERSONALITIES.stablecoinMonk]: {
+    zh: "USDT 禅修班学员",
+    en: "USDT Meditation Student",
+    verdict: {
+      zh: "你不是没有野心，你只是把野心暂存在稳定币里。",
+      en: "You are not ambitionless. Your ambition is temporarily parked in stablecoins."
+    }
+  },
+  [PERSONALITIES.collector]: {
+    zh: "只买不卖型收藏家",
+    en: "Buy-Only Museum Curator",
+    verdict: {
+      zh: "你不是交易员，你像一个什么都舍不得扔的链上收藏夹。",
+      en: "You are less a trader and more a museum curator for things you never sell."
+    }
+  },
+  [PERSONALITIES.dustMuseum]: {
+    zh: "链上灰尘博物馆馆长",
+    en: "Dust Museum Director",
+    verdict: {
+      zh: "你的钱包不是乱，是每一粒链上灰尘都有自己的展柜。",
+      en: "Your wallet is not messy. Every speck of onchain dust has its own display case."
+    }
+  },
+  [PERSONALITIES.bluechipTourist]: {
+    zh: "蓝筹观光客",
+    en: "Bluechip Tourist",
+    verdict: {
+      zh: "你有主流资产的体面，也有随时想去小币区看热闹的心。",
+      en: "You hold respectable assets, but your curiosity keeps staring at the spicy aisle."
+    }
+  },
+  [PERSONALITIES.whaleCosplay]: {
+    zh: "巨鲸 Cosplay 玩家",
+    en: "Whale Cosplayer",
+    verdict: {
+      zh: "你的仓位有排面，操作却偶尔像在夜市试吃。",
+      en: "The balance has presence. The behavior occasionally shops like a street-market sampler."
+    }
+  },
+  [PERSONALITIES.yieldFarmGhost]: {
+    zh: "流动性挖矿后遗症",
+    en: "Yield Farm Afterimage",
+    verdict: {
+      zh: "你对池子、质押和收益率的条件反射，还停在 DeFi 夏天。",
+      en: "Your reflex for pools, staking, and yield still smells faintly like DeFi summer."
+    }
+  }
 };
 
 function json(res, status, body) {
@@ -159,6 +432,30 @@ function json(res, status, body) {
 
 function isAddress(input) {
   return /^0x[a-fA-F0-9]{40}$/.test(String(input || "").trim());
+}
+
+function normalizeLang(input) {
+  const value = String(input || "").trim().toLowerCase();
+  return SUPPORTED_LANGS.has(value) ? value : "zh";
+}
+
+function pickLocalized(lang, zh, en) {
+  return lang === "en" ? en : zh;
+}
+
+function personalityName(id, lang) {
+  return PERSONALITY_TEXT[id]?.[lang] || PERSONALITY_TEXT[PERSONALITIES.normal][lang];
+}
+
+function personalityVerdict(id, lang) {
+  return PERSONALITY_TEXT[id]?.verdict?.[lang] || PERSONALITY_TEXT[PERSONALITIES.normal].verdict[lang];
+}
+
+function pickByAddress(address, options) {
+  const candidates = options.filter(Boolean);
+  if (!candidates.length) return PERSONALITIES.normal;
+  const bucket = Number.parseInt(String(address || "").slice(-8), 16);
+  return candidates[Number.isFinite(bucket) ? bucket % candidates.length : 0];
 }
 
 function normalizeAddress(input) {
@@ -668,138 +965,180 @@ function scoreWallet(metrics) {
   };
 }
 
-function choosePersonality(metrics, scores) {
-  if (metrics.failedRate > 0.18 || metrics.methodCounts.swap > 8) return PERSONALITIES.pressure;
-  if (scores.airdrop > 68 && metrics.chainsWithActivity >= 4) return PERSONALITIES.airdrop;
-  if (metrics.nftTransferCount > metrics.sampledTxs && metrics.nftTransferCount > 8) return PERSONALITIES.nftGhost;
-  if (scores.diamond > 78 && metrics.txPerDay < 1.2) return PERSONALITIES.diamond;
-  if (metrics.stableRatio > 0.68 && scores.degen < 45) return PERSONALITIES.stable;
-  if (metrics.memeTokenCount >= 8 && scores.degen > 70) return PERSONALITIES.memeSoldier;
-  if (metrics.memeRatio > 0.45 && metrics.lowLiquidityTokenCount > 4) return PERSONALITIES.topBuyer;
-  if (metrics.outgoingTransfers < metrics.incomingTransfers / 4 && metrics.uniqueTokenCount > 12) return PERSONALITIES.collector;
-  if (scores.degen < 25) return PERSONALITIES.civilServant;
-  if (scores.degen < 42) return PERSONALITIES.conservative;
-  return PERSONALITIES.normal;
-}
-
-function degenBand(score) {
-  if (score <= 20) return "链上公务员";
-  if (score <= 40) return "保守型玩家";
-  if (score <= 60) return "正常韭菜";
-  if (score <= 80) return "高风险冲锋队";
-  return "钱包生命垂危，但精神状态良好";
-}
-
-function buildLossCause(metrics, scores) {
-  if (metrics.memeTokenCount >= 8) return "看到别人赚钱后手速过快";
-  if (metrics.lowLiquidityTokenCount >= 6) return "喜欢冲流动性不太够的小币";
-  if (metrics.txPerDay > 2.5) return "交易频率太高，手续费和情绪一起收割你";
-  if (metrics.failedRate > 0.12) return "合约交互太急，失败交易都在替你喊停";
-  if (metrics.stableRatio > 0.72 && scores.degen < 45) return "不是亏损，是把牛市活成了观察席";
-  if (metrics.outgoingTransfers < metrics.incomingTransfers / 5) return "只会进货，不太会体面下车";
-  return "不是市场太坏，是你太容易相信下一根阳线";
-}
-
-function buildVerdict(personality, metrics, scores) {
-  const verdicts = {
-    [PERSONALITIES.memeSoldier]: "你这个钱包不像资产组合，更像热点雷达的急诊室。",
-    [PERSONALITIES.topBuyer]: "你不是没有判断力，你只是太容易相信下一根阳线。",
-    [PERSONALITIES.airdrop]: "你像是在链上迁徙，哪里有任务，哪里就有你的 gas 费。",
-    [PERSONALITIES.diamond]: "你有几个币拿了很久，可能是信仰，也可能是忘记卖了。",
-    [PERSONALITIES.pressure]: "你这个钱包看起来很冷静，实际下手的时候比群里喊单的人还急。",
-    [PERSONALITIES.stable]: "你把波动留给别人，把安全感留给自己，顺便错过一点刺激。",
-    [PERSONALITIES.nftGhost]: "你的链上足迹还停在 JPEG 很贵、群里很吵的那个年代。",
-    [PERSONALITIES.collector]: "你不是交易员，你像一个什么都舍不得扔的链上收藏夹。",
-    [PERSONALITIES.civilServant]: "你的钱包纪律性很强，强到牛市路过都怕打扰你。",
-    [PERSONALITIES.conservative]: "你不是不敢冲，你只是每次冲之前先把自己劝退了。",
-    [PERSONALITIES.normal]: "你很像一个标准币圈玩家：懂一点，冲一点，嘴硬很多点。"
-  };
-
-  if (metrics.portfolioUsd > 100_000 && scores.degen > 70) {
-    return "你不是风险偏好高，你是带着金库在夜市里试吃。";
+function choosePersonality(metrics, scores, address) {
+  const picks = [];
+  if (metrics.portfolioUsd > 100_000 && scores.degen > 68) picks.push(PERSONALITIES.whaleCosplay);
+  if (metrics.failedRate > 0.18) picks.push(PERSONALITIES.gasArsonist, PERSONALITIES.contractButtonMasher);
+  if (metrics.methodCounts.swap > 8) picks.push(PERSONALITIES.pressure, PERSONALITIES.contractButtonMasher);
+  if (metrics.methodCounts.defi > 6) picks.push(PERSONALITIES.yieldFarmGhost);
+  if (scores.airdrop > 68 && metrics.chainsWithActivity >= 4) {
+    picks.push(PERSONALITIES.airdrop, PERSONALITIES.bridgeNomad, PERSONALITIES.questNPC);
   }
-  return verdicts[personality] || verdicts[PERSONALITIES.normal];
+  if (metrics.nftTransferCount > metrics.sampledTxs && metrics.nftTransferCount > 8) {
+    picks.push(PERSONALITIES.nftGhost, PERSONALITIES.jpgArchaeologist);
+  }
+  if (scores.diamond > 78 && metrics.txPerDay < 1.2) {
+    picks.push(PERSONALITIES.diamond, PERSONALITIES.timeCapsuleHolder, PERSONALITIES.bagMonk);
+  }
+  if (metrics.stableRatio > 0.68 && scores.degen < 45) {
+    picks.push(PERSONALITIES.stable, PERSONALITIES.stablecoinMonk);
+  }
+  if (metrics.memeTokenCount >= 8 && scores.degen > 70) {
+    picks.push(PERSONALITIES.memeSoldier, PERSONALITIES.dogcoinSurgeon, PERSONALITIES.liquidityDiver);
+  }
+  if (metrics.memeRatio > 0.45 && metrics.lowLiquidityTokenCount > 4) {
+    picks.push(PERSONALITIES.topBuyer, PERSONALITIES.greenCandleRomantic, PERSONALITIES.exitLiquidityPoet);
+  }
+  if (metrics.outgoingTransfers < metrics.incomingTransfers / 4 && metrics.uniqueTokenCount > 12) {
+    picks.push(PERSONALITIES.collector, PERSONALITIES.dustMuseum);
+  }
+  if (metrics.bluechipTokenCount >= 2 && scores.degen < 55) picks.push(PERSONALITIES.bluechipTourist);
+  if (metrics.uniqueTokenCount > 24 && scores.degen < 65) picks.push(PERSONALITIES.dustMuseum);
+  if (scores.degen < 25) picks.push(PERSONALITIES.civilServant, PERSONALITIES.coldWalletMonk);
+  if (scores.degen < 42) picks.push(PERSONALITIES.conservative, PERSONALITIES.riskCommittee);
+  if (!picks.length) {
+    picks.push(PERSONALITIES.normal, PERSONALITIES.groupChatIndicator, PERSONALITIES.halfThesisBeliever);
+  }
+  return pickByAddress(address, [...new Set(picks)]);
 }
 
-function buildAlphaRadar(metrics) {
+function degenBand(score, lang) {
+  if (score <= 20) return pickLocalized(lang, "链上公务员", "Onchain Civil Servant");
+  if (score <= 40) return pickLocalized(lang, "保守型玩家", "Conservative Player");
+  if (score <= 60) return pickLocalized(lang, "正常韭菜", "Standard Retail Specimen");
+  if (score <= 80) return pickLocalized(lang, "高风险冲锋队", "High-Risk Vanguard");
+  return pickLocalized(lang, "钱包生命垂危，但精神状态良好", "Wallet critical, morale excellent");
+}
+
+function buildLossCause(metrics, scores, lang) {
+  if (metrics.memeTokenCount >= 8) return pickLocalized(lang, "看到别人赚钱后手速过快", "your hands accelerate when other people post gains");
+  if (metrics.lowLiquidityTokenCount >= 6) return pickLocalized(lang, "喜欢冲流动性不太够的小币", "you keep diving into tokens with suspiciously shallow liquidity");
+  if (metrics.txPerDay > 2.5) return pickLocalized(lang, "交易频率太高，手续费和情绪一起收割你", "your trade frequency lets fees and feelings farm you together");
+  if (metrics.failedRate > 0.12) return pickLocalized(lang, "合约交互太急，失败交易都在替你喊停", "your failed transactions are trying to be your risk manager");
+  if (metrics.stableRatio > 0.72 && scores.degen < 45) return pickLocalized(lang, "不是亏损，是把牛市活成了观察席", "you turned the bull market into a spectator sport");
+  if (metrics.outgoingTransfers < metrics.incomingTransfers / 5) return pickLocalized(lang, "只会进货，不太会体面下车", "you know how to enter, but exits remain theoretical");
+  return pickLocalized(lang, "不是市场太坏，是你太容易相信下一根阳线", "the market is not the problem; your faith in the next green candle is");
+}
+
+function buildVerdict(personalityId, metrics, scores, lang) {
+  if (metrics.portfolioUsd > 100_000 && scores.degen > 70) {
+    return pickLocalized(
+      lang,
+      "你不是风险偏好高，你是带着金库在夜市里试吃。",
+      "You are not merely risk-on. You are taking a treasury wallet to a street-food market."
+    );
+  }
+  return personalityVerdict(personalityId, lang);
+}
+
+function buildAlphaRadar(metrics, lang) {
   const signals = [];
-  if (metrics.bluechipTokenCount >= 2) signals.push("钱包里有主流资产留存，不是纯靠情绪开车。");
-  if (metrics.chainsWithActivity >= 4) signals.push("跨链探索能力不错，至少不是单链游客。");
-  if (metrics.methodCounts.claim || metrics.methodCounts.bridge) signals.push("有空投/跨链交互习惯，属于会翻任务列表的人。");
-  if (metrics.stableUsd > 100) signals.push("稳定币仓位给你留了后手，说明还没完全上头。");
-  if (metrics.sampledHoldDays && metrics.sampledHoldDays > 30) signals.push("样本里有长期留存资产，多少有点拿得住。");
-  if (metrics.nftTransferCount > 3) signals.push("NFT 痕迹明显，社区活动和链上身份感都不弱。");
-  if (!signals.length) signals.push("这个钱包行为还比较轻，至少暂时没有把自己写成反面教材。");
+  if (metrics.bluechipTokenCount >= 2) {
+    signals.push(pickLocalized(lang, "钱包里有主流资产留存，不是纯靠情绪开车。", "Bluechip exposure exists, so this is not pure emotional driving."));
+  }
+  if (metrics.chainsWithActivity >= 4) {
+    signals.push(pickLocalized(lang, "跨链探索能力不错，至少不是单链游客。", "Cross-chain exploration is real; you are not a one-chain tourist."));
+  }
+  if (metrics.methodCounts.claim || metrics.methodCounts.bridge) {
+    signals.push(pickLocalized(lang, "有空投/跨链交互习惯，属于会翻任务列表的人。", "Airdrop or bridge habits detected; you know where the quest lists live."));
+  }
+  if (metrics.stableUsd > 100) {
+    signals.push(pickLocalized(lang, "稳定币仓位给你留了后手，说明还没完全上头。", "Stablecoin reserves give you a second move, which means the wallet is not fully tilted."));
+  }
+  if (metrics.sampledHoldDays && metrics.sampledHoldDays > 30) {
+    signals.push(pickLocalized(lang, "样本里有长期留存资产，多少有点拿得住。", "Some assets survived longer holding windows; there is at least a trace of patience."));
+  }
+  if (metrics.nftTransferCount > 3) {
+    signals.push(pickLocalized(lang, "NFT 痕迹明显，社区活动和链上身份感都不弱。", "NFT traces are visible; the wallet has social identity residue."));
+  }
+  if (!signals.length) {
+    signals.push(pickLocalized(lang, "这个钱包行为还比较轻，至少暂时没有把自己写成反面教材。", "The wallet is still light on data, which means it has not yet written itself into a cautionary tale."));
+  }
   return signals.slice(0, 4);
 }
 
-function buildFate(metrics, scores) {
+function buildFate(metrics, scores, lang) {
   const first =
     scores.degen > 70
-      ? "错过一个观察很久的币，然后在别人翻倍后重新冲进去"
-      : "继续观察几个热点，最后只在群里打出“我早看好了”";
+      ? pickLocalized(lang, "错过一个观察很久的币，然后在别人翻倍后重新冲进去", "miss a token you watched for weeks, then re-enter after someone posts a 2x")
+      : pickLocalized(lang, "继续观察几个热点，最后只在群里打出“我早看好了”", "keep watching narratives and eventually type 'I saw this early' in chat");
   const second =
     metrics.stableRatio > 0.6
-      ? "在稳定币里等回调，等到回调结束"
-      : "发现自己的主要仓位又开始讲一个全新的叙事";
+      ? pickLocalized(lang, "在稳定币里等回调，等到回调结束", "wait in stables for a pullback until the pullback is already over")
+      : pickLocalized(lang, "发现自己的主要仓位又开始讲一个全新的叙事", "discover that your main bag has adopted a brand-new narrative");
   const third =
     metrics.txPerDay > 1.5
-      ? "开始研究自动交易系统，试图把手速交给机器"
-      : "开始研究事件雷达，想在下一次动手前多一个确认";
+      ? pickLocalized(lang, "开始研究自动交易系统，试图把手速交给机器", "start researching automation so your hand speed can be outsourced")
+      : pickLocalized(lang, "开始研究事件雷达，想在下一次动手前多一个确认", "start using an event radar to get one more confirmation before clicking");
   return [first, second, third];
 }
 
-function buildStrategyFit(metrics, scores) {
-  if (metrics.txPerDay > 2 || scores.degen > 75) return "事件驱动 + 二次确认";
-  if (metrics.stableRatio > 0.62) return "低频波段 + 资金管理";
-  if (scores.diamond > 72) return "趋势跟随 + 长线持仓";
-  if (metrics.methodCounts.bridge || metrics.methodCounts.claim) return "空投交互路线 + 协议雷达";
-  return "趋势跟随 + 轻量风控";
+function buildStrategyFit(metrics, scores, lang) {
+  if (metrics.txPerDay > 2 || scores.degen > 75) return pickLocalized(lang, "事件驱动 + 二次确认", "Event-driven trading + second confirmation");
+  if (metrics.stableRatio > 0.62) return pickLocalized(lang, "低频波段 + 资金管理", "Low-frequency swing + capital management");
+  if (scores.diamond > 72) return pickLocalized(lang, "趋势跟随 + 长线持仓", "Trend following + long holding windows");
+  if (metrics.methodCounts.bridge || metrics.methodCounts.claim) return pickLocalized(lang, "空投交互路线 + 协议雷达", "Airdrop route + protocol radar");
+  return pickLocalized(lang, "趋势跟随 + 轻量风控", "Trend following + lightweight risk controls");
 }
 
-function buildLabels(personality, metrics, scores) {
-  const labels = [personality];
-  if (scores.degen > 70) labels.push("高风险冲锋队");
-  if (scores.airdrop > 55) labels.push("空投游牧民");
-  if (metrics.memeTokenCount >= 4) labels.push("Meme 冲锋队");
-  if (metrics.lowLiquidityTokenCount >= 4) labels.push("土狗幸存者");
-  if (metrics.nftTransferCount > 4) labels.push("NFT 时代遗民");
-  if (metrics.stableRatio > 0.6) labels.push("稳定币躺平派");
-  if (scores.diamond > 70) labels.push("钻石手老登");
-  if (metrics.methodCounts.swap > 4) labels.push("合约压力怪");
+function buildLabels(personalityId, metrics, scores, lang) {
+  const labels = [personalityName(personalityId, lang)];
+  if (scores.degen > 70) labels.push(pickLocalized(lang, "高风险冲锋队", "High-Risk Vanguard"));
+  if (scores.airdrop > 55) labels.push(pickLocalized(lang, "空投游牧民", "Airdrop Nomad"));
+  if (metrics.memeTokenCount >= 4) labels.push(pickLocalized(lang, "Meme 冲锋队", "Meme Frontline"));
+  if (metrics.lowLiquidityTokenCount >= 4) labels.push(pickLocalized(lang, "土狗幸存者", "Microcap Survivor"));
+  if (metrics.nftTransferCount > 4) labels.push(pickLocalized(lang, "NFT 时代遗民", "NFT Era Relic"));
+  if (metrics.stableRatio > 0.6) labels.push(pickLocalized(lang, "稳定币躺平派", "Stablecoin Couch"));
+  if (scores.diamond > 70) labels.push(pickLocalized(lang, "钻石手老登", "Ancient Diamond Hands"));
+  if (metrics.methodCounts.swap > 4) labels.push(pickLocalized(lang, "合约压力怪", "Contract Stress Tester"));
   return [...new Set(labels)].slice(0, 5);
 }
 
-function buildReport(address, chains) {
+function buildReport(address, chains, lang = "zh") {
   const metrics = buildMetrics(address, chains);
   const scores = scoreWallet(metrics);
-  const personality = choosePersonality(metrics, scores);
-  const lossCause = buildLossCause(metrics, scores);
-  const verdict = buildVerdict(personality, metrics, scores);
-  const labels = buildLabels(personality, metrics, scores);
+  const personalityId = choosePersonality(metrics, scores, address);
+  const personality = personalityName(personalityId, lang);
+  const lossCause = buildLossCause(metrics, scores, lang);
+  const verdict = buildVerdict(personalityId, metrics, scores, lang);
+  const labels = buildLabels(personalityId, metrics, scores, lang);
 
   const behavior =
     metrics.sampledHoldDays === null
-      ? "样本里还看不出稳定持仓周期，更像刚开始在链上留下脚印。"
-      : `样本平均持仓约 ${metrics.sampledHoldDays.toFixed(1)} 天，${
-          metrics.sampledHoldDays < 7
-            ? "属于刚买就想换下一个叙事的类型。"
-            : metrics.sampledHoldDays > 60
-              ? "要么信仰很硬，要么真的忘记卖了。"
-              : "能拿一阵，但看到新叙事还是会心动。"
-        }`;
+      ? pickLocalized(lang, "样本里还看不出稳定持仓周期，更像刚开始在链上留下脚印。", "The sample does not reveal a stable holding period yet; this wallet is still leaving early footprints.")
+      : pickLocalized(
+          lang,
+          `样本平均持仓约 ${metrics.sampledHoldDays.toFixed(1)} 天，${
+            metrics.sampledHoldDays < 7
+              ? "属于刚买就想换下一个叙事的类型。"
+              : metrics.sampledHoldDays > 60
+                ? "要么信仰很硬，要么真的忘记卖了。"
+                : "能拿一阵，但看到新叙事还是会心动。"
+          }`,
+          `Average sampled holding period is about ${metrics.sampledHoldDays.toFixed(1)} days. ${
+            metrics.sampledHoldDays < 7
+              ? "This wallet starts looking for the next narrative almost immediately."
+              : metrics.sampledHoldDays > 60
+                ? "That is either conviction or a very committed forgotten bag."
+                : "It can hold for a while, but new narratives still get its attention."
+          }`
+        );
 
   return {
     generatedAt: new Date().toISOString(),
+    language: lang,
     address,
     shortAddress: shortAddress(address),
     siteUrl: SITE_URL,
     siteHost: SITE_HOST,
+    productName: pickLocalized(lang, "链上照妖镜", "Degen DNA"),
+    productSubtitle: pickLocalized(lang, "Degen DNA Report", "Onchain Mirror"),
+    personalityId,
     personality,
     verdict,
     lossCause,
     labels,
-    degenBand: degenBand(scores.degen),
+    degenBand: degenBand(scores.degen, lang),
     scores,
     metrics: {
       ...metrics,
@@ -812,15 +1151,16 @@ function buildReport(address, chains) {
     },
     report: {
       assetPersonality:
-        `这个钱包像${personality}。` +
-        `公开样本显示它跨 ${metrics.chainsWithActivity}/${metrics.chainCount} 条链活动，` +
-        `Token 样本 ${metrics.uniqueTokenCount} 个，稳定币占比约 ${Math.round(metrics.stableRatio * 100)}%，` +
-        `Meme 暴露约 ${Math.round(metrics.memeRatio * 100)}%。`,
+        pickLocalized(
+          lang,
+          `这个钱包像${personality}。公开样本显示它跨 ${metrics.chainsWithActivity}/${metrics.chainCount} 条链活动，Token 样本 ${metrics.uniqueTokenCount} 个，稳定币占比约 ${Math.round(metrics.stableRatio * 100)}%，Meme 暴露约 ${Math.round(metrics.memeRatio * 100)}%。`,
+          `This wallet reads like a ${personality}. Public samples show activity across ${metrics.chainsWithActivity}/${metrics.chainCount} chains, ${metrics.uniqueTokenCount} token samples, about ${Math.round(metrics.stableRatio * 100)}% stablecoin exposure, and roughly ${Math.round(metrics.memeRatio * 100)}% meme exposure.`
+        ),
       holdingBehavior: behavior,
-      lossBlackBox: `你的主要亏损来源不是市场，而是${lossCause}。`,
-      alphaRadar: buildAlphaRadar(metrics),
-      fate90Days: buildFate(metrics, scores),
-      strategyFit: buildStrategyFit(metrics, scores)
+      lossBlackBox: pickLocalized(lang, `你的主要亏损来源不是市场，而是${lossCause}。`, `Your main leak is not the market; it is that ${lossCause}.`),
+      alphaRadar: buildAlphaRadar(metrics, lang),
+      fate90Days: buildFate(metrics, scores, lang),
+      strategyFit: buildStrategyFit(metrics, scores, lang)
     },
     chains: chains.map((chain) => ({
       id: chain.id,
@@ -841,24 +1181,24 @@ function buildReport(address, chains) {
   };
 }
 
-async function analyzeWallet(address) {
+async function analyzeWallet(address, lang = "zh") {
   const normalized = normalizeAddress(address);
-  const key = normalized.toLowerCase();
+  const language = normalizeLang(lang);
+  const key = `chains:${normalized.toLowerCase()}`;
   const cached = cache.get(key);
   if (cached && Date.now() - cached.createdAt < CACHE_TTL_MS) {
-    return { ...cached.report, cache: "hit" };
+    return { ...buildReport(normalized, cached.chains, language), cache: "hit" };
   }
 
   const chainResults = await Promise.all([
     ...BLOCKSCOUT_CHAINS.map((chain) => fetchBlockscoutChain(chain, normalized)),
     fetchBnbChain(normalized)
   ]);
-  const report = buildReport(normalized, chainResults);
-  cache.set(key, { createdAt: Date.now(), report });
-  return { ...report, cache: "miss" };
+  cache.set(key, { createdAt: Date.now(), chains: chainResults });
+  return { ...buildReport(normalized, chainResults, language), cache: "miss" };
 }
 
-function compareReports(a, b) {
+function compareReports(a, b, lang = "zh") {
   const aBull = a.scores.degen * 0.55 + a.metrics.txPerDay * 8 + a.metrics.memeTokenCount * 2;
   const bBull = b.scores.degen * 0.55 + b.metrics.txPerDay * 8 + b.metrics.memeTokenCount * 2;
   const aBear = a.scores.diamond * 0.7 + a.metrics.stableRatio * 30 - a.metrics.failedRate * 20;
@@ -869,12 +1209,12 @@ function compareReports(a, b) {
     bearWinner: aBear >= bBear ? "A" : "B",
     verdict:
       aBull >= bBull
-        ? "A 更像牛市里敢冲敢晒的人；B 更像会在旁边说“风险太高”的人。"
-        : "B 更像牛市里敢冲敢晒的人；A 更像会在旁边说“风险太高”的人。",
+        ? pickLocalized(lang, "A 更像牛市里敢冲敢晒的人；B 更像会在旁边说“风险太高”的人。", "A looks more like the bull-market sprinter; B looks more like the person saying 'risk is high' from the side.")
+        : pickLocalized(lang, "B 更像牛市里敢冲敢晒的人；A 更像会在旁边说“风险太高”的人。", "B looks more like the bull-market sprinter; A looks more like the person saying 'risk is high' from the side."),
     survival:
       aBear >= bBear
-        ? "A 更像熊市里能活下来的人。"
-        : "B 更像熊市里能活下来的人。"
+        ? pickLocalized(lang, "A 更像熊市里能活下来的人。", "A looks more likely to survive a bear market.")
+        : pickLocalized(lang, "B 更像熊市里能活下来的人。", "B looks more likely to survive a bear market.")
   };
 }
 
@@ -888,32 +1228,34 @@ async function handleApi(req, res, pathname, searchParams) {
   }
 
   if (pathname === "/api/analyze") {
+    const lang = normalizeLang(searchParams.get("lang"));
     const address = normalizeAddress(searchParams.get("address"));
     if (!isAddress(address)) {
-      return json(res, 400, { error: "请输入有效的 EVM 钱包地址。" });
+      return json(res, 400, { error: pickLocalized(lang, "请输入有效的 EVM 钱包地址。", "Enter a valid EVM wallet address.") });
     }
     try {
-      return json(res, 200, await analyzeWallet(address));
+      return json(res, 200, await analyzeWallet(address, lang));
     } catch (error) {
-      return json(res, 502, { error: error.message || "链上数据读取失败。" });
+      return json(res, 502, { error: error.message || pickLocalized(lang, "链上数据读取失败。", "Failed to read onchain data.") });
     }
   }
 
   if (pathname === "/api/compare") {
+    const lang = normalizeLang(searchParams.get("lang"));
     const addressA = normalizeAddress(searchParams.get("addressA"));
     const addressB = normalizeAddress(searchParams.get("addressB"));
     if (!isAddress(addressA) || !isAddress(addressB)) {
-      return json(res, 400, { error: "请输入两个有效的 EVM 钱包地址。" });
+      return json(res, 400, { error: pickLocalized(lang, "请输入两个有效的 EVM 钱包地址。", "Enter two valid EVM wallet addresses.") });
     }
     try {
-      const [a, b] = await Promise.all([analyzeWallet(addressA), analyzeWallet(addressB)]);
+      const [a, b] = await Promise.all([analyzeWallet(addressA, lang), analyzeWallet(addressB, lang)]);
       return json(res, 200, {
         a,
         b,
-        comparison: compareReports(a, b)
+        comparison: compareReports(a, b, lang)
       });
     } catch (error) {
-      return json(res, 502, { error: error.message || "钱包 PK 数据读取失败。" });
+      return json(res, 502, { error: error.message || pickLocalized(lang, "钱包 PK 数据读取失败。", "Wallet PK data fetch failed.") });
     }
   }
 
@@ -942,9 +1284,13 @@ async function serveStatic(req, res, pathname) {
     const fileStat = await stat(target);
     if (!fileStat.isFile()) throw new Error("not a file");
     const body = await readFile(target);
+    const ext = extname(target);
+    const cacheControl = target.endsWith("index.html") || ext === ".css" || ext === ".js"
+      ? "no-store"
+      : "public, max-age=3600";
     res.writeHead(200, {
-      "content-type": MIME[extname(target)] || "application/octet-stream",
-      "cache-control": target.endsWith("index.html") ? "no-store" : "public, max-age=3600"
+      "content-type": MIME[ext] || "application/octet-stream",
+      "cache-control": cacheControl
     });
     res.end(body);
   } catch {

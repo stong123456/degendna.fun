@@ -8,32 +8,37 @@
       name="description"
       content="输入钱包地址，生成能晒、能比、能自嘲的链上人格报告。"
     />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/styles.css?v=20260619-bilingual" />
   </head>
   <body>
     <div class="app-shell">
       <header class="topbar">
-        <a class="brand" href="/" aria-label="链上照妖镜">
-          <span class="brand-mark">照</span>
+        <a class="brand" href="/" aria-label="链上照妖镜" data-i18n-aria="brand.aria">
+          <span class="brand-mark" data-i18n="brand.mark">照</span>
           <span>
-            <strong>链上照妖镜</strong>
-            <small>Degen DNA Report</small>
+            <strong data-i18n="brand.name">链上照妖镜</strong>
+            <small data-i18n="brand.sub">Degen DNA Report</small>
           </span>
         </a>
-        <nav class="nav-actions" aria-label="工具入口">
-          <button class="ghost-button" data-scroll="#pk-panel" type="button">钱包 PK</button>
-          <button class="ghost-button" data-scroll="#leaderboard" type="button">X 排行榜</button>
+        <nav class="nav-actions" aria-label="工具入口" data-i18n-aria="nav.aria">
+          <button id="language-toggle" class="ghost-button lang-toggle" type="button" aria-label="Switch language">
+            <span data-lang-option="zh">中文</span>
+            <i>/</i>
+            <span data-lang-option="en">EN</span>
+          </button>
+          <button class="ghost-button" data-scroll="#pk-panel" type="button" data-i18n="nav.pk">钱包 PK</button>
+          <button class="ghost-button" data-scroll="#leaderboard" type="button" data-i18n="nav.board">X 排行榜</button>
           <a class="ghost-button link-button" href="https://degendna.fun" target="_blank" rel="noreferrer">degendna.fun</a>
         </nav>
       </header>
 
       <main>
-        <section id="follow-gate" class="follow-gate" aria-label="关注任务">
+        <section id="follow-gate" class="follow-gate" aria-label="关注任务" data-i18n-aria="gate.aria">
           <div class="creator-card">
-            <img src="/assets/stone-avatar.png" alt="Stone141319 头像" />
+            <img src="/assets/stone-avatar.png" alt="Stone141319 头像" data-i18n-alt="gate.avatarAlt" />
             <div>
-              <h2>先关注 Stone，再照钱包</h2>
-              <p>关注后就能照钱包；想进公开排行榜、显示 X 头像和名字，再用 X 授权登录。</p>
+              <h2 data-i18n="gate.title">先关注 Stone，再照钱包</h2>
+              <p data-i18n="gate.copy">关注后就能照钱包；想进公开排行榜、显示 X 头像和名字，再用 X 授权登录。</p>
             </div>
           </div>
           <div class="gate-actions">
@@ -43,6 +48,7 @@
               href="https://x.com/Stone141319"
               target="_blank"
               rel="noreferrer"
+              data-i18n="gate.follow"
             >关注 @Stone141319</a>
             <button id="unlock-follow" class="ghost-button" type="button">我已关注，解锁工具</button>
           </div>
@@ -50,11 +56,12 @@
 
         <section class="scanner">
           <div class="scanner-copy">
-            <h1>输入钱包地址，看看你到底是哪种链上玩家。</h1>
-            <p>是钻石手，还是高位接盘侠？是空投猎人，还是土狗冲锋队？链上数据不会撒谎，但文案会补刀。</p>
+            <p class="eyebrow" data-i18n="hero.eyebrow">中文名出梗，英文名出圈</p>
+            <h1 data-i18n="hero.title">输入钱包地址，看看你到底是哪种链上玩家。</h1>
+            <p data-i18n="hero.copy">是钻石手，还是高位接盘侠？是空投猎人，还是土狗冲锋队？链上数据不会撒谎，但文案会补刀。</p>
           </div>
           <form id="scan-form" class="scan-form">
-            <label for="wallet-address">EVM 钱包地址</label>
+            <label for="wallet-address" data-i18n="form.label">EVM 钱包地址</label>
             <div class="input-row">
               <input
                 id="wallet-address"
@@ -63,14 +70,14 @@
                 spellcheck="false"
                 placeholder="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
               />
-              <button class="primary-button" type="submit">生成报告</button>
+              <button class="primary-button" type="submit" data-i18n="form.submit">生成报告</button>
             </div>
-            <div class="quick-row" aria-label="示例钱包">
+            <div class="quick-row" aria-label="示例钱包" data-i18n-aria="form.samples">
               <button type="button" data-sample="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045">Vitalik</button>
               <button type="button" data-sample="0x00000000219ab540356cbb839cbe05303d7705fa">ETH Deposit</button>
               <button type="button" data-sample="0x28C6c06298d514Db089934071355E5743bf21d60">Binance Hot</button>
             </div>
-            <p id="form-note" class="form-note">不连接钱包，不要签名，不碰私钥。只读取公开链上数据。</p>
+            <p id="form-note" class="form-note"></p>
           </form>
         </section>
 
@@ -91,54 +98,54 @@
               <div id="label-list" class="label-list"></div>
             </section>
 
-            <section class="metric-strip" aria-label="核心指数">
+            <section class="metric-strip" aria-label="核心指数" data-i18n-aria="metrics.aria">
               <article>
-                <span>Degen 指数</span>
+                <span data-i18n="metrics.degen">Degen 指数</span>
                 <strong id="degen-score">--</strong>
                 <div class="meter"><i id="degen-meter"></i></div>
               </article>
               <article>
-                <span>钻石手指数</span>
+                <span data-i18n="metrics.diamond">钻石手指数</span>
                 <strong id="diamond-score">--</strong>
                 <div class="meter green"><i id="diamond-meter"></i></div>
               </article>
               <article>
-                <span>空投雷达</span>
+                <span data-i18n="metrics.airdrop">空投雷达</span>
                 <strong id="airdrop-score">--</strong>
                 <div class="meter yellow"><i id="airdrop-meter"></i></div>
               </article>
             </section>
 
             <section class="report-section">
-              <h3>链上资产性格</h3>
+              <h3 data-i18n="sections.asset">链上资产性格</h3>
               <p id="asset-personality"></p>
               <div id="chain-list" class="chain-list"></div>
             </section>
 
             <section class="report-split">
               <article class="report-section danger">
-                <h3>亏损黑匣子</h3>
+                <h3 data-i18n="sections.loss">亏损黑匣子</h3>
                 <p id="loss-black-box"></p>
               </article>
               <article class="report-section">
-                <h3>钻石手 / 纸手</h3>
+                <h3 data-i18n="sections.holding">钻石手 / 纸手</h3>
                 <p id="holding-behavior"></p>
               </article>
             </section>
 
             <section class="report-split">
               <article class="report-section">
-                <h3>Alpha 雷达</h3>
+                <h3 data-i18n="sections.alpha">Alpha 雷达</h3>
                 <ul id="alpha-list" class="clean-list"></ul>
               </article>
               <article class="report-section">
-                <h3>90 天钱包命运</h3>
+                <h3 data-i18n="sections.fate">90 天钱包命运</h3>
                 <ol id="fate-list" class="clean-list ordered"></ol>
               </article>
             </section>
 
             <section class="report-section">
-              <h3>Hermes 策略映射</h3>
+              <h3 data-i18n="sections.strategy">Hermes 策略映射</h3>
               <p id="strategy-fit"></p>
               <div id="token-list" class="token-list"></div>
             </section>
@@ -148,22 +155,22 @@
             <section class="share-card-wrap">
               <div id="share-card" class="share-card">
                 <div class="share-card-top">
-                  <span>链上照妖镜检测报告</span>
+                  <span data-i18n="card.reportTitle">链上照妖镜检测报告</span>
                   <b>Degen DNA</b>
                 </div>
                 <div class="share-card-body">
                   <p class="share-wallet" id="card-address">0x...</p>
                   <h2 id="card-personality">钱包人格</h2>
                   <div class="card-score-row">
-                    <span>Degen 指数</span>
+                    <span data-i18n="card.degen">Degen 指数</span>
                     <strong id="card-degen">--/100</strong>
                   </div>
                   <div class="card-score-row">
-                    <span>钻石手指数</span>
+                    <span data-i18n="card.diamond">钻石手指数</span>
                     <strong id="card-diamond">--/100</strong>
                   </div>
                   <div class="card-loss">
-                    <span>亏损主因</span>
+                    <span data-i18n="card.loss">亏损主因</span>
                     <p id="card-loss-cause">--</p>
                   </div>
                   <div id="card-tags" class="card-tags"></div>
@@ -178,17 +185,17 @@
                 </div>
               </div>
               <div class="share-actions">
-                <button id="share-card-button" class="primary-button" type="button">生成晒图并发到 X</button>
+                <button id="share-card-button" class="primary-button" type="button" data-i18n="card.share">生成晒图并发到 X</button>
               </div>
             </section>
 
             <section class="mini-panel">
-              <h3>样本数据</h3>
+              <h3 data-i18n="stats.title">样本数据</h3>
               <dl class="data-list">
-                <div><dt>估算资产</dt><dd id="stat-portfolio">--</dd></div>
-                <div><dt>交易次数</dt><dd id="stat-tx">--</dd></div>
-                <div><dt>Token 样本</dt><dd id="stat-token">--</dd></div>
-                <div><dt>Meme 暴露</dt><dd id="stat-meme">--</dd></div>
+                <div><dt data-i18n="stats.portfolio">估算资产</dt><dd id="stat-portfolio">--</dd></div>
+                <div><dt data-i18n="stats.tx">交易次数</dt><dd id="stat-tx">--</dd></div>
+                <div><dt data-i18n="stats.token">Token 样本</dt><dd id="stat-token">--</dd></div>
+                <div><dt data-i18n="stats.meme">Meme 暴露</dt><dd id="stat-meme">--</dd></div>
               </dl>
             </section>
           </aside>
@@ -196,13 +203,13 @@
 
         <section id="pk-panel" class="pk-panel">
           <div>
-            <h2>钱包 PK</h2>
-            <p>我的 Degen 指数 82，你敢测吗？两个地址一比，谁适合牛市冲锋、谁适合熊市活下来，一眼就很尴尬。</p>
+            <h2 data-i18n="pk.title">钱包 PK</h2>
+            <p data-i18n="pk.copy">我的 Degen 指数 82，你敢测吗？两个地址一比，谁适合牛市冲锋、谁适合熊市活下来，一眼就很水尬。</p>
           </div>
           <form id="pk-form" class="pk-form">
-            <input id="pk-a" placeholder="钱包 A：0x..." autocomplete="off" spellcheck="false" />
-            <input id="pk-b" placeholder="钱包 B：0x..." autocomplete="off" spellcheck="false" />
-            <button class="primary-button" type="submit">开始 PK</button>
+            <input id="pk-a" placeholder="钱包 A：0x..." autocomplete="off" spellcheck="false" data-i18n-placeholder="pk.a" />
+            <input id="pk-b" placeholder="钱包 B：0x..." autocomplete="off" spellcheck="false" data-i18n-placeholder="pk.b" />
+            <button class="primary-button" type="submit" data-i18n="pk.submit">开始 PK</button>
           </form>
           <div id="pk-result" class="pk-result" hidden></div>
         </section>
@@ -210,20 +217,20 @@
         <section id="leaderboard" class="leaderboard">
           <div class="section-title-row">
             <div>
-              <h2>X 授权排行榜</h2>
-              <p>普通检测不需要登录；只有自愿上榜的钱包才需要 X 授权，用头像、昵称和钱包人格一起卷。</p>
+              <h2 data-i18n="board.title">X 授权排行榜</h2>
+              <p data-i18n="board.copy">普通检测不需要登录；只有自愿上榜的钱包才需要 X 授权，用头像、昵称和钱包人格一起卷。</p>
             </div>
-            <button id="clear-board" class="ghost-button" type="button">清空本机预览</button>
+            <button id="clear-board" class="ghost-button" type="button" data-i18n="board.clear">清空本机预览</button>
           </div>
           <div class="auth-teaser">
-            <span>上榜后会显示：X 头像 / 昵称 / @handle / 钱包人格 / Degen 指数 / 钻石手指数</span>
-            <button id="x-login-teaser" class="primary-button" type="button">X 授权上榜</button>
+            <span data-i18n="board.teaser">上榜后会显示：X 头像 / 昵称 / @handle / 钱包人格 / Degen 指数 / 钻石手指数</span>
+            <button id="x-login-teaser" class="primary-button" type="button" data-i18n="board.auth">X 授权上榜</button>
           </div>
           <div id="leaderboard-list" class="leaderboard-list"></div>
         </section>
       </main>
     </div>
     <canvas id="card-canvas" width="1200" height="1600" hidden></canvas>
-    <script src="/app.js" type="module"></script>
+    <script src="/app.js?v=20260619-bilingual" type="module"></script>
   </body>
 </html>
