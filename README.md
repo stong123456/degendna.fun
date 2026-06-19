@@ -28,8 +28,8 @@ GET /api/health
 ## Deploy Notes
 
 - This is a zero-dependency Node app, so it can run on a VPS, Render, Railway, Fly.io, or any Node-capable container host.
-- Recommended MVP host: Render or Railway, because this repo is a normal Node HTTP server.
-- Render/Railway settings:
+- Recommended MVP host: Railway, because this repo is a normal Node HTTP server and includes `railway.json`.
+- Railway settings:
   - Root directory: repository root
   - Build command: `npm install`
   - Start command: `npm start`
@@ -38,8 +38,8 @@ GET /api/health
     - `PUBLIC_SITE_URL=https://degendna.fun`
     - `PUBLIC_SITE_HOST=degendna.fun`
 - DNS:
-  - Add `degendna.fun` as a custom domain in your hosting provider.
-  - Then set the DNS record exactly as that provider shows in its domain screen.
+  - Add `degendna.fun` as a custom domain in Railway service settings.
+  - Then set the `CNAME` and `TXT` records exactly as Railway shows in its domain screen.
   - Remove any old `A` record that points `degendna.fun` to unrelated IPs.
 - For Vercel/Next.js, move `analyzeWallet` logic from `server.mjs` into a serverless route first. Deploying this exact Node server directly to Vercel is not the best first path.
 - Point your domain to the deployment and set:
