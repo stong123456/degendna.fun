@@ -9,28 +9,42 @@ const I18N = {
     gate: {
       aria: "关注任务",
       avatarAlt: "Stone141319 头像",
-      title: "先关注 Stone，再照钱包",
+      title: "先关注石头，再照钱包",
       copy: "关注后就能照钱包；想进公开排行榜、显示 X 头像和名字，再用 X 授权登录。",
-      follow: "关注 @Stone141319",
+      follow: "关注石头 @Stone141319",
       unlock: "我已关注，解锁工具",
       unlocked: "已解锁",
-      lockText: "关注 @Stone141319 后解锁"
+      lockText: "关注石头后解锁"
     },
     hero: {
-      eyebrow: "中文名出梗，英文名出圈",
+      eyebrow: "链上精神病历",
       title: "输入钱包地址，看看你到底是哪种链上玩家。",
-      copy: "是钻石手，还是高位接盘侠？是空投猎人，还是土狗冲锋队？链上数据不会撒谎，但文案会补刀。"
+      copy: "你的钱包，比你自己更诚实。K 线没杀死你，你的手速差点杀死你。这份报告更像一张链上精神病历。"
     },
     form: {
       label: "EVM 钱包地址",
       submit: "生成报告",
       samples: "示例钱包",
+      sampleTitle: "不知道测什么？先照这几个钱包。",
+      trustAria: "安全提示",
       unlockedNote: "已解锁。不连接钱包，不要签名，不碰私钥。只读取公开链上数据。",
-      lockedNote: "先关注 @Stone141319 并确认后解锁。全程不连接钱包、不签名。",
+      lockedNote: "先关注石头并确认后解锁。全程不连接钱包、不签名。",
       invalid: "请输入有效的 EVM 钱包地址。",
       loading: "正在读取 Ethereum / Base / Arbitrum / Optimism / Polygon / BNB Chain 公开链上数据...",
       failed: "生成失败，请稍后再试。",
-      mustFollow: "先完成关注 @Stone141319 的任务，再生成链上人格报告。"
+      mustFollow: "先完成关注石头的任务，再生成链上人格报告。"
+    },
+    trust: {
+      public: "只分析公开链上数据",
+      noConnect: "不连接钱包",
+      noSign: "不需要签名",
+      noKey: "不读取私钥",
+      noAsset: "不触碰资产"
+    },
+    samples: {
+      vitalik: "照 Vitalik 钱包",
+      binance: "照 Binance 热钱包",
+      random: "照随机 Degen 钱包"
     },
     metrics: { aria: "核心指数", degen: "Degen 指数", diamond: "钻石手指数", airdrop: "空投雷达" },
     sections: {
@@ -39,10 +53,18 @@ const I18N = {
       holding: "钻石手 / 纸手",
       alpha: "Alpha 雷达",
       fate: "90 天钱包命运",
-      strategy: "Hermes 策略映射"
+      strategy: "适合你的交易风格",
+      strategyNote: "由 Hermes 策略映射生成"
+    },
+    mode: {
+      aria: "报告模式",
+      normal: "普通版",
+      roast: "嘴毒版",
+      abstract: "抽象版",
+      kol: "KOL 版"
     },
     card: {
-      reportTitle: "链上照妖镜检测报告",
+      reportTitle: "链上精神病历",
       personalityPrefix: "钱包人格：",
       degen: "Degen 指数",
       diamond: "钻石手指数",
@@ -52,10 +74,16 @@ const I18N = {
       defaultVerdict: "你不是没有判断力，你只是太容易相信下一根阳线。",
       publicOnly: "不签名 · 只看公开数据"
     },
+    tweet: {
+      title: "可复制推文",
+      copy: "复制推文",
+      copied: "推文已复制，拿去公开处刑。",
+      failed: "复制失败，可以手动选中文案。"
+    },
     stats: { title: "样本数据", portfolio: "估算资产", tx: "交易次数", token: "Token 样本", meme: "Meme 暴露" },
     pk: {
       title: "钱包 PK",
-      copy: "我的 Degen 指数 82，你敢测吗？两个地址一比，谁适合牛市冲锋、谁适合熊市活下来，一眼就很水尬。",
+      copy: "你说你比我会交易？地址拿来。链上照妖镜帮你们打一架。",
       a: "钱包 A：0x...",
       b: "钱包 B：0x...",
       submit: "开始 PK",
@@ -72,11 +100,18 @@ const I18N = {
       empty: "还没有本机预览记录。正式公开榜会在 X 授权后写入服务端榜单。",
       retest: "重测",
       diamond: "钻石手",
+      rankAria: "排行榜分类",
+      rankDegen: "本周最高 Degen 指数",
+      rankDiamond: "本周最强钻石手",
+      rankAirdrop: "本周最像空投猎人",
+      rankTop: "本周最惨接盘侠",
+      rankCivil: "本周最像链上公务员",
+      rankUninstall: "本周最有可能卸载钱包",
       authHint: "X 授权上榜需要先在 X Developer Portal 配置 OAuth App：callback 用 https://degendna.fun/api/auth/x/callback。配置好 Client ID/Secret 后就能接入。"
     },
     report: {
-      strategyPrefix: "你的交易风格更适合：",
-      strategySuffix: "。如果继续手动追热点，最好让 Hermes 事件雷达先帮你做二次确认。",
+      strategyPrefix: "",
+      strategySuffix: "",
       noTokens: "暂无可估值 Token",
       weakSample: "公开样本不足",
       offline: "离线"
@@ -108,20 +143,34 @@ ${report.verdict}
       lockText: "Follow @Stone141319 to unlock"
     },
     hero: {
-      eyebrow: "Chinese memes, global screenshots",
+      eyebrow: "Onchain Medical File",
       title: "Paste a wallet address. Find out your Degen DNA.",
-      copy: "Diamond hands or top buyer? Airdrop hunter or meme sprinter? Onchain data does not lie. The report just makes it easier to laugh at."
+      copy: "Your wallet is more honest than you are. Candles did not kill you; hand speed almost did. This report reads like an onchain medical file."
     },
     form: {
       label: "EVM wallet address",
       submit: "Generate report",
       samples: "Sample wallets",
+      sampleTitle: "No wallet ready? Test these first.",
+      trustAria: "Trust notes",
       unlockedNote: "Unlocked. No wallet connection, no signature, no private keys. Public onchain data only.",
       lockedNote: "Follow @Stone141319 and confirm to unlock. No wallet connection or signature required.",
       invalid: "Enter a valid EVM wallet address.",
       loading: "Reading public onchain data from Ethereum / Base / Arbitrum / Optimism / Polygon / BNB Chain...",
       failed: "Generation failed. Try again later.",
       mustFollow: "Follow @Stone141319 first, then generate your Degen DNA report."
+    },
+    trust: {
+      public: "Public onchain data only",
+      noConnect: "No wallet connection",
+      noSign: "No signature",
+      noKey: "No private keys",
+      noAsset: "No asset access"
+    },
+    samples: {
+      vitalik: "Scan Vitalik",
+      binance: "Scan Binance hot wallet",
+      random: "Scan a random Degen"
     },
     metrics: { aria: "Core scores", degen: "Degen Index", diamond: "Diamond Hands", airdrop: "Airdrop Radar" },
     sections: {
@@ -130,7 +179,15 @@ ${report.verdict}
       holding: "Diamond / Paper Hands",
       alpha: "Alpha Radar",
       fate: "90-Day Wallet Plot",
-      strategy: "Hermes Strategy Fit"
+      strategy: "Your Trading Style Fit",
+      strategyNote: "Generated through Hermes strategy mapping"
+    },
+    mode: {
+      aria: "Report mode",
+      normal: "Normal",
+      roast: "Roast",
+      abstract: "Absurd",
+      kol: "KOL"
     },
     card: {
       reportTitle: "Degen DNA Report",
@@ -142,6 +199,12 @@ ${report.verdict}
       share: "Create card and share to X",
       defaultVerdict: "You do have judgment. It simply melts whenever the next candle turns green.",
       publicOnly: "No signature · public data only"
+    },
+    tweet: {
+      title: "Copy-ready tweet",
+      copy: "Copy tweet",
+      copied: "Tweet copied. Public execution is now portable.",
+      failed: "Copy failed. Select the text manually."
     },
     stats: { title: "Sample Data", portfolio: "Est. Assets", tx: "Transactions", token: "Token Sample", meme: "Meme Exposure" },
     pk: {
@@ -163,11 +226,18 @@ ${report.verdict}
       empty: "No local preview records yet. The public board will write to the server after X auth.",
       retest: "Retest",
       diamond: "Diamond",
+      rankAria: "Leaderboard categories",
+      rankDegen: "Highest Degen Index this week",
+      rankDiamond: "Strongest Diamond Hands",
+      rankAirdrop: "Most Airdrop Hunter",
+      rankTop: "Most Tragic Top Buyer",
+      rankCivil: "Most Onchain Civil Servant",
+      rankUninstall: "Most Likely to Uninstall Wallet",
       authHint: "X leaderboard login needs an OAuth app first. Callback: https://degendna.fun/api/auth/x/callback. Add Client ID/Secret and this button can go live."
     },
     report: {
-      strategyPrefix: "This wallet is better suited for: ",
-      strategySuffix: ". If you keep chasing manually, let the Hermes event radar add a second confirmation first.",
+      strategyPrefix: "",
+      strategySuffix: "",
       noTokens: "No priced token sample",
       weakSample: "Public sample too thin",
       offline: "Offline"
@@ -187,8 +257,16 @@ Dare to test yours?`
 const state = {
   currentReport: null,
   unlocked: localStorage.getItem("onchainMirrorFollowUnlocked") === "1",
-  lang: localStorage.getItem("onchainMirrorLang") === "en" ? "en" : "zh"
+  lang: localStorage.getItem("onchainMirrorLang") === "en" ? "en" : "zh",
+  reportMode: localStorage.getItem("onchainMirrorReportMode") || "abstract"
 };
+
+const RANDOM_SAMPLES = [
+  "0x020cA66C30beC2c4Fe3861a94E4DB4A498A35872",
+  "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+  "0xF977814e90dA44bFA03b6295A0616a897441aceC",
+  "0x4e9ce36e442e55ecd9025b9a6e0d88485d628a67"
+];
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -242,6 +320,10 @@ function applyLanguage() {
   if (!state.currentReport) {
     text("#card-personality", `${t("card.personalityPrefix")}${state.lang === "zh" ? "钱包人格" : "Wallet Type"}`);
     text("#card-verdict", t("card.defaultVerdict"));
+    const tweetText = $("#tweet-text");
+    if (tweetText) tweetText.value = "";
+  } else {
+    renderModeContent(state.currentReport);
   }
 }
 
@@ -357,30 +439,59 @@ function renderLeaderboard() {
   );
 }
 
+function modeReport(report = state.currentReport) {
+  if (!report) return null;
+  const modes = report.modes || {};
+  if (!modes[state.reportMode]) {
+    state.reportMode = modes[report.defaultMode] ? report.defaultMode : Object.keys(modes)[0] || "abstract";
+    localStorage.setItem("onchainMirrorReportMode", state.reportMode);
+  }
+  return modes[state.reportMode] || report.report;
+}
+
+function updateModeButtons() {
+  $$("[data-report-mode]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.reportMode === state.reportMode);
+  });
+}
+
+function renderModeContent(report = state.currentReport) {
+  const selected = modeReport(report);
+  if (!selected) return;
+  updateModeButtons();
+  text("#verdict", selected.verdict || report.verdict);
+  text("#asset-personality", selected.assetPersonality);
+  text("#loss-black-box", selected.lossBlackBox);
+  text("#holding-behavior", selected.holdingBehavior);
+  text("#strategy-fit", `${t("report.strategyPrefix")}${selected.strategyFit}${t("report.strategySuffix")}`);
+  renderList($("#alpha-list"), selected.alphaRadar || [], (item) => `<li>${escapeHtml(item)}</li>`);
+  renderList($("#fate-list"), selected.fate90Days || [], (item) => `<li>${escapeHtml(item)}</li>`);
+
+  text("#card-loss-cause", selected.lossCause || report.lossCause);
+  text("#card-verdict", selected.verdict || report.verdict);
+  const tweetText = $("#tweet-text");
+  if (tweetText) tweetText.value = selected.tweetText || buildShareText(report);
+}
+
 function renderReport(report) {
   state.currentReport = report;
+  if (report.defaultMode && !report.modes?.[state.reportMode]) {
+    state.reportMode = report.defaultMode;
+  }
   reportView.hidden = false;
 
   const locale = state.lang === "zh" ? "zh-CN" : "en-US";
   text("#report-address", `${report.shortAddress} · ${new Date(report.generatedAt).toLocaleString(locale)}`);
   text("#personality", report.personality);
   text("#degen-band", report.degenBand);
-  text("#verdict", report.verdict);
   text("#degen-score", `${report.scores.degen}/100`);
   text("#diamond-score", `${report.scores.diamond}/100`);
   text("#airdrop-score", `${report.scores.airdrop}/100`);
   setMeter("#degen-meter", report.scores.degen);
   setMeter("#diamond-meter", report.scores.diamond);
   setMeter("#airdrop-meter", report.scores.airdrop);
-  text("#asset-personality", report.report.assetPersonality);
-  text("#loss-black-box", report.report.lossBlackBox);
-  text("#holding-behavior", report.report.holdingBehavior);
-  text("#strategy-fit", `${t("report.strategyPrefix")}${report.report.strategyFit}${t("report.strategySuffix")}`);
 
   $("#label-list").innerHTML = report.labels.map((label) => `<span>${escapeHtml(label)}</span>`).join("");
-
-  renderList($("#alpha-list"), report.report.alphaRadar, (item) => `<li>${escapeHtml(item)}</li>`);
-  renderList($("#fate-list"), report.report.fate90Days, (item) => `<li>${escapeHtml(item)}</li>`);
 
   renderList(
     $("#chain-list"),
@@ -417,8 +528,6 @@ function renderReport(report) {
   text("#card-personality", `${t("card.personalityPrefix")}${report.personality}`);
   text("#card-degen", `${report.scores.degen}/100`);
   text("#card-diamond", `${report.scores.diamond}/100`);
-  text("#card-loss-cause", report.lossCause);
-  text("#card-verdict", report.verdict);
   text("#card-site", report.siteHost);
   $("#card-tags").innerHTML = report.labels.slice(0, 4).map((label) => `<span>${escapeHtml(label)}</span>`).join("");
 
@@ -427,6 +536,7 @@ function renderReport(report) {
   text("#stat-token", `${report.metrics.uniqueTokenCount}`);
   text("#stat-meme", `${Math.round(report.metrics.memeRatio * 100)}%`);
 
+  renderModeContent(report);
   saveToLeaderboard(report);
   reportView.scrollIntoView({ block: "start", behavior: "smooth" });
 }
@@ -503,6 +613,7 @@ function loadImage(src) {
 async function drawShareCanvas(report) {
   const lang = report.language || state.lang;
   const tr = (key) => getText(lang, key);
+  const selected = modeReport(report) || report.report || {};
   const canvas = $("#card-canvas");
   const ctx = canvas.getContext("2d");
   const w = canvas.width;
@@ -574,7 +685,7 @@ async function drawShareCanvas(report) {
   ctx.fillText(tr("card.loss"), 92, 822);
   ctx.fillStyle = "#f7f1e8";
   ctx.font = "800 44px Microsoft YaHei, Inter, sans-serif";
-  drawWrappedText(ctx, report.lossCause, 92, 884, 1000, 58, 3);
+  drawWrappedText(ctx, selected.lossCause || report.lossCause, 92, 884, 1000, 58, 3);
 
   ctx.fillStyle = "#b8ff5c";
   ctx.font = "800 30px Microsoft YaHei, Inter, sans-serif";
@@ -602,7 +713,7 @@ async function drawShareCanvas(report) {
   ctx.fillRect(92, 1260, 6, 178);
   ctx.fillStyle = "#f7f1e8";
   ctx.font = "800 42px Microsoft YaHei, Inter, sans-serif";
-  drawWrappedText(ctx, report.verdict, 122, 1322, 940, 58, 3);
+  drawWrappedText(ctx, selected.verdict || report.verdict, 122, 1322, 940, 58, 3);
 
   ctx.save();
   ctx.beginPath();
@@ -641,7 +752,8 @@ async function downloadCard() {
 }
 
 function buildShareText(report) {
-  return I18N[state.lang].share.text(report);
+  const selected = modeReport(report);
+  return selected?.tweetText || I18N[state.lang].share.text(report);
 }
 
 function openXIntent(report) {
@@ -682,6 +794,24 @@ async function shareCard() {
   link.click();
   URL.revokeObjectURL(objectUrl);
   openXIntent(report);
+}
+
+async function copyTweet() {
+  if (!state.currentReport) return;
+  const value = buildShareText(state.currentReport);
+  const textarea = $("#tweet-text");
+  if (textarea) textarea.value = value;
+  try {
+    await navigator.clipboard.writeText(value);
+    setStatus(t("tweet.copied"));
+    setTimeout(clearStatus, 1800);
+  } catch {
+    textarea?.focus();
+    textarea?.select();
+    const copied = document.execCommand?.("copy");
+    setStatus(copied ? t("tweet.copied") : t("tweet.failed"), copied ? "info" : "error");
+    setTimeout(clearStatus, copied ? 1800 : 2200);
+  }
 }
 
 async function handlePk(event) {
@@ -736,7 +866,15 @@ async function setLanguage(lang) {
 form.addEventListener("submit", handleScan);
 $("#pk-form").addEventListener("submit", handlePk);
 $("#share-card-button").addEventListener("click", shareCard);
+$("#copy-tweet").addEventListener("click", copyTweet);
 $("#language-toggle").addEventListener("click", () => setLanguage(state.lang === "zh" ? "en" : "zh"));
+$$("[data-report-mode]").forEach((button) => {
+  button.addEventListener("click", () => {
+    state.reportMode = button.dataset.reportMode;
+    localStorage.setItem("onchainMirrorReportMode", state.reportMode);
+    renderModeContent(state.currentReport);
+  });
+});
 $("#unlock-follow").addEventListener("click", () => {
   state.unlocked = true;
   localStorage.setItem("onchainMirrorFollowUnlocked", "1");
@@ -753,9 +891,11 @@ $("#x-login-teaser").addEventListener("click", () => {
   setTimeout(clearStatus, 5200);
 });
 
-$$("[data-sample]").forEach((button) => {
+$$("[data-sample], [data-sample-random]").forEach((button) => {
   button.addEventListener("click", () => {
-    addressInput.value = button.dataset.sample;
+    addressInput.value = button.dataset.sampleRandom
+      ? RANDOM_SAMPLES[Math.floor(Math.random() * RANDOM_SAMPLES.length)]
+      : button.dataset.sample;
     if (!state.unlocked) {
       requireUnlocked();
       return;

@@ -8,7 +8,7 @@
       name="description"
       content="输入钱包地址，生成能晒、能比、能自嘲的链上人格报告。"
     />
-    <link rel="stylesheet" href="/styles.css?v=20260619-bilingual" />
+    <link rel="stylesheet" href="/styles.css?v=20260619-psychart" />
   </head>
   <body>
     <div class="app-shell">
@@ -37,7 +37,7 @@
           <div class="creator-card">
             <img src="/assets/stone-avatar.png" alt="Stone141319 头像" data-i18n-alt="gate.avatarAlt" />
             <div>
-              <h2 data-i18n="gate.title">先关注 Stone，再照钱包</h2>
+              <h2 data-i18n="gate.title">先关注石头，再照钱包</h2>
               <p data-i18n="gate.copy">关注后就能照钱包；想进公开排行榜、显示 X 头像和名字，再用 X 授权登录。</p>
             </div>
           </div>
@@ -56,7 +56,7 @@
 
         <section class="scanner">
           <div class="scanner-copy">
-            <p class="eyebrow" data-i18n="hero.eyebrow">中文名出梗，英文名出圈</p>
+            <p class="eyebrow" data-i18n="hero.eyebrow">链上精神病历</p>
             <h1 data-i18n="hero.title">输入钱包地址，看看你到底是哪种链上玩家。</h1>
             <p data-i18n="hero.copy">是钻石手，还是高位接盘侠？是空投猎人，还是土狗冲锋队？链上数据不会撒谎，但文案会补刀。</p>
           </div>
@@ -72,10 +72,18 @@
               />
               <button class="primary-button" type="submit" data-i18n="form.submit">生成报告</button>
             </div>
+            <div class="trust-list" aria-label="安全提示" data-i18n-aria="form.trustAria">
+              <span data-i18n="trust.public">只分析公开链上数据</span>
+              <span data-i18n="trust.noConnect">不连接钱包</span>
+              <span data-i18n="trust.noSign">不需要签名</span>
+              <span data-i18n="trust.noKey">不读取私钥</span>
+              <span data-i18n="trust.noAsset">不触碰资产</span>
+            </div>
+            <p class="sample-title" data-i18n="form.sampleTitle">不知道测什么？先照这几个钱包。</p>
             <div class="quick-row" aria-label="示例钱包" data-i18n-aria="form.samples">
-              <button type="button" data-sample="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045">Vitalik</button>
-              <button type="button" data-sample="0x00000000219ab540356cbb839cbe05303d7705fa">ETH Deposit</button>
-              <button type="button" data-sample="0x28C6c06298d514Db089934071355E5743bf21d60">Binance Hot</button>
+              <button type="button" data-sample="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" data-i18n="samples.vitalik">照 Vitalik 钱包</button>
+              <button type="button" data-sample="0x28C6c06298d514Db089934071355E5743bf21d60" data-i18n="samples.binance">照 Binance 热钱包</button>
+              <button type="button" data-sample-random="1" data-i18n="samples.random">照随机 Degen 钱包</button>
             </div>
             <p id="form-note" class="form-note"></p>
           </form>
@@ -96,6 +104,12 @@
               </div>
               <p id="verdict" class="verdict"></p>
               <div id="label-list" class="label-list"></div>
+              <div class="mode-switcher" aria-label="报告模式" data-i18n-aria="mode.aria">
+                <button type="button" data-report-mode="normal" data-i18n="mode.normal">普通版</button>
+                <button type="button" data-report-mode="roast" data-i18n="mode.roast">嘴毒版</button>
+                <button type="button" data-report-mode="abstract" data-i18n="mode.abstract">抽象版</button>
+                <button type="button" data-report-mode="kol" data-i18n="mode.kol">KOL 版</button>
+              </div>
             </section>
 
             <section class="metric-strip" aria-label="核心指数" data-i18n-aria="metrics.aria">
@@ -145,7 +159,8 @@
             </section>
 
             <section class="report-section">
-              <h3 data-i18n="sections.strategy">Hermes 策略映射</h3>
+              <h3 data-i18n="sections.strategy">适合你的交易风格</h3>
+              <p class="section-note" data-i18n="sections.strategyNote">由 Hermes 策略映射生成</p>
               <p id="strategy-fit"></p>
               <div id="token-list" class="token-list"></div>
             </section>
@@ -187,6 +202,13 @@
               <div class="share-actions">
                 <button id="share-card-button" class="primary-button" type="button" data-i18n="card.share">生成晒图并发到 X</button>
               </div>
+              <div class="tweet-box">
+                <div class="tweet-box-head">
+                  <span data-i18n="tweet.title">可复制推文</span>
+                  <button id="copy-tweet" class="ghost-button" type="button" data-i18n="tweet.copy">复制推文</button>
+                </div>
+                <textarea id="tweet-text" readonly></textarea>
+              </div>
             </section>
 
             <section class="mini-panel">
@@ -204,7 +226,7 @@
         <section id="pk-panel" class="pk-panel">
           <div>
             <h2 data-i18n="pk.title">钱包 PK</h2>
-            <p data-i18n="pk.copy">我的 Degen 指数 82，你敢测吗？两个地址一比，谁适合牛市冲锋、谁适合熊市活下来，一眼就很水尬。</p>
+            <p data-i18n="pk.copy">你说你比我会交易？地址拿来。链上照妖镜帮你们打一架。</p>
           </div>
           <form id="pk-form" class="pk-form">
             <input id="pk-a" placeholder="钱包 A：0x..." autocomplete="off" spellcheck="false" data-i18n-placeholder="pk.a" />
@@ -226,11 +248,19 @@
             <span data-i18n="board.teaser">上榜后会显示：X 头像 / 昵称 / @handle / 钱包人格 / Degen 指数 / 钻石手指数</span>
             <button id="x-login-teaser" class="primary-button" type="button" data-i18n="board.auth">X 授权上榜</button>
           </div>
+          <div class="rank-prompts" aria-label="排行榜分类" data-i18n-aria="board.rankAria">
+            <span data-i18n="board.rankDegen">本周最高 Degen 指数</span>
+            <span data-i18n="board.rankDiamond">本周最强钻石手</span>
+            <span data-i18n="board.rankAirdrop">本周最像空投猎人</span>
+            <span data-i18n="board.rankTop">本周最惨接盘侠</span>
+            <span data-i18n="board.rankCivil">本周最像链上公务员</span>
+            <span data-i18n="board.rankUninstall">本周最有可能卸载钱包</span>
+          </div>
           <div id="leaderboard-list" class="leaderboard-list"></div>
         </section>
       </main>
     </div>
     <canvas id="card-canvas" width="1200" height="1600" hidden></canvas>
-    <script src="/app.js?v=20260619-bilingual" type="module"></script>
+    <script src="/app.js?v=20260619-psychart" type="module"></script>
   </body>
 </html>

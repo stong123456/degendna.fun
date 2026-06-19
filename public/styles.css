@@ -344,6 +344,30 @@ input:focus {
   margin-top: 12px;
 }
 
+.sample-title {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.trust-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.trust-list span {
+  border: 1px solid rgba(184, 255, 92, 0.2);
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: rgba(184, 255, 92, 0.055);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .quick-row button {
   min-height: 34px;
   padding: 0 10px;
@@ -460,6 +484,29 @@ input:focus {
   margin-top: 18px;
 }
 
+.mode-switcher {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.mode-switcher button {
+  min-height: 38px;
+  border: 1px solid rgba(247, 241, 232, 0.14);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.mode-switcher button.active {
+  border-color: rgba(184, 255, 92, 0.55);
+  background: rgba(184, 255, 92, 0.12);
+  color: var(--green);
+}
+
 .label-list span,
 .card-tags span {
   border: 1px solid rgba(184, 255, 92, 0.28);
@@ -532,6 +579,13 @@ input:focus {
   font-size: 20px;
 }
 
+.section-note {
+  margin: -2px 0 10px;
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .report-section p {
   margin-bottom: 0;
   color: #ddd2c3;
@@ -576,6 +630,23 @@ input:focus {
 
 .auth-teaser .primary-button {
   flex: 0 0 auto;
+}
+
+.rank-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.rank-prompts span {
+  border: 1px solid rgba(255, 73, 52, 0.28);
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: rgba(255, 73, 52, 0.08);
+  color: #ffd5cc;
+  font-size: 13px;
+  font-weight: 850;
 }
 
 .chain-row,
@@ -640,6 +711,45 @@ input:focus {
   gap: 12px;
 }
 
+.tweet-box {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius);
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.tweet-box-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tweet-box-head span {
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.tweet-box-head .ghost-button {
+  min-height: 34px;
+}
+
+#tweet-text {
+  width: 100%;
+  min-height: 158px;
+  resize: vertical;
+  border: 1px solid rgba(247, 241, 232, 0.14);
+  border-radius: 6px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--ink);
+  line-height: 1.45;
+  outline: none;
+}
+
 .share-card {
   position: relative;
   overflow: hidden;
@@ -673,6 +783,9 @@ input:focus {
   color: var(--muted);
   font-size: 12px;
   font-weight: 800;
+}
+
+.share-card-top {
   text-transform: uppercase;
 }
 
@@ -894,6 +1007,10 @@ dd {
   .metric-strip,
   .report-split {
     grid-template-columns: 1fr;
+  }
+
+  .mode-switcher {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .auth-teaser {

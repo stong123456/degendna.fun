@@ -421,6 +421,390 @@ const PERSONALITY_TEXT = {
   }
 };
 
+const EXTRA_PERSONALITIES = {
+  leverageSleepwalker: "leverageSleepwalker",
+  stopLossMissingPerson: "stopLossMissingPerson",
+  greenCandleAllergy: "greenCandleAllergy",
+  redCandleAmnesia: "redCandleAmnesia",
+  narrativeHostage: "narrativeHostage",
+  liquidityExitVolunteer: "liquidityExitVolunteer",
+  fomoCardiacPatient: "fomoCardiacPatient",
+  thesisAfterBuy: "thesisAfterBuy",
+  mouseFingerAthlete: "mouseFingerAthlete",
+  chartPossessed: "chartPossessed",
+  gasFeePhilanthropist: "gasFeePhilanthropist",
+  mevSnack: "mevSnack",
+  walletAutopsyIntern: "walletAutopsyIntern",
+  bullMarketHallucination: "bullMarketHallucination",
+  bearMarketPretendDead: "bearMarketPretendDead",
+  liquidityPoolLifeguard: "liquidityPoolLifeguard",
+  airdropReceiptCollector: "airdropReceiptCollector",
+  bridgeStampCollector: "bridgeStampCollector",
+  protocolDoorKnocker: "protocolDoorKnocker",
+  nftMemoryPalace: "nftMemoryPalace",
+  jpgBagHistorian: "jpgBagHistorian",
+  stablecoinZenGarden: "stablecoinZenGarden",
+  usdtParkingLotGuard: "usdtParkingLotGuard",
+  dustPositionBuddha: "dustPositionBuddha",
+  approvalArchaeologist: "approvalArchaeologist",
+  walletPersonalityCrisis: "walletPersonalityCrisis",
+  smartMoneyCosplayer: "smartMoneyCosplayer",
+  kolShadowTrader: "kolShadowTrader",
+  reverseIndicatorOracle: "reverseIndicatorOracle",
+  exitButtonPhilosopher: "exitButtonPhilosopher",
+  dipBuyerOnRooftop: "dipBuyerOnRooftop",
+  candleWorshipper: "candleWorshipper",
+  portfolioJengaPlayer: "portfolioJengaPlayer",
+  pnlFogMachine: "pnlFogMachine",
+  lateCycleRomantic: "lateCycleRomantic",
+  degenMedicalRecord: "degenMedicalRecord",
+  chainPsychWardVIP: "chainPsychWardVIP",
+  contractExorcist: "contractExorcist",
+  treasuryNightMarket: "treasuryNightMarket",
+  multiChainVagrant: "multiChainVagrant",
+  liquidityBlackHole: "liquidityBlackHole",
+  notificationAddict: "notificationAddict"
+};
+
+Object.assign(PERSONALITY_TEXT, {
+  [EXTRA_PERSONALITIES.leverageSleepwalker]: {
+    zh: "合约梦游症患者",
+    en: "Leverage Sleepwalker",
+    verdict: {
+      zh: "你的钱包像半夜起来开仓，醒来只剩一张链上精神病历。",
+      en: "This wallet trades like it opens positions while sleepwalking and wakes up to an onchain medical record."
+    }
+  },
+  [EXTRA_PERSONALITIES.stopLossMissingPerson]: {
+    zh: "止损功能失踪人口",
+    en: "Stop-Loss Missing Person",
+    verdict: {
+      zh: "你的止损按钮疑似离家出走，留下仓位独自面对世界。",
+      en: "Your stop-loss button appears to have left home, leaving the position to face the world alone."
+    }
+  },
+  [EXTRA_PERSONALITIES.greenCandleAllergy]: {
+    zh: "阳线过敏体质",
+    en: "Green Candle Allergy",
+    verdict: {
+      zh: "别人看到阳线是行情，你看到阳线是命运在私信你。",
+      en: "Others see a green candle as price action. You see destiny sliding into your DMs."
+    }
+  },
+  [EXTRA_PERSONALITIES.redCandleAmnesia]: {
+    zh: "阴线失忆症",
+    en: "Red Candle Amnesia",
+    verdict: {
+      zh: "每次下跌你都短暂失忆，然后把补仓叫做信仰升级。",
+      en: "Every dip triggers memory loss, then you rename averaging down as upgraded conviction."
+    }
+  },
+  [EXTRA_PERSONALITIES.narrativeHostage]: {
+    zh: "叙事绑架受害者",
+    en: "Narrative Hostage",
+    verdict: {
+      zh: "你不是在研究赛道，你是被每个新名词轮流扣押。",
+      en: "You are not researching sectors. You are being held hostage by rotating buzzwords."
+    }
+  },
+  [EXTRA_PERSONALITIES.liquidityExitVolunteer]: {
+    zh: "退出流动性志愿者",
+    en: "Exit Liquidity Volunteer",
+    verdict: {
+      zh: "你总在别人需要流动性的时候出现，币圈应该给你发锦旗。",
+      en: "You appear whenever others need liquidity. Crypto should issue you a certificate."
+    }
+  },
+  [EXTRA_PERSONALITIES.fomoCardiacPatient]: {
+    zh: "FOMO 心内科常客",
+    en: "FOMO Cardiology Patient",
+    verdict: {
+      zh: "群里一喊翻倍，你的心率和 gas price 一起上链。",
+      en: "When chat says 2x, your heart rate and gas price go onchain together."
+    }
+  },
+  [EXTRA_PERSONALITIES.thesisAfterBuy]: {
+    zh: "买后补论文型选手",
+    en: "Thesis-After-Buy Trader",
+    verdict: {
+      zh: "你不是没有研究，你只是喜欢先买票再写出行攻略。",
+      en: "You do research. You just prefer buying the ticket before writing the travel plan."
+    }
+  },
+  [EXTRA_PERSONALITIES.mouseFingerAthlete]: {
+    zh: "鼠标左键运动员",
+    en: "Left-Click Athlete",
+    verdict: {
+      zh: "你的核心竞争力不是判断，是手指比脑子先完成热身。",
+      en: "Your edge is not judgment. It is finger speed arriving before the brain finishes booting."
+    }
+  },
+  [EXTRA_PERSONALITIES.chartPossessed]: {
+    zh: "K 线附体型人格",
+    en: "Chart-Possessed Personality",
+    verdict: {
+      zh: "K 线没有杀死你，但你的解读方式差点把钱包送走。",
+      en: "The candle did not kill you. Your interpretation almost escorted the wallet out."
+    }
+  },
+  [EXTRA_PERSONALITIES.gasFeePhilanthropist]: {
+    zh: "Gas 费慈善家",
+    en: "Gas Fee Philanthropist",
+    verdict: {
+      zh: "你对节点生态的贡献，主要体现在手续费慈善。",
+      en: "Your contribution to network infrastructure is best described as fee philanthropy."
+    }
+  },
+  [EXTRA_PERSONALITIES.mevSnack]: {
+    zh: "MEV 零食包",
+    en: "MEV Snack Pack",
+    verdict: {
+      zh: "你的交易路径看起来很努力，但在链上像被路过顺手咬了一口。",
+      en: "Your route looks hardworking, but onchain it resembles a snack left unattended."
+    }
+  },
+  [EXTRA_PERSONALITIES.walletAutopsyIntern]: {
+    zh: "钱包尸检实习生",
+    en: "Wallet Autopsy Intern",
+    verdict: {
+      zh: "这不是复盘，这是在给自己的仓位做链上尸检。",
+      en: "This is not a review. It is an onchain autopsy of your own positions."
+    }
+  },
+  [EXTRA_PERSONALITIES.bullMarketHallucination]: {
+    zh: "牛市幻觉型选手",
+    en: "Bull Market Hallucinator",
+    verdict: {
+      zh: "你看到的不是趋势，是大脑给钱包播放的励志片。",
+      en: "What you see is not a trend. It is motivational cinema projected onto your wallet."
+    }
+  },
+  [EXTRA_PERSONALITIES.bearMarketPretendDead]: {
+    zh: "熊市装死型选手",
+    en: "Bear Market Possum Mode",
+    verdict: {
+      zh: "你不卖不是因为坚定，是钱包已经进入低功耗求生模式。",
+      en: "You are not holding from conviction. The wallet has entered low-power survival mode."
+    }
+  },
+  [EXTRA_PERSONALITIES.liquidityPoolLifeguard]: {
+    zh: "流动性池救生员",
+    en: "Liquidity Pool Lifeguard",
+    verdict: {
+      zh: "你看见池子就想下水，至于会不会游泳，链上另说。",
+      en: "You see a pool and jump in. Whether you can swim is a separate onchain question."
+    }
+  },
+  [EXTRA_PERSONALITIES.airdropReceiptCollector]: {
+    zh: "空投小票收集癖",
+    en: "Airdrop Receipt Collector",
+    verdict: {
+      zh: "你的交互像便利店小票，单张不值钱，但你坚信会有兑奖日。",
+      en: "Your interactions look like receipts: tiny alone, sacred if a reward day appears."
+    }
+  },
+  [EXTRA_PERSONALITIES.bridgeStampCollector]: {
+    zh: "跨链邮戳收藏家",
+    en: "Bridge Stamp Collector",
+    verdict: {
+      zh: "你不是跨链，你是在给每条链盖到此一游的章。",
+      en: "You are not bridging. You are stamping 'I was here' across chains."
+    }
+  },
+  [EXTRA_PERSONALITIES.protocolDoorKnocker]: {
+    zh: "协议敲门办事员",
+    en: "Protocol Door Knocker",
+    verdict: {
+      zh: "每个新协议你都去敲一下门，像怕空投名单把你漏在门外。",
+      en: "You knock on every new protocol like the airdrop list might forget your address."
+    }
+  },
+  [EXTRA_PERSONALITIES.nftMemoryPalace]: {
+    zh: "NFT 记忆宫殿管理员",
+    en: "NFT Memory Palace Keeper",
+    verdict: {
+      zh: "你的 NFT 不是资产，是上一轮社交幻觉的标本。",
+      en: "Your NFTs are not assets. They are preserved specimens of last cycle's social hallucination."
+    }
+  },
+  [EXTRA_PERSONALITIES.jpgBagHistorian]: {
+    zh: "JPEG 套牢史学家",
+    en: "JPEG Bag Historian",
+    verdict: {
+      zh: "你的钱包保存的不是图片，是每个地板价下沉的历史切片。",
+      en: "Your wallet stores not images, but historical slices of every floor-price collapse."
+    }
+  },
+  [EXTRA_PERSONALITIES.stablecoinZenGarden]: {
+    zh: "稳定币禅院住持",
+    en: "Stablecoin Zen Garden",
+    verdict: {
+      zh: "你的波动率被修剪得很整齐，像一座不敢开仓的禅院。",
+      en: "Your volatility is neatly trimmed, like a Zen garden afraid to open a position."
+    }
+  },
+  [EXTRA_PERSONALITIES.usdtParkingLotGuard]: {
+    zh: "USDT 停车场保安",
+    en: "USDT Parking Lot Guard",
+    verdict: {
+      zh: "你的资金不是空仓，是在停车场等一个永远不来的完美买点。",
+      en: "Your capital is not sidelined. It is guarding a parking lot for the perfect entry."
+    }
+  },
+  [EXTRA_PERSONALITIES.dustPositionBuddha]: {
+    zh: "灰尘仓位菩萨",
+    en: "Dust Position Buddha",
+    verdict: {
+      zh: "每个小仓位都被你普度众生，哪怕它只剩浏览器收藏夹级别的意义。",
+      en: "Every tiny position receives compassion, even when its only value is sentimental."
+    }
+  },
+  [EXTRA_PERSONALITIES.approvalArchaeologist]: {
+    zh: "授权记录考古队",
+    en: "Approval Archaeologist",
+    verdict: {
+      zh: "你的授权历史像地下遗址，随便一铲都有古早协议露头。",
+      en: "Your approval history is an excavation site; every shovel reveals an ancient protocol."
+    }
+  },
+  [EXTRA_PERSONALITIES.walletPersonalityCrisis]: {
+    zh: "钱包人格分裂现场",
+    en: "Wallet Identity Crisis",
+    verdict: {
+      zh: "这个钱包同时想当聪明钱、空投党和土狗选手，精神状态很链上。",
+      en: "This wallet wants to be smart money, an airdrop hunter, and a meme sprinter at once."
+    }
+  },
+  [EXTRA_PERSONALITIES.smartMoneyCosplayer]: {
+    zh: "聪明钱 Cosplay",
+    en: "Smart Money Cosplayer",
+    verdict: {
+      zh: "你模仿聪明钱的姿势很像，问题是出场时机比较像观众。",
+      en: "The smart-money pose is convincing. The timing still resembles the audience."
+    }
+  },
+  [EXTRA_PERSONALITIES.kolShadowTrader]: {
+    zh: "KOL 影子跟单员",
+    en: "KOL Shadow Trader",
+    verdict: {
+      zh: "你不是跟趋势，你是在跟某个头像的情绪周期。",
+      en: "You are not following trends. You are following the mood cycle of someone else's avatar."
+    }
+  },
+  [EXTRA_PERSONALITIES.reverseIndicatorOracle]: {
+    zh: "反向指标预言机",
+    en: "Contra-Signal Oracle",
+    verdict: {
+      zh: "你的钱包不是亏，它是在给市场提供反向参考数据。",
+      en: "Your wallet is not losing; it is donating contra-signal data to the market."
+    }
+  },
+  [EXTRA_PERSONALITIES.exitButtonPhilosopher]: {
+    zh: "退出按钮哲学家",
+    en: "Exit Button Philosopher",
+    verdict: {
+      zh: "你经常思考退出，但思考本身已经占用了退出窗口。",
+      en: "You think deeply about exits. The thinking usually consumes the exit window."
+    }
+  },
+  [EXTRA_PERSONALITIES.dipBuyerOnRooftop]: {
+    zh: "抄底天台观察员",
+    en: "Dip Buyer on the Roof",
+    verdict: {
+      zh: "你每次说抄底，都像站在楼顶研究风向。",
+      en: "Every 'buy the dip' from this wallet feels like checking wind direction on a roof."
+    }
+  },
+  [EXTRA_PERSONALITIES.candleWorshipper]: {
+    zh: "K 线祭司",
+    en: "Candle Worshipper",
+    verdict: {
+      zh: "你对图表的尊重已经接近宗教活动，缺点是神谕经常延迟。",
+      en: "Your respect for charts borders on religion. The oracle just happens to lag."
+    }
+  },
+  [EXTRA_PERSONALITIES.portfolioJengaPlayer]: {
+    zh: "仓位叠叠乐玩家",
+    en: "Portfolio Jenga Player",
+    verdict: {
+      zh: "你的资产组合像叠叠乐，抽错一块就开始全场安静。",
+      en: "Your portfolio is Jenga: one wrong block and the room goes quiet."
+    }
+  },
+  [EXTRA_PERSONALITIES.pnlFogMachine]: {
+    zh: "盈亏迷雾制造机",
+    en: "PnL Fog Machine",
+    verdict: {
+      zh: "你的盈亏不是曲线，是舞台烟雾，适合遮住真实情绪。",
+      en: "Your PnL is less a curve and more stage fog for hiding emotions."
+    }
+  },
+  [EXTRA_PERSONALITIES.lateCycleRomantic]: {
+    zh: "周期末浪漫主义者",
+    en: "Late-Cycle Romantic",
+    verdict: {
+      zh: "你总在故事最热闹的时候相信爱情，市场负责分手。",
+      en: "You believe in love near the end of every cycle. The market handles the breakup."
+    }
+  },
+  [EXTRA_PERSONALITIES.degenMedicalRecord]: {
+    zh: "链上精神病历本人",
+    en: "Degen Medical Record",
+    verdict: {
+      zh: "这份报告不是财务分析，更像你的链上精神病历被打印出来。",
+      en: "This is not financial analysis. It is your onchain psychiatric file printed in public."
+    }
+  },
+  [EXTRA_PERSONALITIES.chainPsychWardVIP]: {
+    zh: "链上精神病院 VIP",
+    en: "Onchain Psych Ward VIP",
+    verdict: {
+      zh: "你不是高风险偏好，你是把钱包挂号到了链上精神科。",
+      en: "This is not high risk appetite. This wallet has checked into onchain psychiatry."
+    }
+  },
+  [EXTRA_PERSONALITIES.contractExorcist]: {
+    zh: "合约驱魔师",
+    en: "Contract Exorcist",
+    verdict: {
+      zh: "你和智能合约的关系像驱魔现场，每次确认都带点仪式感。",
+      en: "Your relationship with smart contracts feels like an exorcism with a confirm button."
+    }
+  },
+  [EXTRA_PERSONALITIES.treasuryNightMarket]: {
+    zh: "金库夜市试吃员",
+    en: "Treasury Night-Market Sampler",
+    verdict: {
+      zh: "你不是风险偏好高，你是带着金库在夜市里试吃。",
+      en: "You are not risk-on; you are sampling street food with a treasury wallet."
+    }
+  },
+  [EXTRA_PERSONALITIES.multiChainVagrant]: {
+    zh: "多链流浪汉",
+    en: "Multi-Chain Vagrant",
+    verdict: {
+      zh: "你的钱包没有主场，只有一串到处留下的链上脚印。",
+      en: "This wallet has no home chain, only footprints scattered across networks."
+    }
+  },
+  [EXTRA_PERSONALITIES.liquidityBlackHole]: {
+    zh: "流动性黑洞体质",
+    en: "Liquidity Black Hole",
+    verdict: {
+      zh: "资金一靠近你选的池子，就开始思考存在主义。",
+      en: "Capital approaches your chosen pools and immediately questions existence."
+    }
+  },
+  [EXTRA_PERSONALITIES.notificationAddict]: {
+    zh: "行情提醒成瘾者",
+    en: "Notification Addict",
+    verdict: {
+      zh: "你不是在盯盘，你是在等手机给钱包判刑。",
+      en: "You are not watching the market. You are waiting for your phone to sentence the wallet."
+    }
+  }
+});
+
 function json(res, status, body) {
   const data = JSON.stringify(body);
   res.writeHead(status, {
@@ -456,6 +840,26 @@ function pickByAddress(address, options) {
   if (!candidates.length) return PERSONALITIES.normal;
   const bucket = Number.parseInt(String(address || "").slice(-8), 16);
   return candidates[Number.isFinite(bucket) ? bucket % candidates.length : 0];
+}
+
+function stableIndex(address, salt, length) {
+  if (!length) return 0;
+  const input = `${String(address || "").toLowerCase()}:${salt}`;
+  let hash = 2166136261;
+  for (const char of input) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return Math.abs(hash) % length;
+}
+
+function pickStable(address, salt, items) {
+  return items[stableIndex(address, salt, items.length)];
+}
+
+function pickStableLocalized(address, salt, lang, items) {
+  const item = pickStable(address, salt, items);
+  return pickLocalized(lang, item.zh, item.en);
 }
 
 function normalizeAddress(input) {
@@ -967,37 +1371,50 @@ function scoreWallet(metrics) {
 
 function choosePersonality(metrics, scores, address) {
   const picks = [];
-  if (metrics.portfolioUsd > 100_000 && scores.degen > 68) picks.push(PERSONALITIES.whaleCosplay);
-  if (metrics.failedRate > 0.18) picks.push(PERSONALITIES.gasArsonist, PERSONALITIES.contractButtonMasher);
-  if (metrics.methodCounts.swap > 8) picks.push(PERSONALITIES.pressure, PERSONALITIES.contractButtonMasher);
-  if (metrics.methodCounts.defi > 6) picks.push(PERSONALITIES.yieldFarmGhost);
+  if (metrics.portfolioUsd > 100_000 && scores.degen > 68) picks.push(PERSONALITIES.whaleCosplay, EXTRA_PERSONALITIES.treasuryNightMarket);
+  if (metrics.failedRate > 0.18) {
+    picks.push(PERSONALITIES.gasArsonist, PERSONALITIES.contractButtonMasher, EXTRA_PERSONALITIES.stopLossMissingPerson, EXTRA_PERSONALITIES.contractExorcist);
+  }
+  if (metrics.methodCounts.swap > 8) {
+    picks.push(PERSONALITIES.pressure, PERSONALITIES.contractButtonMasher, EXTRA_PERSONALITIES.mouseFingerAthlete, EXTRA_PERSONALITIES.leverageSleepwalker);
+  }
+  if (metrics.methodCounts.swap > 4 && scores.degen > 60) {
+    picks.push(EXTRA_PERSONALITIES.fomoCardiacPatient, EXTRA_PERSONALITIES.chartPossessed, EXTRA_PERSONALITIES.notificationAddict);
+  }
+  if (metrics.methodCounts.defi > 6) picks.push(PERSONALITIES.yieldFarmGhost, EXTRA_PERSONALITIES.liquidityPoolLifeguard, EXTRA_PERSONALITIES.liquidityBlackHole);
   if (scores.airdrop > 68 && metrics.chainsWithActivity >= 4) {
-    picks.push(PERSONALITIES.airdrop, PERSONALITIES.bridgeNomad, PERSONALITIES.questNPC);
+    picks.push(PERSONALITIES.airdrop, PERSONALITIES.bridgeNomad, PERSONALITIES.questNPC, EXTRA_PERSONALITIES.airdropReceiptCollector, EXTRA_PERSONALITIES.bridgeStampCollector, EXTRA_PERSONALITIES.protocolDoorKnocker, EXTRA_PERSONALITIES.multiChainVagrant);
   }
   if (metrics.nftTransferCount > metrics.sampledTxs && metrics.nftTransferCount > 8) {
-    picks.push(PERSONALITIES.nftGhost, PERSONALITIES.jpgArchaeologist);
+    picks.push(PERSONALITIES.nftGhost, PERSONALITIES.jpgArchaeologist, EXTRA_PERSONALITIES.nftMemoryPalace, EXTRA_PERSONALITIES.jpgBagHistorian);
   }
   if (scores.diamond > 78 && metrics.txPerDay < 1.2) {
-    picks.push(PERSONALITIES.diamond, PERSONALITIES.timeCapsuleHolder, PERSONALITIES.bagMonk);
+    picks.push(PERSONALITIES.diamond, PERSONALITIES.timeCapsuleHolder, PERSONALITIES.bagMonk, EXTRA_PERSONALITIES.bearMarketPretendDead, EXTRA_PERSONALITIES.exitButtonPhilosopher);
   }
   if (metrics.stableRatio > 0.68 && scores.degen < 45) {
-    picks.push(PERSONALITIES.stable, PERSONALITIES.stablecoinMonk);
+    picks.push(PERSONALITIES.stable, PERSONALITIES.stablecoinMonk, EXTRA_PERSONALITIES.stablecoinZenGarden, EXTRA_PERSONALITIES.usdtParkingLotGuard);
   }
   if (metrics.memeTokenCount >= 8 && scores.degen > 70) {
-    picks.push(PERSONALITIES.memeSoldier, PERSONALITIES.dogcoinSurgeon, PERSONALITIES.liquidityDiver);
+    picks.push(PERSONALITIES.memeSoldier, PERSONALITIES.dogcoinSurgeon, PERSONALITIES.liquidityDiver, EXTRA_PERSONALITIES.greenCandleAllergy, EXTRA_PERSONALITIES.bullMarketHallucination, EXTRA_PERSONALITIES.chainPsychWardVIP);
   }
   if (metrics.memeRatio > 0.45 && metrics.lowLiquidityTokenCount > 4) {
-    picks.push(PERSONALITIES.topBuyer, PERSONALITIES.greenCandleRomantic, PERSONALITIES.exitLiquidityPoet);
+    picks.push(PERSONALITIES.topBuyer, PERSONALITIES.greenCandleRomantic, PERSONALITIES.exitLiquidityPoet, EXTRA_PERSONALITIES.liquidityExitVolunteer, EXTRA_PERSONALITIES.lateCycleRomantic, EXTRA_PERSONALITIES.dipBuyerOnRooftop);
   }
   if (metrics.outgoingTransfers < metrics.incomingTransfers / 4 && metrics.uniqueTokenCount > 12) {
-    picks.push(PERSONALITIES.collector, PERSONALITIES.dustMuseum);
+    picks.push(PERSONALITIES.collector, PERSONALITIES.dustMuseum, EXTRA_PERSONALITIES.dustPositionBuddha, EXTRA_PERSONALITIES.approvalArchaeologist);
   }
-  if (metrics.bluechipTokenCount >= 2 && scores.degen < 55) picks.push(PERSONALITIES.bluechipTourist);
-  if (metrics.uniqueTokenCount > 24 && scores.degen < 65) picks.push(PERSONALITIES.dustMuseum);
-  if (scores.degen < 25) picks.push(PERSONALITIES.civilServant, PERSONALITIES.coldWalletMonk);
-  if (scores.degen < 42) picks.push(PERSONALITIES.conservative, PERSONALITIES.riskCommittee);
+  if (metrics.lowLiquidityTokenCount >= 8) {
+    picks.push(EXTRA_PERSONALITIES.liquidityBlackHole, EXTRA_PERSONALITIES.mevSnack, EXTRA_PERSONALITIES.walletAutopsyIntern);
+  }
+  if (metrics.bluechipTokenCount >= 2 && scores.degen < 55) picks.push(PERSONALITIES.bluechipTourist, EXTRA_PERSONALITIES.smartMoneyCosplayer);
+  if (metrics.uniqueTokenCount > 24 && scores.degen < 65) picks.push(PERSONALITIES.dustMuseum, EXTRA_PERSONALITIES.walletPersonalityCrisis);
+  if (scores.degen > 80) {
+    picks.push(EXTRA_PERSONALITIES.degenMedicalRecord, EXTRA_PERSONALITIES.chainPsychWardVIP, EXTRA_PERSONALITIES.portfolioJengaPlayer);
+  }
+  if (scores.degen < 25) picks.push(PERSONALITIES.civilServant, PERSONALITIES.coldWalletMonk, EXTRA_PERSONALITIES.usdtParkingLotGuard);
+  if (scores.degen < 42) picks.push(PERSONALITIES.conservative, PERSONALITIES.riskCommittee, EXTRA_PERSONALITIES.stablecoinZenGarden);
   if (!picks.length) {
-    picks.push(PERSONALITIES.normal, PERSONALITIES.groupChatIndicator, PERSONALITIES.halfThesisBeliever);
+    picks.push(PERSONALITIES.normal, PERSONALITIES.groupChatIndicator, PERSONALITIES.halfThesisBeliever, EXTRA_PERSONALITIES.thesisAfterBuy, EXTRA_PERSONALITIES.narrativeHostage, EXTRA_PERSONALITIES.kolShadowTrader, EXTRA_PERSONALITIES.reverseIndicatorOracle, EXTRA_PERSONALITIES.pnlFogMachine, EXTRA_PERSONALITIES.candleWorshipper);
   }
   return pickByAddress(address, [...new Set(picks)]);
 }
@@ -1081,6 +1498,437 @@ function buildStrategyFit(metrics, scores, lang) {
   return pickLocalized(lang, "趋势跟随 + 轻量风控", "Trend following + lightweight risk controls");
 }
 
+function holdingSummary(metrics, address, lang, mode) {
+  const fast = [
+    {
+      zh: "平均持仓像短视频完播率，刚开始热血，下一秒就想换叙事。",
+      en: "The holding period looks like short-form attention span: excited on entry, hunting a new narrative seconds later."
+    },
+    {
+      zh: "你的纸手不是纸，是湿纸巾，行情一吹就开始变形。",
+      en: "These are not paper hands. They are wet wipes in a wind tunnel."
+    },
+    {
+      zh: "买入之后的耐心疑似按分钟计费，超过一周就算长期主义。",
+      en: "Patience appears billed by the minute; surviving a week counts as long-term thinking."
+    }
+  ];
+  const medium = [
+    {
+      zh: "你能拿一阵，但新叙事敲门时，钱包会自动整理行李。",
+      en: "You can hold for a while, but when a new narrative knocks the wallet starts packing."
+    },
+    {
+      zh: "这不是钻石手，也不是纸手，更像看心情开关的半自动仓位。",
+      en: "Not diamond hands, not paper hands; more like semi-automatic exposure with mood controls."
+    },
+    {
+      zh: "你的持仓周期介于信仰和手痒之间，属于币圈常见亚健康。",
+      en: "Your holding window sits between conviction and itchy fingers: common crypto sub-health."
+    }
+  ];
+  const slow = [
+    {
+      zh: "你拿得住，但链上照妖镜暂时无法判断这是信仰、麻木，还是忘了密码。",
+      en: "You can hold, though the mirror cannot tell whether this is conviction, numbness, or a forgotten password."
+    },
+    {
+      zh: "你的钻石手指数像祖传物件，可能值钱，也可能只是没人舍得扔。",
+      en: "Your diamond-hand score feels inherited: maybe valuable, maybe just never thrown away."
+    },
+    {
+      zh: "你把时间拉长成护城河，也把退出按钮修成了摆设。",
+      en: "You stretch time into a moat and quietly turn the exit button into decoration."
+    }
+  ];
+
+  if (!Number.isFinite(metrics.sampledHoldDays)) {
+    return pickStableLocalized(address, `holding-empty-${mode}`, lang, [
+      {
+        zh: "样本里还看不出稳定持仓周期，像刚挂号还没进诊室。",
+        en: "The sample does not reveal a stable holding period yet; the wallet is checked in but not examined."
+      },
+      {
+        zh: "持仓周期数据还太薄，暂时只能判断：这个钱包刚开始在链上留下鞋印。",
+        en: "Holding data is thin; for now, this wallet is just leaving fresh footprints onchain."
+      }
+    ]);
+  }
+
+  const bucket = metrics.sampledHoldDays < 7 ? fast : metrics.sampledHoldDays > 60 ? slow : medium;
+  const prefix = pickLocalized(lang, `样本平均持仓约 ${metrics.sampledHoldDays.toFixed(1)} 天。`, `Average sampled holding period is about ${metrics.sampledHoldDays.toFixed(1)} days. `);
+  return `${prefix}${pickStableLocalized(address, `holding-${mode}`, lang, bucket)}`;
+}
+
+function buildModeVerdict(mode, context) {
+  const { address, lang, verdict, personality, scores, metrics } = context;
+  const normal = verdict;
+  const roast = pickStableLocalized(address, "verdict-roast", lang, [
+    {
+      zh: `你的钱包人格是「${personality}」，核心症状是每次市场刚热起来，就觉得自己被行情点名表扬。`,
+      en: `Your Degen DNA is ${personality}; the core symptom is thinking every warm market is personally applauding you.`
+    },
+    {
+      zh: `这个钱包最大的问题不是不懂，而是懂一点之后立刻开始相信自己是天选之子。`,
+      en: "The problem is not ignorance. It is knowing a little and immediately feeling chosen by the market."
+    },
+    {
+      zh: `链上数据显示：你不是没有判断力，你只是把判断力经常外包给热闹。`,
+      en: "Onchain evidence suggests you have judgment; you just outsource it to noise too often."
+    }
+  ]);
+  const abstract = pickStableLocalized(address, "verdict-abstract", lang, [
+    {
+      zh: `钱包状态：阳线过敏，阴线失忆，止损功能疑似离家出走。Degen 指数 ${scores.degen}/100，建议挂链上精神科。`,
+      en: `Wallet status: allergic to green candles, amnesiac on red candles, stop-loss missing. Degen Index ${scores.degen}/100.`
+    },
+    {
+      zh: `这不是财务报告，这是链上精神病历：症状稳定，病因复杂，复发概率取决于群友截图。`,
+      en: "This is not a financial report. It is an onchain medical file: stable symptoms, complex causes, relapse triggered by screenshots."
+    },
+    {
+      zh: `你的钱包像一台情绪矿机，输入叙事，输出手续费，副产品是嘴硬。`,
+      en: "Your wallet is an emotion miner: narrative goes in, fees come out, denial is the byproduct."
+    }
+  ]);
+  const kol = pickStableLocalized(address, "verdict-kol", lang, [
+    {
+      zh: `这个钱包适合发成 KOL 人设：被叙事反复教育，但仍然保留冲锋姿势的链上幸存者。`,
+      en: "This wallet can be packaged as a KOL persona: repeatedly educated by narratives, still posing like a survivor."
+    },
+    {
+      zh: `如果把这个钱包包装成观点号，简介可以写：经历过周期，尊重过亏损，偶尔还相信下一根阳线。`,
+      en: "If this wallet had a bio: survived cycles, respected drawdowns, occasionally believes in the next green candle."
+    },
+    {
+      zh: `它看起来像普通散户，但发言气质已经接近“我早就说过”。`,
+      en: "It looks retail, but the posting energy is already dangerously close to 'I called this early'."
+    }
+  ]);
+
+  if (metrics.portfolioUsd > 100_000 && scores.degen > 70 && mode !== "normal") {
+    return pickLocalized(lang, "你不是风险偏好高，你是带着金库在夜市里随机试吃，还觉得自己在做资产配置。", "You are not risk-on; you are sampling street food with a treasury wallet and calling it allocation.");
+  }
+  return { normal, roast, abstract, kol }[mode] || normal;
+}
+
+function buildModeLossCause(mode, context) {
+  const { address, lang, lossCause, metrics } = context;
+  if (mode === "normal") return lossCause;
+  const bank = {
+    roast: [
+      {
+        zh: `不是市场太坏，是${lossCause}，而且你还经常给它找宏观理由。`,
+        en: `not the market being evil, but that ${lossCause}, usually with a macro excuse attached`
+      },
+      {
+        zh: `主要亏损来源：情绪上链速度快于大脑同步速度。`,
+        en: "main leak: emotions reach the chain before the brain finishes syncing"
+      },
+      {
+        zh: `亏损不是意外，是你把“再看看”翻译成了“再买点”。`,
+        en: "losses are not accidents; you translate 'watching' into 'buying more'"
+      }
+    ],
+    abstract: [
+      {
+        zh: `阳线过敏、阴线失忆、退出按钮灵魂出窍。`,
+        en: "green-candle allergy, red-candle amnesia, exit button out-of-body experience"
+      },
+      {
+        zh: `钱包精神状态不稳定，看到群友盈利截图后会自动进入战斗形态。`,
+        en: "wallet mental state unstable; profit screenshots trigger combat mode"
+      },
+      {
+        zh: `止损功能离家出走，补仓按钮成为临时监护人。`,
+        en: "stop-loss left home; average-down button became temporary guardian"
+      }
+    ],
+    kol: [
+      {
+        zh: `你很适合写复盘，但更适合先停止把复盘素材继续做大。`,
+        en: "you are great at writing post-mortems; even better if you stop producing more material"
+      },
+      {
+        zh: `交易风格像内容创业：先制造冲突，再寻找解释。`,
+        en: "trading style resembles content creation: create conflict first, explain later"
+      },
+      {
+        zh: `你亏的不是钱，是每次转发热点时多出来的自信。`,
+        en: "you are not losing money; you are losing the extra confidence generated by reposting narratives"
+      }
+    ]
+  };
+
+  if (metrics.lowLiquidityTokenCount >= 8 && mode !== "normal") {
+    return pickLocalized(lang, "流动性像地下室，你进去的时候很丝滑，出来的时候开始研究人生。", "liquidity behaves like a basement: easy to enter, philosophical to exit");
+  }
+  return pickStableLocalized(address, `loss-cause-${mode}`, lang, bank[mode] || bank.roast);
+}
+
+function buildModeAssetPersonality(mode, context) {
+  const { address, lang, metrics, personality } = context;
+  const statsZh = `公开样本：${metrics.chainsWithActivity}/${metrics.chainCount} 条链有活动，Token 样本 ${metrics.uniqueTokenCount} 个，稳定币约 ${Math.round(metrics.stableRatio * 100)}%，Meme 暴露约 ${Math.round(metrics.memeRatio * 100)}%。`;
+  const statsEn = `Public sample: activity on ${metrics.chainsWithActivity}/${metrics.chainCount} chains, ${metrics.uniqueTokenCount} token samples, about ${Math.round(metrics.stableRatio * 100)}% stablecoin exposure and ${Math.round(metrics.memeRatio * 100)}% meme exposure.`;
+  const prefix = pickLocalized(lang, statsZh, statsEn);
+  const modeLine = {
+    normal: pickLocalized(lang, `这个钱包像${personality}。`, `This wallet reads like a ${personality}.`),
+    roast: pickStableLocalized(address, "asset-roast", lang, [
+      {
+        zh: `这个钱包不是资产组合，是情绪、叙事和手速共同签字的事故现场。`,
+        en: "This is not a portfolio; it is an incident report co-signed by emotion, narrative, and hand speed."
+      },
+      {
+        zh: `资产分布看起来像群聊投票结果，哪里热闹哪里就出现一点仓位。`,
+        en: "The allocation looks like a group-chat poll: wherever attention goes, exposure follows."
+      },
+      {
+        zh: `它不像钱包，更像一个把热点全都试吃一口的链上自助餐盘。`,
+        en: "This wallet feels less like capital allocation and more like an onchain buffet plate."
+      }
+    ]),
+    abstract: pickStableLocalized(address, "asset-abstract", lang, [
+      {
+        zh: `资产性格：K 线附体，叙事中毒，仓位偶尔出现短暂清醒。`,
+        en: "Asset personality: chart-possessed, narrative-intoxicated, occasionally visited by short bursts of clarity."
+      },
+      {
+        zh: `钱包像一张链上精神病历，主诉是“我再也不追高了”，复诊记录是“又追了”。`,
+        en: "The wallet reads like an onchain medical file: chief complaint 'never chasing again', follow-up note 'chased again'."
+      },
+      {
+        zh: `资产组合呈现出一种抽象的自洽：哪里能讲故事，哪里就能住一点本金。`,
+        en: "The allocation has abstract coherence: wherever a story can live, some capital can rent a room."
+      }
+    ]),
+    kol: pickStableLocalized(address, "asset-kol", lang, [
+      {
+        zh: `如果这个钱包当 KOL，会主打“我不是喊单，我只是把亏损写成叙事”。`,
+        en: "If this wallet were a KOL, its tagline would be: not calls, just drawdowns converted into narrative."
+      },
+      {
+        zh: `它的人设适合做成置顶帖：经历过很多，卖点不一定多，但故事一定够长。`,
+        en: "Its persona fits a pinned post: many experiences, not necessarily many exits, definitely a long story."
+      },
+      {
+        zh: `这是一个能把仓位讲成观点、把回撤讲成格局的钱包。`,
+        en: "This wallet can turn positions into opinions and drawdowns into philosophy."
+      }
+    ])
+  };
+  return `${modeLine[mode] || modeLine.normal}${pickLocalized(lang, " ", " ")}${prefix}`;
+}
+
+function buildModeAlphaRadar(mode, context) {
+  const { address, lang, metrics } = context;
+  const base = buildAlphaRadar(metrics, lang);
+  const extras = {
+    normal: [
+      {
+        zh: "至少链上留下了可分析的行为样本，比只在群里嘴硬强。",
+        en: "At least there is analyzable onchain behavior, which beats pure chat-room confidence."
+      },
+      {
+        zh: "这个钱包还有升级空间，前提是别把每次上头都叫实验。",
+        en: "The wallet has upgrade potential, assuming every impulse is not renamed as an experiment."
+      }
+    ],
+    roast: [
+      {
+        zh: "优点是行动力强；缺点是行动力经常绕过风控。",
+        en: "Strength: decisive action. Weakness: decisive action often bypasses risk control."
+      },
+      {
+        zh: "你的链上探索能力不错，只是有时像拿本金当门票。",
+        en: "Exploration ability is real; sometimes the principal is simply treated as an admission ticket."
+      },
+      {
+        zh: "你确实能发现热点，只是发现之后通常需要一个成年人在旁边按住鼠标。",
+        en: "You can spot attention; you may still need adult supervision near the mouse."
+      }
+    ],
+    abstract: [
+      {
+        zh: "Alpha 雷达仍在工作，只是偶尔会把警报声听成冲锋号。",
+        en: "The alpha radar works; it just occasionally mistakes alarms for battle horns."
+      },
+      {
+        zh: "这个钱包具备链上嗅觉，但鼻炎发作时会把土狗闻成龙。",
+        en: "This wallet has onchain smell, but during allergy season every dogcoin smells like a dragon."
+      },
+      {
+        zh: "精神状态不算稳定，但至少不是完全离线，属于可抢救型 Degen。",
+        en: "Mental state unstable, but not offline; this is a recoverable degen."
+      }
+    ],
+    kol: [
+      {
+        zh: "可包装亮点：跨链/交互/持仓痕迹足够写成一条“我的交易框架”。",
+        en: "Packagable angle: enough cross-chain, interaction, or holding traces to become a 'my framework' post."
+      },
+      {
+        zh: "适合做内容标题：我从这个钱包里看到了散户的三种幻觉。",
+        en: "Content angle: three retail illusions visible inside one wallet."
+      },
+      {
+        zh: "如果做公开榜，这个钱包不是最强，但很适合被评论区研究。",
+        en: "For a public leaderboard, this wallet may not be the strongest, but it is comment-section material."
+      }
+    ]
+  };
+  return [...base, pickStableLocalized(address, `alpha-${mode}-a`, lang, extras[mode] || extras.normal), pickStableLocalized(address, `alpha-${mode}-b`, lang, extras[mode] || extras.normal)]
+    .filter((item, index, arr) => arr.indexOf(item) === index)
+    .slice(0, 5);
+}
+
+function buildModeFate(metrics, scores, address, lang, mode) {
+  const base = buildFate(metrics, scores, lang);
+  const extra = {
+    normal: [
+      {
+        zh: "某天开始认真整理交易纪律，然后在下一条热点出现时暂停整理。",
+        en: "start organizing trading discipline, then pause the effort when the next narrative appears"
+      }
+    ],
+    roast: [
+      {
+        zh: "看到别人晒收益后，立刻把“谨慎观察”改名为“轻仓参与”。",
+        en: "after seeing someone post gains, rename 'careful observation' into 'small exploratory position'"
+      },
+      {
+        zh: "在某个群里说“我就看看”，五分钟后链上出现新交易。",
+        en: "say 'just watching' in a chat, then produce a new transaction five minutes later"
+      }
+    ],
+    abstract: [
+      {
+        zh: "链上精神病历新增一页：阳线过敏复发，止损按钮继续失联。",
+        en: "the onchain medical file gains a new page: green-candle allergy relapsed, stop-loss still missing"
+      },
+      {
+        zh: "钱包进入薛定谔盈利状态：不打开组合就永远没亏。",
+        en: "wallet enters Schroedinger PnL: as long as the portfolio stays closed, the loss is not real"
+      }
+    ],
+    kol: [
+      {
+        zh: "把一次回撤写成“我对市场结构的再理解”，并获得三条安慰评论。",
+        en: "turn a drawdown into 'my renewed understanding of market structure' and receive three comforting replies"
+      },
+      {
+        zh: "开始考虑做公开复盘帖，标题里带“血泪”。",
+        en: "consider publishing a public review post with 'painful lessons' in the title"
+      }
+    ]
+  };
+  return [...base, pickStableLocalized(address, `fate-${mode}`, lang, extra[mode] || extra.normal)].slice(0, 4);
+}
+
+function buildModeStrategy(mode, context) {
+  const { address, lang, metrics, scores } = context;
+  const base = buildStrategyFit(metrics, scores, lang);
+  const diagnosis = {
+    normal: pickLocalized(lang, `${base}。`, `${base}.`),
+    roast: pickStableLocalized(address, "strategy-roast", lang, [
+      {
+        zh: `${base}，但请先确认自己不是把“二次确认”理解成“第二次追高”。`,
+        en: `${base}, but confirm that 'second confirmation' does not mean 'second chase'.`
+      },
+      {
+        zh: `${base}。当前最大风控建议：让手指晚于脑子 10 秒钟上线。`,
+        en: `${base}. Main risk control: let the finger log in ten seconds after the brain.`
+      },
+      {
+        zh: `${base}。策略不是没有，主要是别让群友截图成为入场信号。`,
+        en: `${base}. The strategy exists; just avoid using chat screenshots as entry signals.`
+      }
+    ]),
+    abstract: pickStableLocalized(address, "strategy-abstract", lang, [
+      {
+        zh: `高波动自毁型 + 事件雷达镇静剂。建议先给钱包降噪，再谈 Alpha。`,
+        en: "High-volatility self-sabotage + event-radar sedative. Reduce wallet noise before discussing alpha."
+      },
+      {
+        zh: `阳线脱敏训练 + 低频装死术。先治疗手速，再优化收益曲线。`,
+        en: "Green-candle desensitization + low-frequency possum mode. Treat hand speed before optimizing returns."
+      },
+      {
+        zh: `链上精神科建议：趋势跟随可以，叙事上头时需要 Hermes 做第二监护人。`,
+        en: "Onchain psychiatry suggests: trend following is fine; Hermes should supervise during narrative intoxication."
+      }
+    ]),
+    kol: pickStableLocalized(address, "strategy-kol", lang, [
+      {
+        zh: `适合包装成“事件驱动型交易者”，实际执行时请把“看到别人赚钱”从信号源里删掉。`,
+        en: "Can be packaged as event-driven trading; remove 'seeing others profit' from the signal source."
+      },
+      {
+        zh: `适合做低频波段 + 公开复盘路线。每次动手前先问：这笔交易能不能经得住截图？`,
+        en: "Fits low-frequency swing plus public review. Before every trade, ask: would this survive a screenshot?"
+      },
+      {
+        zh: `适合用 Hermes 事件雷达做二次确认，把冲动留给文案，把本金留给下一轮。`,
+        en: "Use Hermes event radar as second confirmation: let the copy be impulsive, keep the capital for the next cycle."
+      }
+    ])
+  };
+  return diagnosis[mode] || diagnosis.normal;
+}
+
+function buildTweetText(mode, context) {
+  const { lang, personality, scores, lossCause, verdict } = context;
+  if (lang === "en") {
+    return `My Degen DNA report is out.
+Type: ${personality}
+Degen Index: ${scores.degen}/100
+Diamond Hands: ${scores.diamond}/100
+Main leak: ${lossCause}
+
+${verdict}
+
+Dare to test yours?
+degendna.fun`;
+  }
+  return `我刚用链上照妖镜测了一下钱包。
+钱包人格：${personality}
+Degen 指数：${scores.degen}/100
+钻石手指数：${scores.diamond}/100
+亏损主因：${lossCause}
+
+${verdict}
+
+你敢照吗？
+degendna.fun`;
+}
+
+function buildReportModes(context) {
+  const modes = {};
+  for (const mode of ["normal", "roast", "abstract", "kol"]) {
+    const modeContext = {
+      ...context,
+      verdict: buildModeVerdict(mode, context),
+      lossCause: buildModeLossCause(mode, context)
+    };
+    modes[mode] = {
+      mode,
+      verdict: modeContext.verdict,
+      lossCause: modeContext.lossCause,
+      assetPersonality: buildModeAssetPersonality(mode, modeContext),
+      holdingBehavior: holdingSummary(context.metrics, context.address, context.lang, mode),
+      lossBlackBox: pickLocalized(
+        context.lang,
+        `你的主要亏损来源不是市场，而是${modeContext.lossCause}。`,
+        `Your main leak is not the market; it is that ${modeContext.lossCause}.`
+      ),
+      alphaRadar: buildModeAlphaRadar(mode, modeContext),
+      fate90Days: buildModeFate(context.metrics, context.scores, context.address, context.lang, mode),
+      strategyFit: buildModeStrategy(mode, modeContext),
+      tweetText: buildTweetText(mode, modeContext)
+    };
+  }
+  return modes;
+}
+
 function buildLabels(personalityId, metrics, scores, lang) {
   const labels = [personalityName(personalityId, lang)];
   if (scores.degen > 70) labels.push(pickLocalized(lang, "高风险冲锋队", "High-Risk Vanguard"));
@@ -1091,7 +1939,15 @@ function buildLabels(personalityId, metrics, scores, lang) {
   if (metrics.stableRatio > 0.6) labels.push(pickLocalized(lang, "稳定币躺平派", "Stablecoin Couch"));
   if (scores.diamond > 70) labels.push(pickLocalized(lang, "钻石手老登", "Ancient Diamond Hands"));
   if (metrics.methodCounts.swap > 4) labels.push(pickLocalized(lang, "合约压力怪", "Contract Stress Tester"));
-  return [...new Set(labels)].slice(0, 5);
+  if (scores.degen > 80) labels.push(pickLocalized(lang, "链上精神病历", "Onchain Medical File"));
+  if (scores.degen > 75 && metrics.memeTokenCount >= 4) labels.push(pickLocalized(lang, "阳线过敏", "Green Candle Allergy"));
+  if (metrics.failedRate > 0.12) labels.push(pickLocalized(lang, "止损失联", "Stop-Loss Missing"));
+  if (metrics.lowLiquidityTokenCount >= 8) labels.push(pickLocalized(lang, "流动性黑洞", "Liquidity Black Hole"));
+  if (metrics.methodCounts.bridge > 2) labels.push(pickLocalized(lang, "跨链流浪", "Multi-Chain Vagrant"));
+  if (metrics.methodCounts.claim > 1) labels.push(pickLocalized(lang, "任务清单成瘾", "Quest List Addict"));
+  if (metrics.outgoingTransfers < metrics.incomingTransfers / 5) labels.push(pickLocalized(lang, "只进不出", "Entry-Only Mode"));
+  if (metrics.txPerDay > 2.5) labels.push(pickLocalized(lang, "手速快过脑速", "Finger Faster Than Brain"));
+  return [...new Set(labels)].slice(0, 6);
 }
 
 function buildReport(address, chains, lang = "zh") {
@@ -1102,27 +1958,9 @@ function buildReport(address, chains, lang = "zh") {
   const lossCause = buildLossCause(metrics, scores, lang);
   const verdict = buildVerdict(personalityId, metrics, scores, lang);
   const labels = buildLabels(personalityId, metrics, scores, lang);
-
-  const behavior =
-    metrics.sampledHoldDays === null
-      ? pickLocalized(lang, "样本里还看不出稳定持仓周期，更像刚开始在链上留下脚印。", "The sample does not reveal a stable holding period yet; this wallet is still leaving early footprints.")
-      : pickLocalized(
-          lang,
-          `样本平均持仓约 ${metrics.sampledHoldDays.toFixed(1)} 天，${
-            metrics.sampledHoldDays < 7
-              ? "属于刚买就想换下一个叙事的类型。"
-              : metrics.sampledHoldDays > 60
-                ? "要么信仰很硬，要么真的忘记卖了。"
-                : "能拿一阵，但看到新叙事还是会心动。"
-          }`,
-          `Average sampled holding period is about ${metrics.sampledHoldDays.toFixed(1)} days. ${
-            metrics.sampledHoldDays < 7
-              ? "This wallet starts looking for the next narrative almost immediately."
-              : metrics.sampledHoldDays > 60
-                ? "That is either conviction or a very committed forgotten bag."
-                : "It can hold for a while, but new narratives still get its attention."
-          }`
-        );
+  const context = { address, lang, metrics, scores, personalityId, personality, lossCause, verdict, labels };
+  const modes = buildReportModes(context);
+  const defaultMode = "abstract";
 
   return {
     generatedAt: new Date().toISOString(),
@@ -1138,6 +1976,8 @@ function buildReport(address, chains, lang = "zh") {
     verdict,
     lossCause,
     labels,
+    modes,
+    defaultMode,
     degenBand: degenBand(scores.degen, lang),
     scores,
     metrics: {
@@ -1147,21 +1987,9 @@ function buildReport(address, chains, lang = "zh") {
       memeUsdText: usd(metrics.memeUsd),
       sampleWindowDays: Number(metrics.sampleWindowDays.toFixed(1)),
       txPerDay: Number(metrics.txPerDay.toFixed(2)),
-      sampledHoldDays: metrics.sampledHoldDays === null ? null : Number(metrics.sampledHoldDays.toFixed(1))
+      sampledHoldDays: Number.isFinite(metrics.sampledHoldDays) ? Number(metrics.sampledHoldDays.toFixed(1)) : null
     },
-    report: {
-      assetPersonality:
-        pickLocalized(
-          lang,
-          `这个钱包像${personality}。公开样本显示它跨 ${metrics.chainsWithActivity}/${metrics.chainCount} 条链活动，Token 样本 ${metrics.uniqueTokenCount} 个，稳定币占比约 ${Math.round(metrics.stableRatio * 100)}%，Meme 暴露约 ${Math.round(metrics.memeRatio * 100)}%。`,
-          `This wallet reads like a ${personality}. Public samples show activity across ${metrics.chainsWithActivity}/${metrics.chainCount} chains, ${metrics.uniqueTokenCount} token samples, about ${Math.round(metrics.stableRatio * 100)}% stablecoin exposure, and roughly ${Math.round(metrics.memeRatio * 100)}% meme exposure.`
-        ),
-      holdingBehavior: behavior,
-      lossBlackBox: pickLocalized(lang, `你的主要亏损来源不是市场，而是${lossCause}。`, `Your main leak is not the market; it is that ${lossCause}.`),
-      alphaRadar: buildAlphaRadar(metrics, lang),
-      fate90Days: buildFate(metrics, scores, lang),
-      strategyFit: buildStrategyFit(metrics, scores, lang)
-    },
+    report: modes[defaultMode],
     chains: chains.map((chain) => ({
       id: chain.id,
       name: chain.name,
@@ -1203,18 +2031,24 @@ function compareReports(a, b, lang = "zh") {
   const bBull = b.scores.degen * 0.55 + b.metrics.txPerDay * 8 + b.metrics.memeTokenCount * 2;
   const aBear = a.scores.diamond * 0.7 + a.metrics.stableRatio * 30 - a.metrics.failedRate * 20;
   const bBear = b.scores.diamond * 0.7 + b.metrics.stableRatio * 30 - b.metrics.failedRate * 20;
+  const bullWinner = aBull >= bBull ? "A" : "B";
+  const bearWinner = aBear >= bBear ? "A" : "B";
+  const otherBull = bullWinner === "A" ? "B" : "A";
+  const otherBear = bearWinner === "A" ? "B" : "A";
 
   return {
-    bullWinner: aBull >= bBull ? "A" : "B",
-    bearWinner: aBear >= bBear ? "A" : "B",
-    verdict:
-      aBull >= bBull
-        ? pickLocalized(lang, "A 更像牛市里敢冲敢晒的人；B 更像会在旁边说“风险太高”的人。", "A looks more like the bull-market sprinter; B looks more like the person saying 'risk is high' from the side.")
-        : pickLocalized(lang, "B 更像牛市里敢冲敢晒的人；A 更像会在旁边说“风险太高”的人。", "B looks more like the bull-market sprinter; A looks more like the person saying 'risk is high' from the side."),
-    survival:
-      aBear >= bBear
-        ? pickLocalized(lang, "A 更像熊市里能活下来的人。", "A looks more likely to survive a bear market.")
-        : pickLocalized(lang, "B 更像熊市里能活下来的人。", "B looks more likely to survive a bear market.")
+    bullWinner,
+    bearWinner,
+    verdict: pickLocalized(
+      lang,
+      `${bullWinner} 负责冲锋，${otherBull} 负责在旁边说“我再等等”。链上照妖镜判定：${bullWinner} 更适合牛市热点互殴。`,
+      `${bullWinner} handles the charge; ${otherBull} says 'I'll wait'. Degen DNA says ${bullWinner} is more built for bull-market brawls.`
+    ),
+    survival: pickLocalized(
+      lang,
+      `${bearWinner} 更像熊市能苟到下一轮的人。${otherBear} 建议不要互相抄作业，容易一起写进链上精神病历。`,
+      `${bearWinner} looks more likely to survive a bear market. ${otherBear} should not copy-trade this; both could end up in the onchain medical file.`
+    )
   };
 }
 
