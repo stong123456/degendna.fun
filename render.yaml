@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: degendna-fun
+    runtime: node
+    branch: main
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PUBLIC_SITE_URL
+        value: https://degendna.fun
+      - key: PUBLIC_SITE_HOST
+        value: degendna.fun
