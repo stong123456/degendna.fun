@@ -1,0 +1,8 @@
+.env
+node_modules/
+dist/
+.vercel/
+.netlify/
+*.log
+server.out.log
+server.err.log

@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>链上照妖镜 - Degen DNA Report</title>
+    <meta
+      name="description"
+      content="输入钱包地址，生成能晒、能比、能自嘲的链上人格报告。"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="链上照妖镜">
+          <span class="brand-mark">照</span>
+          <span>
+            <strong>链上照妖镜</strong>
+            <small>Degen DNA Report</small>
+          </span>
+        </a>
+        <nav class="nav-actions" aria-label="工具入口">
+          <button class="ghost-button" data-scroll="#pk-panel" type="button">钱包 PK</button>
+          <button class="ghost-button" data-scroll="#leaderboard" type="button">本机榜单</button>
+          <a class="ghost-button link-button" href="https://degendna.fun" target="_blank" rel="noreferrer">degendna.fun</a>
+        </nav>
+      </header>
+
+      <main>
+        <section id="follow-gate" class="follow-gate" aria-label="关注任务">
+          <div class="creator-card">
+            <img src="/assets/stone-avatar.png" alt="Stone141319 头像" />
+            <div>
+              <h2>先关注 Stone，再照钱包</h2>
+              <p>完成关注任务后解锁链上人格报告。第一版不强制登录 X，用本机确认解锁；后续可以接 X OAuth 做硬校验。</p>
+            </div>
+          </div>
+          <div class="gate-actions">
+            <a
+              id="follow-link"
+              class="primary-button link-button"
+              href="https://x.com/Stone141319"
+              target="_blank"
+              rel="noreferrer"
+            >关注 @Stone141319</a>
+            <button id="unlock-follow" class="ghost-button" type="button">我已关注，解锁工具</button>
+          </div>
+        </section>
+
+        <section class="scanner">
+          <div class="scanner-copy">
+            <h1>输入钱包地址，看看你到底是哪种链上玩家。</h1>
+            <p>是钻石手，还是高位接盘侠？是空投猎人，还是土狗冲锋队？链上数据不会撒谎，但文案会补刀。</p>
+          </div>
+          <form id="scan-form" class="scan-form">
+            <label for="wallet-address">EVM 钱包地址</label>
+            <div class="input-row">
+              <input
+                id="wallet-address"
+                name="address"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+              />
+              <button class="primary-button" type="submit">生成报告</button>
+            </div>
+            <div class="quick-row" aria-label="示例钱包">
+              <button type="button" data-sample="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045">Vitalik</button>
+              <button type="button" data-sample="0x00000000219ab540356cbb839cbe05303d7705fa">ETH Deposit</button>
+              <button type="button" data-sample="0x28C6c06298d514Db089934071355E5743bf21d60">Binance Hot</button>
+            </div>
+            <p id="form-note" class="form-note">不连接钱包，不要签名，不碰私钥。只读取公开链上数据。</p>
+          </form>
+        </section>
+
+        <section id="status" class="status-line" hidden></section>
+
+        <section id="report-view" class="report-grid" hidden>
+          <div class="report-main">
+            <section class="diagnosis-panel">
+              <div class="section-kicker">Onchain Mirror</div>
+              <div class="diagnosis-heading">
+                <div>
+                  <p id="report-address" class="address-line"></p>
+                  <h2 id="personality">钱包人格</h2>
+                </div>
+                <div class="grade-stamp" id="degen-band">正常韭菜</div>
+              </div>
+              <p id="verdict" class="verdict"></p>
+              <div id="label-list" class="label-list"></div>
+            </section>
+
+            <section class="metric-strip" aria-label="核心指数">
+              <article>
+                <span>Degen 指数</span>
+                <strong id="degen-score">--</strong>
+                <div class="meter"><i id="degen-meter"></i></div>
+              </article>
+              <article>
+                <span>钻石手指数</span>
+                <strong id="diamond-score">--</strong>
+                <div class="meter green"><i id="diamond-meter"></i></div>
+              </article>
+              <article>
+                <span>空投雷达</span>
+                <strong id="airdrop-score">--</strong>
+                <div class="meter yellow"><i id="airdrop-meter"></i></div>
+              </article>
+            </section>
+
+            <section class="report-section">
+              <h3>链上资产性格</h3>
+              <p id="asset-personality"></p>
+              <div id="chain-list" class="chain-list"></div>
+            </section>
+
+            <section class="report-split">
+              <article class="report-section danger">
+                <h3>亏损黑匣子</h3>
+                <p id="loss-black-box"></p>
+              </article>
+              <article class="report-section">
+                <h3>钻石手 / 纸手</h3>
+                <p id="holding-behavior"></p>
+              </article>
+            </section>
+
+            <section class="report-split">
+              <article class="report-section">
+                <h3>Alpha 雷达</h3>
+                <ul id="alpha-list" class="clean-list"></ul>
+              </article>
+              <article class="report-section">
+                <h3>90 天钱包命运</h3>
+                <ol id="fate-list" class="clean-list ordered"></ol>
+              </article>
+            </section>
+
+            <section class="report-section">
+              <h3>Hermes 策略映射</h3>
+              <p id="strategy-fit"></p>
+              <div id="token-list" class="token-list"></div>
+            </section>
+          </div>
+
+          <aside class="share-rail">
+            <section class="share-card-wrap">
+              <div id="share-card" class="share-card">
+                <div class="share-card-top">
+                  <span>链上照妖镜检测报告</span>
+                  <b>Degen DNA</b>
+                </div>
+                <div class="share-card-body">
+                  <p class="share-wallet" id="card-address">0x...</p>
+                  <h2 id="card-personality">钱包人格</h2>
+                  <div class="card-score-row">
+                    <span>Degen 指数</span>
+                    <strong id="card-degen">--/100</strong>
+                  </div>
+                  <div class="card-score-row">
+                    <span>钻石手指数</span>
+                    <strong id="card-diamond">--/100</strong>
+                  </div>
+                  <div class="card-loss">
+                    <span>亏损主因</span>
+                    <p id="card-loss-cause">--</p>
+                  </div>
+                  <div id="card-tags" class="card-tags"></div>
+                  <blockquote id="card-verdict">你不是没有判断力，你只是太容易相信下一根阳线。</blockquote>
+                </div>
+                <div class="share-card-foot">
+                  <span id="card-site">degendna.fun</span>
+                  <span>不签名 · 只看公开数据</span>
+                </div>
+              </div>
+              <div class="share-actions">
+                <button id="download-card" class="primary-button" type="button">下载晒图</button>
+                <button id="share-x" class="ghost-button" type="button">发到 X</button>
+              </div>
+            </section>
+
+            <section class="mini-panel">
+              <h3>样本数据</h3>
+              <dl class="data-list">
+                <div><dt>估算资产</dt><dd id="stat-portfolio">--</dd></div>
+                <div><dt>交易次数</dt><dd id="stat-tx">--</dd></div>
+                <div><dt>Token 样本</dt><dd id="stat-token">--</dd></div>
+                <div><dt>Meme 暴露</dt><dd id="stat-meme">--</dd></div>
+              </dl>
+            </section>
+          </aside>
+        </section>
+
+        <section id="pk-panel" class="pk-panel">
+          <div>
+            <h2>钱包 PK</h2>
+            <p>我的 Degen 指数 82，你敢测吗？两个地址一比，谁适合牛市冲锋、谁适合熊市活下来，一眼就很尴尬。</p>
+          </div>
+          <form id="pk-form" class="pk-form">
+            <input id="pk-a" placeholder="钱包 A：0x..." autocomplete="off" spellcheck="false" />
+            <input id="pk-b" placeholder="钱包 B：0x..." autocomplete="off" spellcheck="false" />
+            <button class="primary-button" type="submit">开始 PK</button>
+          </form>
+          <div id="pk-result" class="pk-result" hidden></div>
+        </section>
+
+        <section id="leaderboard" class="leaderboard">
+          <div class="section-title-row">
+            <div>
+              <h2>本机人格榜</h2>
+              <p>先用 localStorage 做冷启动，后续接 Supabase 就能变成公开 KOL 榜。</p>
+            </div>
+            <button id="clear-board" class="ghost-button" type="button">清空</button>
+          </div>
+          <div id="leaderboard-list" class="leaderboard-list"></div>
+        </section>
+      </main>
+    </div>
+    <canvas id="card-canvas" width="1200" height="1600" hidden></canvas>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
