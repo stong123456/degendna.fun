@@ -2192,6 +2192,20 @@ async function writeLeaderboard(entries) {
   await writeFile(LEADERBOARD_PATH, `${JSON.stringify(entries, null, 2)}\n`, "utf8");
 }
 
+async function leaderboardStorageStatus() {
+  if (!hasSupabaseLeaderboard()) {
+    return { mode: "file", configured: false };
+  }
+
+  try {
+    await readSupabaseLeaderboard();
+    return { mode: "supabase", configured: true };
+  } catch (error) {
+    console.error(error.message);
+    return { mode: "file-fallback", configured: true };
+  }
+}
+
 function publicLeaderboard(entries) {
   return entries
     .slice()
@@ -2285,6 +2299,7 @@ async function handleApi(req, res, pathname, searchParams) {
     return json(res, 200, {
       ok: true,
       service: "onchain-mirror",
+      leaderboard: await leaderboardStorageStatus(),
       chains: [...BLOCKSCOUT_CHAINS.map((chain) => chain.name), BNB_CHAIN.name]
     });
   }
