@@ -803,6 +803,36 @@ input:focus {
   padding-top: 10px;
 }
 
+.board-row {
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+}
+
+.board-rank {
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(184, 255, 92, 0.24);
+  border-radius: 6px;
+  background: rgba(184, 255, 92, 0.07);
+  color: var(--green);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.board-row:nth-child(1) .board-rank {
+  border-color: rgba(255, 209, 102, 0.75);
+  background: rgba(255, 209, 102, 0.14);
+  color: var(--yellow);
+}
+
+.board-row:nth-child(2) .board-rank,
+.board-row:nth-child(3) .board-rank {
+  border-color: rgba(194, 123, 255, 0.48);
+  background: rgba(194, 123, 255, 0.12);
+  color: #d9adff;
+}
+
 .board-user {
   display: flex;
   align-items: center;
@@ -1245,5 +1275,14 @@ dd {
 
   .share-card h2 {
     font-size: 32px;
+  }
+
+  .board-row {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .board-row .ghost-button {
+    grid-column: 2;
+    justify-self: start;
   }
 }

@@ -453,8 +453,8 @@ function setMeter(id, value) {
 
 function renderList(node, items, renderer) {
   node.innerHTML = "";
-  for (const item of items) {
-    node.insertAdjacentHTML("beforeend", renderer(item));
+  for (const [index, item] of items.entries()) {
+    node.insertAdjacentHTML("beforeend", renderer(item, index));
   }
 }
 
@@ -514,12 +514,13 @@ async function renderLeaderboard(providedItems = null) {
   renderList(
     board,
     items.sort((a, b) => Number(b.rarity?.score || 0) - Number(a.rarity?.score || 0) || Number(b.rankScore || 0) - Number(a.rankScore || 0)),
-    (item) => {
+    (item, index) => {
       const rarity = item.rarity || {};
       const badges = item.badges || [];
       const badgeText = badges.slice(0, 3).map((badge) => badge.name).join(" / ");
       return `
       <div class="board-row" data-rarity="${escapeHtml(rarity.tier || "common")}">
+        <div class="board-rank">#${index + 1}</div>
         <div class="board-user">
           <img src="${escapeHtml(item.avatarUrl || "/assets/stone-avatar.png")}" alt="${escapeHtml(item.handle || "@X")}" referrerpolicy="no-referrer" />
           <div>
@@ -970,13 +971,41 @@ function downloadBlob(blob, filename) {
 
 function buildShareText(report) {
   const selected = modeReport(report);
-  return selected?.tweetText || I18N[state.lang].share.text(report);
+  return fitTweetText(selected?.tweetText || I18N[state.lang].share.text(report));
+}
+
+function charLength(value) {
+  return Array.from(String(value || "")).length;
+}
+
+function truncateChars(value, max) {
+  const chars = Array.from(String(value || ""));
+  return chars.length <= max ? chars.join("") : `${chars.slice(0, Math.max(0, max - 1)).join("")}…`;
+}
+
+function fitTweetText(value, max = 250) {
+  const textValue = String(value || "").trim();
+  if (charLength(textValue) <= max) return textValue;
+  const site = "degendna.fun";
+  const lines = textValue.split(/\n+/).map((line) => line.trim()).filter(Boolean);
+  const kept = [];
+  for (const line of lines) {
+    if (line === site) continue;
+    const candidate = `${kept.concat(line).join("\n")}\n\n${site}`;
+    if (charLength(candidate) <= max) {
+      kept.push(line);
+      continue;
+    }
+    const remaining = max - charLength(`${kept.join("\n")}\n\n${site}`) - 2;
+    if (remaining > 16) kept.push(truncateChars(line, remaining));
+    break;
+  }
+  return `${kept.join("\n")}\n\n${site}`;
 }
 
 function buildXIntentUrl(report) {
   const url = new URL("https://twitter.com/intent/tweet");
   url.searchParams.set("text", buildShareText(report));
-  url.searchParams.set("url", report.siteUrl || location.href);
   return url.toString();
 }
 

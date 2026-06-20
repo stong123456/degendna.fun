@@ -1918,34 +1918,47 @@ function buildModeStrategy(mode, context) {
   return diagnosis[mode] || diagnosis.normal;
 }
 
+function compactTweetLine(text, limit) {
+  const clean = trimSentenceEnd(String(text || "").replace(/\s+/g, " ").trim());
+  if (clean.length <= limit) return clean;
+  return `${clean.slice(0, Math.max(0, limit - 1))}…`;
+}
+
+function tweetOpener(mode, lang) {
+  const openers = {
+    normal: ["我的链上精神病历出来了。", "My Degen DNA scan is out."],
+    roast: ["我的钱包刚被链上照妖镜公开补刀。", "My wallet just got roasted by Degen DNA."],
+    abstract: ["链上精神科给我开诊断了。", "Onchain diagnosis just dropped."],
+    kol: ["如果这个钱包有账号简介，大概是这样。", "If this wallet had a bio, it would be this."]
+  };
+  const [zh, en] = openers[mode] || openers.abstract;
+  return pickLocalized(lang, zh, en);
+}
+
 function buildTweetText(mode, context) {
-  const { lang, personality, scores, lossCause, verdict, rarity, badges = [] } = context;
-  const badgeLine = badges.slice(0, 3).map((badge) => badge.name).join(" / ");
+  const { lang, personality, scores, verdict, rarity, badges = [] } = context;
+  const badgeLine = badges.slice(0, 2).map((badge) => badge.name).join(" / ");
+  const rarityName = rarity?.tierName || pickLocalized(lang, "链上异类", "Rare");
+  const comboRate = rarity?.combo?.appearanceRate || "--";
   if (lang === "en") {
-    return `My Degen DNA report is out.
+    return `${tweetOpener(mode, lang)}
 Type: ${personality}
-Rarity: ${rarity?.tierName || "Rare"} · combo occurrence ${rarity?.combo?.appearanceRate || "--"}%
-Badges: ${badgeLine}
-Degen Index: ${scores.degen}/100
-Diamond Hands: ${scores.diamond}/100
-Main leak: ${lossCause}
+Rarity: ${rarityName} · ${comboRate}% combo
+Badge: ${badgeLine || "Unclassified"}
+Degen: ${scores.degen}/100
 
-${verdict}
+${compactTweetLine(verdict, 68)}
 
-Dare to test yours?
 degendna.fun`;
   }
-  return `我刚用链上照妖镜测了一下钱包。
-钱包人格：${personality}
-稀有度：${rarity?.tierName || "链上异类"} · 组合出现率 ${rarity?.combo?.appearanceRate || "--"}%
-核心徽章：${badgeLine}
-Degen 指数：${scores.degen}/100
-钻石手指数：${scores.diamond}/100
-亏损主因：${lossCause}
+  return `${tweetOpener(mode, lang)}
+人格：${personality}
+稀有度：${rarityName} · ${comboRate}%组合
+徽章：${badgeLine || "未收录"}
+Degen：${scores.degen}/100
 
-${verdict}
+${compactTweetLine(verdict, 48)}
 
-你敢照吗？
 degendna.fun`;
 }
 
