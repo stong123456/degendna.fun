@@ -263,8 +263,8 @@ const PERSONALITY_TEXT = {
     zh: "高位接盘艺术家",
     en: "Top Buyer in Residence",
     verdict: {
-      zh: "你不是没有判断力，你只是太容易相信下一根阳线。",
-      en: "You do have judgment. It simply melts whenever the next candle turns green."
+      zh: "你的钱包最大问题，是太容易相信下一根阳线。",
+      en: "Your wallet's main issue is believing the next green candle too easily."
     }
   },
   [PERSONALITIES.greenCandleRomantic]: {
@@ -479,8 +479,8 @@ Object.assign(PERSONALITY_TEXT, {
     zh: "合约梦游症患者",
     en: "Leverage Sleepwalker",
     verdict: {
-      zh: "你的钱包像半夜起来开仓，醒来只剩一张链上精神病历。",
-      en: "This wallet trades like it opens positions while sleepwalking and wakes up to an onchain medical record."
+      zh: "你的钱包像半夜起来开仓，醒来只剩一张风险复盘。",
+      en: "This wallet trades like it opens positions while sleepwalking and wakes up to a risk review."
     }
   },
   [EXTRA_PERSONALITIES.stopLossMissingPerson]: {
@@ -1616,8 +1616,8 @@ function buildModeVerdict(mode, context) {
       en: "The problem is not ignorance. It is knowing a little and immediately feeling chosen by the market."
     },
     {
-      zh: `链上数据显示：你不是没有判断力，你只是把判断力经常外包给热闹。`,
-      en: "Onchain evidence suggests you have judgment; you just outsource it to noise too often."
+      zh: `链上数据显示：你的判断力偶尔在线，但热闹一来就容易掉线。`,
+      en: "Onchain evidence suggests your judgment is sometimes online, until the loudest narrative logs in."
     }
   ]);
   const abstract = pickStableLocalized(address, "verdict-abstract", lang, [
@@ -1926,7 +1926,7 @@ function compactTweetLine(text, limit) {
 
 function tweetOpener(mode, lang) {
   const openers = {
-    normal: ["我的链上精神病历出来了。", "My Degen DNA scan is out."],
+    normal: ["我的 Degen DNA 报告出来了。", "My Degen DNA scan is out."],
     roast: ["我的钱包刚被链上照妖镜公开补刀。", "My wallet just got roasted by Degen DNA."],
     abstract: ["链上精神科给我开诊断了。", "Onchain diagnosis just dropped."],
     kol: ["如果这个钱包有账号简介，大概是这样。", "If this wallet had a bio, it would be this."]
@@ -2456,7 +2456,7 @@ async function submitLeaderboardEntry({ address, lang, username }) {
   if (report.metrics.txCount < 20 || report.metrics.sampleWindowDays < 30) {
     throw new Error(pickLocalized(
       lang,
-      "这个钱包样本太薄，可以生成链上精神病历，但暂时不能进入稀有度排行榜。",
+      "这个钱包样本太薄，可以生成 Degen DNA 报告，但暂时不能进入稀有度排行榜。",
       "This wallet can generate a report, but the sample is too thin for the rarity leaderboard."
     ));
   }

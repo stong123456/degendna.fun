@@ -6,7 +6,7 @@ const I18N = {
     },
     brand: { aria: "链上照妖镜", mark: "照", name: "链上照妖镜", sub: "Degen DNA Report" },
     nav: { aria: "工具入口", mirror: "照钱包", pk: "钱包 PK", board: "X 排行榜", tg: "TG 频道" },
-    views: { aria: "页面视图", mirror: "链上精神病历", pk: "钱包 PK", board: "稀有度排行榜" },
+    views: { aria: "页面视图", mirror: "钱包检测", pk: "钱包 PK", board: "稀有度排行榜" },
     gate: {
       aria: "关注任务",
       avatarAlt: "Stone141319 头像",
@@ -18,9 +18,9 @@ const I18N = {
       lockText: "关注石头后解锁"
     },
     hero: {
-      eyebrow: "链上精神病历",
+      eyebrow: "Degen DNA Report",
       title: "输入钱包地址，看看你到底是哪种链上玩家。",
-      copy: "你的钱包，比你自己更诚实。K 线没杀死你，你的手速差点杀死你。这份报告更像一张链上精神病历。"
+      copy: "链上数据不会撒谎，但文案会补刀。"
     },
     form: {
       label: "EVM 钱包地址",
@@ -76,7 +76,7 @@ const I18N = {
       kol: "KOL 版"
     },
     card: {
-      reportTitle: "链上精神病历",
+      reportTitle: "链上精神状态评估",
       personalityPrefix: "钱包人格：",
       degen: "Degen 指数",
       diamond: "钻石手指数",
@@ -84,7 +84,7 @@ const I18N = {
       tags: "核心徽章",
       rarity: "稀有度",
       share: "生成晒图并发到 X",
-      defaultVerdict: "你不是没有判断力，你只是太容易相信下一根阳线。",
+      defaultVerdict: "你的钱包最大问题，是太容易相信下一根阳线。",
       publicOnly: "不签名 · 只看公开数据"
     },
     tweet: {
@@ -109,7 +109,7 @@ const I18N = {
       copy: "填 @X 用户名生成报告后，头像、名字、钱包人格和综合评分会自动上榜。",
       refresh: "刷新榜单",
       teaser: "上榜后会显示：X 头像 / @handle / 钱包人格 / Degen 指数 / 钻石手指数 / 综合处刑分",
-      empty: "还没有公开记录。填 @X 用户名生成报告，第一张链上精神病历就会自动上榜。",
+      empty: "还没有公开记录。填 @X 用户名生成报告，第一份 Degen DNA 报告就会自动上榜。",
       retest: "重测",
       diamond: "钻石手",
       composite: "综合处刑分",
@@ -152,7 +152,7 @@ ${report.verdict}
     },
     brand: { aria: "Degen DNA", mark: "DNA", name: "Degen DNA", sub: "链上照妖镜" },
     nav: { aria: "Tool navigation", mirror: "Scan", pk: "Wallet PK", board: "X Leaderboard", tg: "TG Channel" },
-    views: { aria: "Page views", mirror: "Onchain Medical File", pk: "Wallet PK", board: "Rarity Leaderboard" },
+    views: { aria: "Page views", mirror: "Wallet Scan", pk: "Wallet PK", board: "Rarity Leaderboard" },
     gate: {
       aria: "Follow gate",
       avatarAlt: "Stone141319 avatar",
@@ -164,9 +164,9 @@ ${report.verdict}
       lockText: "Follow @Stone141319 to unlock"
     },
     hero: {
-      eyebrow: "Onchain Medical File",
+      eyebrow: "Degen DNA Report",
       title: "Paste a wallet address. Find out your Degen DNA.",
-      copy: "Your wallet is more honest than you are. Candles did not kill you; hand speed almost did. This report reads like an onchain medical file."
+      copy: "Onchain data does not lie. The copy just adds the punchline."
     },
     form: {
       label: "EVM wallet address",
@@ -230,7 +230,7 @@ ${report.verdict}
       tags: "Core Badges",
       rarity: "Rarity",
       share: "Create card and share to X",
-      defaultVerdict: "You do have judgment. It simply melts whenever the next candle turns green.",
+      defaultVerdict: "Your wallet's main issue is believing the next green candle too easily.",
       publicOnly: "No signature · public data only"
     },
     tweet: {
@@ -255,7 +255,7 @@ ${report.verdict}
       copy: "Add an @X handle before generating a report, and the avatar, name, wallet type, and composite score rank automatically.",
       refresh: "Refresh board",
       teaser: "Leaderboard identity: X avatar / @handle / wallet type / Degen Index / Diamond Hands / Composite Score",
-      empty: "No public records yet. Add an @X handle and generate the first onchain medical file.",
+      empty: "No public records yet. Add an @X handle and generate the first Degen DNA report.",
       retest: "Retest",
       diamond: "Diamond",
       composite: "Composite",
