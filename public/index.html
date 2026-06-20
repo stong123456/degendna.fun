@@ -29,6 +29,7 @@
           <button class="ghost-button" data-view="mirror" type="button" data-i18n="nav.mirror">照钱包</button>
           <button class="ghost-button" data-view="pk" type="button" data-i18n="nav.pk">钱包 PK</button>
           <button class="ghost-button" data-view="board" type="button" data-i18n="nav.board">X 排行榜</button>
+          <button class="ghost-button" data-view="about" type="button" data-i18n="nav.about">关于</button>
           <a class="ghost-button link-button" href="https://t.me/Stone141319" target="_blank" rel="noreferrer" data-i18n="nav.tg">TG 频道</a>
           <a class="ghost-button link-button" href="https://degendna.fun" target="_blank" rel="noreferrer">degendna.fun</a>
         </nav>
@@ -242,16 +243,12 @@
                     <p id="card-loss-cause">--</p>
                   </div>
                   <div id="card-tags" class="card-tags"></div>
-                  <blockquote id="card-verdict">你的钱包最大问题，是太容易相信下一根阳线。</blockquote>
+                  <blockquote id="card-verdict">你的判断力偶尔在线，但下一根阳线总能让它下线。</blockquote>
                 </div>
                 <div class="share-card-foot">
-                  <a class="stone-profile-foot" href="https://x.com/Stone141319" target="_blank" rel="noopener noreferrer" aria-label="Open Stone on X">
-                    <img src="/assets/stone-avatar.png" alt="@Stone141319" />
-                    <b>@Stone141319</b>
-                  </a>
-                  <a class="stone-qr" href="https://x.com/Stone141319" target="_blank" rel="noopener noreferrer" aria-label="QR code to Stone on X">
-                    <img id="stone-x-qr" alt="QR: x.com/Stone141319" />
-                  </a>
+                  <span class="card-doctor" data-i18n="card.doctor">链上主治医生：石头 @Stone141319</span>
+                  <span id="card-care-note">照完钱包，也记得照顾好自己。</span>
+                  <b>degendna.fun</b>
                 </div>
               </div>
               <div class="share-actions">
@@ -313,7 +310,29 @@
           </div>
           <div id="leaderboard-list" class="leaderboard-list"></div>
         </section>
+
+        <section id="about-panel" class="about-panel view-panel" data-view-panel="about" hidden>
+          <div class="section-title-row">
+            <div>
+              <h2 data-i18n="about.title">为什么我做链上照妖镜？</h2>
+              <p data-i18n="about.kicker">一个用代码和抽象感对抗情绪低谷的加密实验。</p>
+            </div>
+          </div>
+          <div class="about-copy">
+            <p data-i18n="about.p1">我是石头，DegenDNA.fun 的创建者，也是链上照妖镜的主理人。</p>
+            <p data-i18n="about.p2">我平时研究 AI Agent、自动交易、预测市场和链上数据，也长期在用各种小工具观察市场和观察自己。</p>
+            <p data-i18n="about.p3">我本人也是中度抑郁症患者。做这个网站的起点其实很简单：币圈太容易让人焦虑了，钱包盈亏、K 线波动、错过机会、追高回撤，都会不断放大人的情绪。</p>
+            <p data-i18n="about.p4">所以我想做一个有点抽象、有点嘴毒，但最后还能提醒大家好好爱自己的链上人格实验。</p>
+            <p data-i18n="about.p5">它可以吐槽你的钱包，但不会定义你的人生。</p>
+          </div>
+        </section>
       </main>
+
+      <footer class="wellbeing-footer">
+        <p data-i18n="footer.line1">你有多久没有照过自己的钱包了？</p>
+        <p data-i18n="footer.line2">也许更该问的是：</p>
+        <p data-i18n="footer.line3">你有多久没有认真看看自己，好好爱自己了？记得好好照顾自己！</p>
+      </footer>
     </div>
     <canvas id="card-canvas" width="1200" height="1600" hidden></canvas>
     <script src="/app.js?v=20260620-rarity" type="module"></script>

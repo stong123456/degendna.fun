@@ -1,5 +1,4 @@
 const STONE_X_HANDLE = "@Stone141319";
-const STONE_X_URL = "https://x.com/Stone141319";
 const STONE_AVATAR_URL = "/assets/stone-avatar.png";
 
 const I18N = {
@@ -9,7 +8,7 @@ const I18N = {
       description: "输入钱包地址，生成能晒、能比、能自嘲的链上人格报告。"
     },
     brand: { aria: "链上照妖镜", mark: "照", name: "链上照妖镜", sub: "Degen DNA Report" },
-    nav: { aria: "工具入口", mirror: "照钱包", pk: "钱包 PK", board: "X 排行榜", tg: "TG 频道" },
+    nav: { aria: "工具入口", mirror: "照钱包", pk: "钱包 PK", board: "X 排行榜", about: "关于", tg: "TG 频道" },
     views: { aria: "页面视图", mirror: "钱包检测", pk: "钱包 PK", board: "稀有度排行榜" },
     gate: {
       aria: "关注任务",
@@ -88,8 +87,26 @@ const I18N = {
       tags: "核心徽章",
       rarity: "稀有度",
       share: "生成晒图并发到 X",
-      defaultVerdict: "你的钱包最大问题，是太容易相信下一根阳线。",
-      publicOnly: "不签名 · 只看公开数据"
+      defaultVerdict: "你的判断力偶尔在线，但下一根阳线总能让它下线。",
+      doctor: "链上主治医生：石头 @Stone141319",
+      publicOnly: "不签名 · 只看公开数据",
+      reminders: [
+        "照完钱包，也记得照顾好自己。",
+        "钱包可以回撤，人不要一直硬扛。",
+        "今天少看一会儿盘，也算一种止损。",
+        "亏损只是账户状态，不是你的人生评价。",
+        "别让一根 K 线决定你今天的心情。",
+        "市场不会心疼你，所以你要自己心疼自己。",
+        "少熬夜，多喝水，别和钱包一起破防。",
+        "你可以对市场嘴硬，但别对自己的情绪装没事。",
+        "如果今天状态不好，先离开屏幕也没关系。",
+        "链上数据会记录交易，但不会定义你这个人。",
+        "钱包需要风控，人也需要休息。",
+        "交易可以慢慢来，人要先稳住。",
+        "别把所有情绪都交给涨跌。",
+        "今天没赚钱，也可以好好睡觉。",
+        "照妖镜负责补刀，你负责好好生活。"
+      ]
     },
     tweet: {
       title: "可复制推文",
@@ -129,6 +146,20 @@ const I18N = {
       rankCivil: "本周最像链上公务员",
       rankUninstall: "本周最有可能卸载钱包"
     },
+    about: {
+      title: "为什么我做链上照妖镜？",
+      kicker: "一个用代码和抽象感对抗情绪低谷的加密实验。",
+      p1: "我是石头，DegenDNA.fun 的创建者，也是链上照妖镜的主理人。",
+      p2: "我平时研究 AI Agent、自动交易、预测市场和链上数据，也长期在用各种小工具观察市场和观察自己。",
+      p3: "我本人也是中度抑郁症患者。做这个网站的起点其实很简单：币圈太容易让人焦虑了，钱包盈亏、K 线波动、错过机会、追高回撤，都会不断放大人的情绪。",
+      p4: "所以我想做一个有点抽象、有点嘴毒，但最后还能提醒大家好好爱自己的链上人格实验。",
+      p5: "它可以吐槽你的钱包，但不会定义你的人生。"
+    },
+    footer: {
+      line1: "你有多久没有照过自己的钱包了？",
+      line2: "也许更该问的是：",
+      line3: "你有多久没有认真看看自己，好好爱自己了？记得好好照顾自己！"
+    },
     report: {
       strategyPrefix: "",
       strategySuffix: "",
@@ -155,7 +186,7 @@ ${report.verdict}
       description: "Paste a wallet address and generate a shareable onchain personality report."
     },
     brand: { aria: "Degen DNA", mark: "DNA", name: "Degen DNA", sub: "链上照妖镜" },
-    nav: { aria: "Tool navigation", mirror: "Scan", pk: "Wallet PK", board: "X Leaderboard", tg: "TG Channel" },
+    nav: { aria: "Tool navigation", mirror: "Scan", pk: "Wallet PK", board: "X Leaderboard", about: "About", tg: "TG Channel" },
     views: { aria: "Page views", mirror: "Wallet Scan", pk: "Wallet PK", board: "Rarity Leaderboard" },
     gate: {
       aria: "Follow gate",
@@ -234,8 +265,26 @@ ${report.verdict}
       tags: "Core Badges",
       rarity: "Rarity",
       share: "Create card and share to X",
-      defaultVerdict: "Your wallet's main issue is believing the next green candle too easily.",
-      publicOnly: "No signature · public data only"
+      defaultVerdict: "Your judgment occasionally comes online, but the next green candle always logs it out.",
+      doctor: "Onchain attending: Stone @Stone141319",
+      publicOnly: "No signature · public data only",
+      reminders: [
+        "Scan the wallet, then take care of yourself too.",
+        "Wallets can draw down. You do not have to tough it out forever.",
+        "Looking away from the chart can be a stop-loss too.",
+        "A loss is an account state, not a life verdict.",
+        "Do not let one candle decide your whole day.",
+        "The market will not be gentle with you, so be gentle with yourself.",
+        "Sleep more, hydrate, and do not break down with the wallet.",
+        "You can act tough to the market, but be honest with your mood.",
+        "If today feels heavy, stepping away from the screen is allowed.",
+        "Onchain data records trades. It does not define you.",
+        "Wallets need risk control. People need rest.",
+        "Trading can wait. Your nervous system comes first.",
+        "Do not hand every feeling to price action.",
+        "No profit today can still end with decent sleep.",
+        "The mirror can roast. You still get to live gently."
+      ]
     },
     tweet: {
       title: "Copy-ready tweet",
@@ -274,6 +323,20 @@ ${report.verdict}
       rankTop: "Most Tragic Top Buyer",
       rankCivil: "Most Onchain Civil Servant",
       rankUninstall: "Most Likely to Uninstall Wallet"
+    },
+    about: {
+      title: "Why I Built Degen DNA",
+      kicker: "A crypto experiment built with code, absurd humor, and a way through low emotional states.",
+      p1: "I am Stone, creator of DegenDNA.fun and the person behind 链上照妖镜.",
+      p2: "I study AI agents, automated trading, prediction markets, and onchain data, and I use small tools to observe both markets and myself.",
+      p3: "I also live with moderate depression. This site started from a simple feeling: crypto can make people anxious. Wallet PnL, candles, missed chances, top buys, and drawdowns can all amplify emotions.",
+      p4: "So I wanted to build an onchain personality experiment that is absurd and sharp, but still reminds people to care for themselves.",
+      p5: "It can roast your wallet, but it cannot define your life."
+    },
+    footer: {
+      line1: "How long has it been since you looked at your wallet?",
+      line2: "Maybe the better question is:",
+      line3: "How long has it been since you looked at yourself with care? Please take care of yourself too."
     },
     report: {
       strategyPrefix: "",
@@ -345,199 +408,6 @@ function escapeRegExp(value) {
   return String(value ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function qrGaloisTables() {
-  if (qrGaloisTables.cache) return qrGaloisTables.cache;
-  const exp = Array(512).fill(0);
-  const log = Array(256).fill(0);
-  let value = 1;
-  for (let i = 0; i < 255; i += 1) {
-    exp[i] = value;
-    log[value] = i;
-    value <<= 1;
-    if (value & 0x100) value ^= 0x11d;
-  }
-  for (let i = 255; i < 512; i += 1) exp[i] = exp[i - 255];
-  qrGaloisTables.cache = { exp, log };
-  return qrGaloisTables.cache;
-}
-
-function qrMultiply(left, right) {
-  if (!left || !right) return 0;
-  const { exp, log } = qrGaloisTables();
-  return exp[log[left] + log[right]];
-}
-
-function qrGeneratorPolynomial(degree) {
-  let result = Array(degree).fill(0);
-  result[degree - 1] = 1;
-  let root = 1;
-  for (let i = 0; i < degree; i += 1) {
-    for (let j = 0; j < degree; j += 1) {
-      result[j] = qrMultiply(result[j], root);
-      if (j + 1 < degree) result[j] ^= result[j + 1];
-    }
-    root = qrMultiply(root, 2);
-  }
-  return result;
-}
-
-function qrReedSolomon(data, degree) {
-  const generator = qrGeneratorPolynomial(degree);
-  const result = Array(degree).fill(0);
-  for (const byte of data) {
-    const factor = byte ^ result.shift();
-    result.push(0);
-    generator.forEach((coefficient, index) => {
-      result[index] ^= qrMultiply(coefficient, factor);
-    });
-  }
-  return result;
-}
-
-function qrFormatBits(mask) {
-  const errorCorrectionLevel = 1;
-  const data = (errorCorrectionLevel << 3) | mask;
-  let remainder = data;
-  for (let i = 0; i < 10; i += 1) {
-    remainder = (remainder << 1) ^ (((remainder >>> 9) & 1) ? 0x537 : 0);
-  }
-  return ((data << 10) | remainder) ^ 0x5412;
-}
-
-function createQrMatrix(text) {
-  const version = 2;
-  const size = version * 4 + 17;
-  const mask = 0;
-  const dataCodewords = 34;
-  const eccCodewords = 10;
-  const modules = Array.from({ length: size }, () => Array(size).fill(false));
-  const reserved = Array.from({ length: size }, () => Array(size).fill(false));
-  const setFunction = (x, y, dark) => {
-    if (x < 0 || y < 0 || x >= size || y >= size) return;
-    modules[y][x] = Boolean(dark);
-    reserved[y][x] = true;
-  };
-
-  const drawFinder = (left, top) => {
-    for (let y = -1; y <= 7; y += 1) {
-      for (let x = -1; x <= 7; x += 1) {
-        const xx = left + x;
-        const yy = top + y;
-        const dark = x >= 0 && x <= 6 && y >= 0 && y <= 6
-          && (x === 0 || x === 6 || y === 0 || y === 6 || (x >= 2 && x <= 4 && y >= 2 && y <= 4));
-        setFunction(xx, yy, dark);
-      }
-    }
-  };
-
-  drawFinder(0, 0);
-  drawFinder(size - 7, 0);
-  drawFinder(0, size - 7);
-
-  for (let i = 8; i < size - 8; i += 1) {
-    setFunction(i, 6, i % 2 === 0);
-    setFunction(6, i, i % 2 === 0);
-  }
-
-  for (let y = -2; y <= 2; y += 1) {
-    for (let x = -2; x <= 2; x += 1) {
-      const distance = Math.max(Math.abs(x), Math.abs(y));
-      setFunction(18 + x, 18 + y, distance === 2 || distance === 0);
-    }
-  }
-
-  setFunction(8, size - 8, true);
-  const format = qrFormatBits(mask);
-  const bit = (index) => ((format >>> index) & 1) !== 0;
-  for (let i = 0; i <= 5; i += 1) setFunction(8, i, bit(i));
-  setFunction(8, 7, bit(6));
-  setFunction(8, 8, bit(7));
-  setFunction(7, 8, bit(8));
-  for (let i = 9; i < 15; i += 1) setFunction(14 - i, 8, bit(i));
-  for (let i = 0; i < 8; i += 1) setFunction(size - 1 - i, 8, bit(i));
-  for (let i = 8; i < 15; i += 1) setFunction(8, size - 15 + i, bit(i));
-
-  const bytes = Array.from(new TextEncoder().encode(text));
-  const bits = [0, 1, 0, 0];
-  for (let i = 7; i >= 0; i -= 1) bits.push((bytes.length >>> i) & 1);
-  bytes.forEach((byte) => {
-    for (let i = 7; i >= 0; i -= 1) bits.push((byte >>> i) & 1);
-  });
-  const capacityBits = dataCodewords * 8;
-  for (let i = 0; i < 4 && bits.length < capacityBits; i += 1) bits.push(0);
-  while (bits.length % 8) bits.push(0);
-  const data = [];
-  for (let i = 0; i < bits.length; i += 8) {
-    data.push(bits.slice(i, i + 8).reduce((acc, current) => (acc << 1) | current, 0));
-  }
-  for (let pad = 0; data.length < dataCodewords; pad += 1) data.push(pad % 2 ? 0x11 : 0xec);
-
-  const codewords = [...data, ...qrReedSolomon(data, eccCodewords)];
-  const codewordBits = [];
-  codewords.forEach((byte) => {
-    for (let i = 7; i >= 0; i -= 1) codewordBits.push((byte >>> i) & 1);
-  });
-
-  let bitIndex = 0;
-  let upward = true;
-  for (let right = size - 1; right >= 1; right -= 2) {
-    if (right === 6) right = 5;
-    for (let vertical = 0; vertical < size; vertical += 1) {
-      const y = upward ? size - 1 - vertical : vertical;
-      for (let x = right; x >= right - 1; x -= 1) {
-        if (reserved[y][x]) continue;
-        const dark = bitIndex < codewordBits.length ? codewordBits[bitIndex] === 1 : false;
-        modules[y][x] = dark !== ((x + y) % 2 === 0);
-        bitIndex += 1;
-      }
-    }
-    upward = !upward;
-  }
-  return { size, modules };
-}
-
-function qrSvgDataUrl(text) {
-  const { size, modules } = createQrMatrix(text);
-  const border = 4;
-  const viewBoxSize = size + border * 2;
-  const rects = [];
-  modules.forEach((row, y) => {
-    row.forEach((dark, x) => {
-      if (dark) rects.push(`<rect x="${x + border}" y="${y + border}" width="1" height="1"/>`);
-    });
-  });
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${viewBoxSize} ${viewBoxSize}" shape-rendering="crispEdges"><path fill="#fff" d="M0 0h${viewBoxSize}v${viewBoxSize}H0z"/><g fill="#090909">${rects.join("")}</g></svg>`;
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-}
-
-function renderStoneQr() {
-  const qr = $("#stone-x-qr");
-  if (qr) qr.src = qrSvgDataUrl(STONE_X_URL);
-}
-
-function drawQrOnCanvas(ctx, text, x, y, size) {
-  const { size: moduleCount, modules } = createQrMatrix(text);
-  const border = 4;
-  const tile = size / (moduleCount + border * 2);
-  ctx.save();
-  ctx.fillStyle = "#ffffff";
-  roundedRect(ctx, x, y, size, size, 10);
-  ctx.fill();
-  ctx.fillStyle = "#090909";
-  modules.forEach((row, rowIndex) => {
-    row.forEach((dark, columnIndex) => {
-      if (!dark) return;
-      ctx.fillRect(
-        x + (columnIndex + border) * tile,
-        y + (rowIndex + border) * tile,
-        Math.ceil(tile),
-        Math.ceil(tile)
-      );
-    });
-  });
-  ctx.restore();
-}
-
 function applyLanguage() {
   document.documentElement.lang = state.lang === "zh" ? "zh-CN" : "en";
   document.title = t("meta.title");
@@ -600,7 +470,7 @@ function requireUnlocked() {
 }
 
 function setActiveView(view, { scroll = true } = {}) {
-  const next = ["mirror", "pk", "board"].includes(view) ? view : "mirror";
+  const next = ["mirror", "pk", "board", "about"].includes(view) ? view : "mirror";
   state.activeView = next;
   $$("[data-view-panel]").forEach((panel) => {
     panel.hidden = panel.dataset.viewPanel !== next;
@@ -794,6 +664,22 @@ function cardRarityLabel(rarity = {}) {
   return `${rarity.tierName || "--"}${rateText}`;
 }
 
+function hashString(value) {
+  let hash = 2166136261;
+  for (const char of String(value || "")) {
+    hash ^= char.codePointAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function careNoteForReport(report = state.currentReport) {
+  const reminders = getText(state.lang, "card.reminders");
+  const pool = Array.isArray(reminders) && reminders.length ? reminders : ["照完钱包，也记得照顾好自己。"];
+  const key = `${report?.address || ""}:${report?.personalityId || ""}:${report?.rarity?.tier || ""}`;
+  return pool[hashString(key) % pool.length];
+}
+
 function renderXIdentity(report = state.currentReport) {
   const profile = report?.xProfile || null;
   const pill = $("#x-profile-pill");
@@ -835,6 +721,7 @@ function renderRarity(report = state.currentReport) {
   if (shareCard) shareCard.dataset.rarity = rarity.tier || "common";
   text("#card-rarity", cardRarityLabel(rarity));
   text("#card-rarity-detail", comboRarityDetail(rarity));
+  text("#card-care-note", careNoteForReport(report));
 }
 
 function renderReport(report) {
@@ -1027,7 +914,6 @@ async function drawShareCanvas(report) {
   const identity = identityForReport(report);
   const avatar = await loadImage(identity.avatarUrl || STONE_AVATAR_URL)
     .catch(() => loadImage(STONE_AVATAR_URL));
-  const stoneAvatar = await loadImage(STONE_AVATAR_URL);
 
   const bg = ctx.createLinearGradient(0, 0, w, h);
   bg.addColorStop(0, "#3a140d");
@@ -1161,23 +1047,17 @@ async function drawShareCanvas(report) {
   ctx.font = "800 42px Microsoft YaHei, Inter, sans-serif";
   drawWrappedText(ctx, selected.verdict || report.verdict, 122, 1402, 940, 54, 3);
 
+  ctx.fillStyle = "#a99f91";
+  ctx.font = "800 22px Microsoft YaHei, Inter, sans-serif";
+  ctx.fillText(tr("card.doctor"), 92, 1490);
   ctx.fillStyle = "#f7f1e8";
-  ctx.font = "700 22px Microsoft YaHei, Inter, sans-serif";
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(124, 1510, 30, 0, Math.PI * 2);
-  ctx.clip();
-  ctx.drawImage(stoneAvatar, 94, 1480, 60, 60);
-  ctx.restore();
-  ctx.strokeStyle = "rgba(184,255,92,0.58)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.arc(124, 1510, 30, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.fillStyle = "#f7f1e8";
-  ctx.font = "900 28px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(STONE_X_HANDLE, 174, 1520);
-  drawQrOnCanvas(ctx, STONE_X_URL, 1006, 1458, 96);
+  ctx.font = "900 24px Microsoft YaHei, Inter, sans-serif";
+  drawWrappedText(ctx, careNoteForReport(report), 92, 1524, 760, 30, 1);
+  ctx.textAlign = "right";
+  ctx.fillStyle = "#b8ff5c";
+  ctx.font = "900 28px Consolas, monospace";
+  ctx.fillText("degendna.fun", 1110, 1524);
+  ctx.textAlign = "left";
   return canvas;
 }
 
@@ -1232,7 +1112,7 @@ function fitTweetText(value, max = 250) {
 }
 
 function buildXIntentUrl(report) {
-  const url = new URL("https://twitter.com/intent/tweet");
+  const url = new URL("https://x.com/intent/post");
   url.searchParams.set("text", buildShareText(report));
   return url.toString();
 }
@@ -1272,30 +1152,21 @@ async function copyImageToClipboard(blob) {
 async function shareCard() {
   if (!state.currentReport) return;
   const report = state.currentReport;
+  const popup = window.open(buildXIntentUrl(report), "_blank");
+  if (popup) {
+    try {
+      popup.opener = null;
+    } catch {
+      // Some browsers disallow writing opener. The composer still opens.
+    }
+  }
   setStatus(t("share.preparing"));
   const canvas = await drawShareCanvas(report);
   const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png", 0.96));
   const filename = `degendna-${report.address.slice(2, 8)}.png`;
-  const file = new File([blob], filename, { type: "image/png" });
-  const shareData = {
-    title: `${t("share.titlePrefix")}${report.personality}`,
-    text: buildShareText(report),
-    url: report.siteUrl || location.href,
-    files: [file]
-  };
-
-  if (navigator.canShare?.({ files: [file] }) && navigator.share) {
-    try {
-      await navigator.share(shareData);
-      return;
-    } catch (error) {
-      if (error?.name === "AbortError") return;
-    }
-  }
-
   const copiedImage = await copyImageToClipboard(blob);
   if (!copiedImage) downloadBlob(blob, filename);
-  openXIntent(report);
+  if (!popup) openXIntent(report);
   setStatus(copiedImage ? t("share.imageCopied") : t("share.imageDownloaded"));
   setTimeout(clearStatus, 5200);
 }
@@ -1417,7 +1288,6 @@ document.addEventListener("click", (event) => {
   form.requestSubmit();
 });
 
-renderStoneQr();
 applyLanguage();
 renderGate();
 setActiveView("mirror", { scroll: false });

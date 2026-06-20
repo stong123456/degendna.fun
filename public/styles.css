@@ -432,7 +432,9 @@ input:focus {
 .form-note,
 .status-line,
 .leaderboard p,
-.pk-panel p {
+.pk-panel p,
+.about-panel p,
+.wellbeing-footer p {
   color: var(--muted);
 }
 
@@ -465,7 +467,8 @@ input:focus {
 .report-section,
 .mini-panel,
 .pk-panel,
-.leaderboard {
+.leaderboard,
+.about-panel {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: rgba(17, 16, 14, 0.82);
@@ -1098,50 +1101,23 @@ input:focus {
 }
 
 .share-card-foot {
+  display: grid;
+  justify-content: stretch;
+  gap: 5px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--muted);
+  text-align: left;
 }
 
-.stone-profile-foot {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.stone-profile-foot:hover b {
+.share-card-foot .card-doctor {
   color: var(--green);
+  font-size: 12px;
 }
 
-.stone-profile-foot img {
-  width: 34px;
-  height: 34px;
-  border: 1px solid rgba(184, 255, 92, 0.45);
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.stone-profile-foot b {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.stone-qr {
-  display: inline-grid;
-  place-items: center;
-  width: 54px;
-  height: 54px;
-  border: 1px solid rgba(247, 241, 232, 0.2);
-  border-radius: 6px;
-  background: #fff;
-}
-
-.stone-qr img {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
+.share-card-foot b {
+  color: var(--paper);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 13px;
 }
 
 .card-owner {
@@ -1201,9 +1177,38 @@ dd {
 }
 
 .pk-panel,
-.leaderboard {
+.leaderboard,
+.about-panel {
   margin-top: 24px;
   padding: 22px;
+}
+
+.about-copy {
+  display: grid;
+  gap: 12px;
+  max-width: 860px;
+  line-height: 1.8;
+}
+
+.about-copy p {
+  margin: 0;
+}
+
+.wellbeing-footer {
+  margin: 26px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 22px 0 4px;
+  text-align: center;
+}
+
+.wellbeing-footer p {
+  margin: 0 0 6px;
+  line-height: 1.75;
+}
+
+.wellbeing-footer p:last-child {
+  color: var(--paper);
+  font-weight: 850;
 }
 
 .pk-panel {

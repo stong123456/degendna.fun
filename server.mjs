@@ -263,8 +263,8 @@ const PERSONALITY_TEXT = {
     zh: "高位接盘艺术家",
     en: "Top Buyer in Residence",
     verdict: {
-      zh: "你的钱包最大问题，是太容易相信下一根阳线。",
-      en: "Your wallet's main issue is believing the next green candle too easily."
+      zh: "你的判断力偶尔在线，但下一根阳线总能让它下线。",
+      en: "Your judgment occasionally comes online, but the next green candle always logs it out."
     }
   },
   [PERSONALITIES.greenCandleRomantic]: {
