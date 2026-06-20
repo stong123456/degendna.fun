@@ -644,9 +644,15 @@ function renderModeContent(report = state.currentReport) {
 function identityForReport(report = state.currentReport) {
   return report?.xProfile || {
     handle: STONE_X_HANDLE,
-    name: STONE_X_HANDLE,
+    name: "Stone",
     avatarUrl: STONE_AVATAR_URL
   };
+}
+
+function formatXName(identity = {}) {
+  const name = identity.name || identity.username || String(identity.handle || "@X").replace(/^@/, "");
+  const handle = identity.handle || (identity.username ? `@${identity.username}` : "");
+  return handle && name !== handle ? `${name} · ${handle}` : name || handle || "@X";
 }
 
 function comboRarityDetail(rarity = {}) {
@@ -693,7 +699,7 @@ function renderXIdentity(report = state.currentReport) {
   const identity = identityForReport(report);
   $("#card-owner-avatar").src = identity.avatarUrl;
   $("#card-owner-avatar").alt = identity.handle || "@X";
-  text("#card-owner-name", identity.handle || identity.name || "@X");
+  text("#card-owner-name", formatXName(identity));
 }
 
 function renderRarity(report = state.currentReport) {
@@ -806,6 +812,19 @@ function renderReport(report) {
   reportView.scrollIntoView({ block: "start", behavior: "smooth" });
 }
 
+function finishReportStatus(report) {
+  if (report?.degraded) {
+    setStatus(
+      state.lang === "zh"
+        ? "部分链上数据源暂时拥堵，本次报告为降级版。"
+        : "Some onchain sources are congested, so this report is in degraded mode."
+    );
+    setTimeout(clearStatus, 3200);
+    return;
+  }
+  clearStatus();
+}
+
 async function handleScan(event) {
   event.preventDefault();
   if (!requireUnlocked()) return;
@@ -831,7 +850,7 @@ async function handleScan(event) {
     report.xProfile = profile;
     setActiveView("mirror", { scroll: false });
     renderReport(report);
-    clearStatus();
+    finishReportStatus(report);
   } catch (error) {
     setStatus(error.message || t("form.failed"), "error");
   } finally {
@@ -1028,10 +1047,10 @@ function drawRarityTexture(ctx, theme, tier, w, h) {
 
 function canvasTitleSize(textValue) {
   const length = charLength(textValue);
-  if (length > 54) return 46;
-  if (length > 44) return 52;
-  if (length > 34) return 60;
-  return 72;
+  if (length > 54) return 42;
+  if (length > 44) return 48;
+  if (length > 34) return 56;
+  return 66;
 }
 
 async function drawShareCanvas(report) {
@@ -1092,10 +1111,10 @@ async function drawShareCanvas(report) {
 
   ctx.fillStyle = "#f7f1e8";
   ctx.font = "800 28px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(identity.handle || identity.name || "@X", 176, 116);
+  ctx.fillText(formatXName(identity), 176, 116, 520);
   ctx.fillStyle = "#a99f91";
   ctx.font = "700 22px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(`${report.siteHost} · @Stone141319`, 176, 150);
+  ctx.fillText(`${report.siteHost} · @Stone141319`, 176, 150, 520);
 
   ctx.fillStyle = rarityColor;
   ctx.font = "800 34px Microsoft YaHei, Inter, sans-serif";
@@ -1114,25 +1133,25 @@ async function drawShareCanvas(report) {
   const titleSize = canvasTitleSize(personalityTitle);
   ctx.fillStyle = "#f7f1e8";
   ctx.font = `900 ${titleSize}px Microsoft YaHei, Inter, sans-serif`;
-  drawWrappedText(ctx, personalityTitle, 92, 330, 980, titleSize + 10, titleSize < 60 ? 3 : 2);
+  drawWrappedText(ctx, personalityTitle, 92, 318, 980, titleSize + 8, titleSize <= 56 ? 3 : 2);
 
   ctx.fillStyle = theme.panel;
-  roundedRect(ctx, 92, 506, 1010, 112, 16);
+  roundedRect(ctx, 92, 488, 1010, 112, 16);
   ctx.fill();
   ctx.strokeStyle = rarityColor;
   ctx.lineWidth = 2;
   ctx.stroke();
   ctx.fillStyle = "#a99f91";
   ctx.font = "800 26px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(tr("card.rarity"), 126, 548);
+  ctx.fillText(tr("card.rarity"), 126, 530);
   ctx.fillStyle = rarityColor;
-  ctx.font = "900 42px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(cardRarityLabel(rarity, lang), 126, 594, 820);
+  ctx.font = "900 40px Microsoft YaHei, Inter, sans-serif";
+  ctx.fillText(cardRarityLabel(rarity, lang), 126, 576, 820);
   ctx.fillStyle = "#f7f1e8";
   ctx.font = "700 24px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(rarity.combo?.text || "", 600, 574, 470);
+  ctx.fillText(rarity.combo?.text || "", 600, 556, 470);
 
-  const scoreY = 668;
+  const scoreY = 642;
   const scoreBoxW = 482;
   for (const [index, item] of [
     [tr("card.degen"), `${report.scores.degen}/100`, "#ff4934"],
@@ -1152,16 +1171,16 @@ async function drawShareCanvas(report) {
 
   ctx.fillStyle = theme.secondary;
   ctx.font = "900 38px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(tr("card.loss"), 92, 940);
+  ctx.fillText(tr("card.loss"), 92, 900);
   ctx.fillStyle = "#f7f1e8";
-  ctx.font = "800 44px Microsoft YaHei, Inter, sans-serif";
-  drawWrappedText(ctx, selected.lossCause || report.lossCause, 92, 1002, 1000, 58, 3);
+  ctx.font = "800 38px Microsoft YaHei, Inter, sans-serif";
+  drawWrappedText(ctx, selected.lossCause || report.lossCause, 92, 960, 1000, 50, 3);
 
   ctx.fillStyle = rarityColor;
   ctx.font = "800 30px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(tr("card.tags"), 92, 1162);
+  ctx.fillText(tr("card.tags"), 92, 1110);
   let tagX = 92;
-  let tagY = 1200;
+  let tagY = 1148;
   ctx.font = "800 28px Microsoft YaHei, Inter, sans-serif";
   for (const item of (badges.length ? badges : report.labels).slice(0, 5)) {
     const tag = item.name || item;
@@ -1181,21 +1200,21 @@ async function drawShareCanvas(report) {
   }
 
   ctx.fillStyle = theme.quote;
-  ctx.fillRect(92, 1340, 6, 158);
+  ctx.fillRect(92, 1305, 6, 150);
   ctx.fillStyle = "#f7f1e8";
-  ctx.font = "800 42px Microsoft YaHei, Inter, sans-serif";
-  drawWrappedText(ctx, selected.verdict || report.verdict, 122, 1402, 940, 54, 3);
+  ctx.font = "800 38px Microsoft YaHei, Inter, sans-serif";
+  drawWrappedText(ctx, selected.verdict || report.verdict, 122, 1360, 940, 50, 3);
 
   ctx.fillStyle = "#a99f91";
   ctx.font = "800 22px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(tr("card.doctor"), 92, 1490);
+  ctx.fillText(tr("card.doctor"), 92, 1482);
   ctx.fillStyle = "#f7f1e8";
   ctx.font = "900 24px Microsoft YaHei, Inter, sans-serif";
-  drawWrappedText(ctx, careNoteForReport(report), 92, 1524, 760, 30, 1);
+  drawWrappedText(ctx, careNoteForReport(report), 92, 1516, 760, 30, 1);
   ctx.textAlign = "right";
   ctx.fillStyle = "#b8ff5c";
   ctx.font = "900 28px Consolas, monospace";
-  ctx.fillText("degendna.fun", 1110, 1524);
+  ctx.fillText("degendna.fun", 1110, 1516);
   ctx.textAlign = "left";
   return canvas;
 }
@@ -1374,7 +1393,7 @@ async function setLanguage(lang) {
     const report = await analyze(address);
     report.xProfile = state.xProfile;
     renderReport(report);
-    clearStatus();
+    finishReportStatus(report);
   } catch (error) {
     setStatus(error.message || t("form.failed"), "error");
   }

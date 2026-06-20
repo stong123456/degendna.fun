@@ -972,6 +972,7 @@ input:focus {
   --card-bg-b: #0c0b09;
   --card-bg-c: #1b120d;
   position: relative;
+  isolation: isolate;
   overflow: hidden;
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
@@ -1146,6 +1147,7 @@ input:focus {
 }
 
 .share-card-top > span:last-child {
+  flex: 0 0 auto;
   display: grid;
   justify-items: end;
   text-align: right;
@@ -1163,7 +1165,7 @@ input:focus {
 
 .share-card-body {
   position: relative;
-  padding: 14px 22px 24px;
+  padding: 12px 20px 20px;
 }
 
 .share-wallet {
@@ -1174,21 +1176,21 @@ input:focus {
 }
 
 .share-card h2 {
-  margin-bottom: 22px;
+  margin-bottom: 15px;
   color: var(--paper);
-  font-size: clamp(28px, 5vw, 38px);
-  line-height: 1.04;
+  font-size: clamp(25px, 4.4vw, 34px);
+  line-height: 1.14;
   overflow-wrap: anywhere;
   text-wrap: balance;
 }
 
 .card-rarity {
   display: grid;
-  gap: 4px;
-  margin: -8px 0 14px;
+  gap: 3px;
+  margin: -4px 0 12px;
   border: 1px solid var(--card-chip-border);
   border-radius: 6px;
-  padding: 10px 12px;
+  padding: 9px 10px;
   background:
     linear-gradient(90deg, var(--card-panel), rgba(255, 255, 255, 0.028)),
     rgba(0, 0, 0, 0.16);
@@ -1201,7 +1203,7 @@ input:focus {
 }
 
 .card-rarity strong {
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1.1;
 }
 
@@ -1210,7 +1212,7 @@ input:focus {
   justify-content: space-between;
   gap: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 12px 0;
+  padding: 9px 0;
 }
 
 .card-score-row span,
@@ -1220,24 +1222,28 @@ input:focus {
 
 .card-score-row strong {
   color: var(--card-accent);
-  font-size: 22px;
+  font-size: 21px;
 }
 
 .card-loss {
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  padding-top: 12px;
+  padding-top: 10px;
 }
 
 .card-loss p {
   margin: 7px 0 0;
   color: var(--card-secondary);
-  font-size: 19px;
+  font-size: 17px;
   font-weight: 900;
-  line-height: 1.35;
+  line-height: 1.34;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .card-tags {
-  margin: 16px 0;
+  margin: 12px 0;
 }
 
 .share-card blockquote {
@@ -1245,14 +1251,19 @@ input:focus {
   border-left: 3px solid var(--card-accent);
   padding-left: 12px;
   color: var(--paper);
-  font-size: 18px;
-  line-height: 1.55;
+  font-size: 16px;
+  line-height: 1.44;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .share-card-foot {
   display: grid;
   justify-content: stretch;
   gap: 5px;
+  padding: 12px 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--muted);
   text-align: left;
@@ -1297,8 +1308,12 @@ input:focus {
   height: 42px;
 }
 
+.card-owner-top {
+  flex: 1 1 auto;
+}
+
 .card-owner-top b {
-  max-width: 160px;
+  max-width: min(250px, 56vw);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1490,7 +1505,13 @@ dd {
   }
 
   .share-card h2 {
-    font-size: 32px;
+    font-size: 29px;
+  }
+
+  .card-owner-top b {
+    max-width: 180px;
+    line-height: 1.2;
+    white-space: normal;
   }
 
   .board-row {

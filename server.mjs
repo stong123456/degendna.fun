@@ -18,9 +18,37 @@ const SUPABASE_URL = String(process.env.SUPABASE_URL || "").replace(/\/+$/, "");
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 const SUPABASE_LEADERBOARD_TABLE = process.env.SUPABASE_LEADERBOARD_TABLE || "onchain_leaderboard";
 const SUPABASE_TIMEOUT_MS = 3500;
+const X_BEARER_TOKEN = process.env.X_BEARER_TOKEN || process.env.TWITTER_BEARER_TOKEN || "";
+const X_PROFILE_TIMEOUT_MS = 3500;
 
-const CACHE_TTL_MS = 3 * 60 * 1000;
-const cache = new Map();
+const REPORT_VERSION = "20260620-rarity-v3";
+const MINUTE_MS = 60 * 1000;
+const HOUR_MS = 60 * MINUTE_MS;
+const ANALYZE_CACHE_TTL_MS = 6 * HOUR_MS;
+const SAMPLE_CACHE_TTL_MS = 24 * HOUR_MS;
+const CHAIN_CACHE_TTL_MS = 6 * HOUR_MS;
+const X_PROFILE_CACHE_TTL_MS = 24 * HOUR_MS;
+const MAX_CACHE_ENTRIES = 500;
+const CACHE_PRUNE_INTERVAL_MS = 5 * MINUTE_MS;
+const ONCHAIN_FETCH_TIMEOUT_MS = 8000;
+const RATE_LIMIT_MESSAGE_ZH = "链上照妖镜现在排队中，稍后再照一次。";
+const RATE_LIMIT_MESSAGE_EN = "Degen DNA is queuing right now. Try another scan shortly.";
+const SAMPLE_ADDRESSES = new Set([
+  "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+  "0x28c6c06298d514db089934071355e5743bf21d60",
+  "0x020ca66c30bec2c4fe3861a94e4db4a498a35872",
+  "0x742d35cc6634c0532925a3b844bc454e4438f44e",
+  "0xf977814e90da44bfa03b6295a0616a897441acec",
+  "0x4e9ce36e442e55ecd9025b9a6e0d88485d628a67"
+]);
+
+const reportCache = new Map();
+const chainCache = new Map();
+const xProfileCache = new Map();
+const analyzeInflight = new Map();
+const addressInflight = new Map();
+const rateBuckets = new Map();
+let lastCachePrune = 0;
 
 const BLOCKSCOUT_CHAINS = [
   {
@@ -1153,6 +1181,90 @@ function normalizeAddress(input) {
   return String(input || "").trim();
 }
 
+function normalizedAddressKey(address) {
+  return normalizeAddress(address).toLowerCase();
+}
+
+function chainConfigKey() {
+  const chainIds = [...BLOCKSCOUT_CHAINS.map((chain) => `${chain.id}:${chain.explorer}`), `${BNB_CHAIN.id}:${BNB_CHAIN.rpc}`];
+  return chainIds.join("|");
+}
+
+function reportCacheKey(address, lang) {
+  return `report:${REPORT_VERSION}:${normalizeLang(lang)}:${chainConfigKey()}:${normalizedAddressKey(address)}`;
+}
+
+function chainCacheKey(address) {
+  return `chains:${REPORT_VERSION}:${chainConfigKey()}:${normalizedAddressKey(address)}`;
+}
+
+function cacheTtlForAddress(address) {
+  return SAMPLE_ADDRESSES.has(normalizedAddressKey(address)) ? SAMPLE_CACHE_TTL_MS : ANALYZE_CACHE_TTL_MS;
+}
+
+function clonePayload(payload) {
+  return JSON.parse(JSON.stringify(payload));
+}
+
+function pruneCacheMap(map, now = Date.now()) {
+  for (const [key, entry] of map.entries()) {
+    if (!entry || now - entry.createdAt >= entry.ttlMs) map.delete(key);
+  }
+  while (map.size > MAX_CACHE_ENTRIES) {
+    const first = map.keys().next().value;
+    if (first === undefined) break;
+    map.delete(first);
+  }
+}
+
+function maybePruneCaches() {
+  const now = Date.now();
+  if (now - lastCachePrune < CACHE_PRUNE_INTERVAL_MS) return;
+  lastCachePrune = now;
+  pruneCacheMap(reportCache, now);
+  pruneCacheMap(chainCache, now);
+  pruneCacheMap(xProfileCache, now);
+  pruneCacheMap(rateBuckets, now);
+}
+
+function getCached(map, key) {
+  maybePruneCaches();
+  const entry = map.get(key);
+  if (!entry || Date.now() - entry.createdAt >= entry.ttlMs) {
+    map.delete(key);
+    return null;
+  }
+  return clonePayload(entry.value);
+}
+
+function setCached(map, key, value, ttlMs) {
+  maybePruneCaches();
+  map.set(key, { createdAt: Date.now(), ttlMs, value: clonePayload(value) });
+}
+
+function clientIp(req) {
+  const forwarded = String(req.headers["cf-connecting-ip"] || req.headers["x-forwarded-for"] || "")
+    .split(",")[0]
+    .trim();
+  return forwarded || req.socket?.remoteAddress || "unknown";
+}
+
+function rateLimit(req, bucketName, { limit, windowMs }) {
+  const now = Date.now();
+  const key = `rate:${bucketName}:${clientIp(req)}`;
+  const bucket = rateBuckets.get(key);
+  if (!bucket || now - bucket.createdAt >= windowMs) {
+    rateBuckets.set(key, { createdAt: now, ttlMs: windowMs, count: 1 });
+    return { ok: true };
+  }
+  bucket.count += 1;
+  bucket.ttlMs = windowMs;
+  if (bucket.count > limit) {
+    return { ok: false, retryAfter: Math.max(1, Math.ceil((windowMs - (now - bucket.createdAt)) / 1000)) };
+  }
+  return { ok: true };
+}
+
 function normalizeXUsername(input) {
   const value = String(input || "")
     .trim()
@@ -1168,10 +1280,59 @@ function buildXProfile(username) {
   return {
     username: normalized,
     handle: `@${normalized}`,
-    name: `@${normalized}`,
+    name: normalized,
     avatarUrl: `https://unavatar.io/x/${encodeURIComponent(normalized)}`,
-    profileUrl: `https://x.com/${encodeURIComponent(normalized)}`
+    profileUrl: `https://x.com/${encodeURIComponent(normalized)}`,
+    source: "fallback"
   };
+}
+
+function fullSizeXAvatar(url) {
+  const value = String(url || "");
+  return value ? value.replace(/_normal(\.[a-zA-Z0-9]+)(\?|$)/, "_400x400$1$2") : "";
+}
+
+async function fetchOfficialXProfile(username) {
+  const normalized = normalizeXUsername(username);
+  if (!normalized || !X_BEARER_TOKEN) return null;
+  const url = new URL(`https://api.x.com/2/users/by/username/${encodeURIComponent(normalized)}`);
+  url.searchParams.set("user.fields", "profile_image_url,verified,verified_type");
+  const payload = await fetchJson(url.toString(), {
+    timeout: X_PROFILE_TIMEOUT_MS,
+    headers: {
+      authorization: `Bearer ${X_BEARER_TOKEN}`
+    }
+  });
+  const data = payload?.data;
+  if (!data?.username) return null;
+  return {
+    username: data.username,
+    handle: `@${data.username}`,
+    name: data.name || data.username,
+    avatarUrl: fullSizeXAvatar(data.profile_image_url) || `https://unavatar.io/x/${encodeURIComponent(data.username)}`,
+    profileUrl: `https://x.com/${encodeURIComponent(data.username)}`,
+    verified: Boolean(data.verified),
+    verifiedType: data.verified_type || "",
+    source: "x-api"
+  };
+}
+
+async function resolveXProfile(username) {
+  const fallback = buildXProfile(username);
+  if (!fallback) return null;
+  const key = `x-profile:${fallback.username.toLowerCase()}`;
+  const cached = getCached(xProfileCache, key);
+  if (cached) return cached;
+
+  let profile = fallback;
+  try {
+    profile = await fetchOfficialXProfile(fallback.username) || fallback;
+  } catch (error) {
+    console.error(`X profile fallback for @${fallback.username}: ${error.message}`);
+  }
+
+  setCached(xProfileCache, key, profile, X_PROFILE_CACHE_TTL_MS);
+  return profile;
 }
 
 function shortAddress(address) {
@@ -1212,14 +1373,15 @@ function usd(value) {
 
 async function fetchJson(url, options = {}) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), options.timeout || 10_000);
+  const timeout = setTimeout(() => controller.abort(), options.timeout || ONCHAIN_FETCH_TIMEOUT_MS);
   try {
     const response = await fetch(url, {
       method: options.method || "GET",
       headers: {
         "accept": "application/json",
         "content-type": "application/json",
-        "user-agent": "OnchainMirror/0.1"
+        "user-agent": "OnchainMirror/0.1",
+        ...(options.headers || {})
       },
       body: options.body,
       signal: controller.signal
@@ -1978,9 +2140,30 @@ function buildModeVerdict(mode, context) {
 }
 
 function buildModeLossCause(mode, context) {
-  const { address, lang, lossCause, metrics } = context;
-  if (mode === "normal") return lossCause;
+  const { address, lang, lossCause, metrics, scores } = context;
   const bank = {
+    normal: [
+      {
+        zh: lossCause,
+        en: lossCause
+      },
+      {
+        zh: `主要风险不是单次判断失误，而是每次情绪升温时，钱包都会替你先举手。`,
+        en: "the main risk is not one bad call; the wallet raises its hand whenever emotion heats up"
+      },
+      {
+        zh: `亏损黑匣子显示：你最容易在“我就小买一点”的地方留下大段链上记录。`,
+        en: "the black box says your biggest traces often begin with 'just a tiny position'"
+      },
+      {
+        zh: `问题不是没有观察，是观察结束和点击买入之间几乎没有冷却时间。`,
+        en: "the issue is not lack of observation; it is the missing cooldown between watching and buying"
+      },
+      {
+        zh: `你的亏损来源更像习惯，不像意外：看到机会、害怕错过、然后让钱包替你解释。`,
+        en: "your leak looks more like habit than accident: see opportunity, fear missing out, let the wallet explain"
+      }
+    ],
     roast: [
       {
         zh: `不是市场太坏，是${lossCause}，而且你还经常给它找宏观理由。`,
@@ -2001,6 +2184,22 @@ function buildModeLossCause(mode, context) {
       {
         zh: `亏损路径很清晰：先被叙事说服，再被价格教育。`,
         en: "loss path is clear: persuaded by narrative, educated by price"
+      },
+      {
+        zh: `问题不是你没做功课，是你做完功课后还会被一张盈利截图重新格式化。`,
+        en: "the issue is not lack of homework; a profit screenshot can still reformat the whole thesis"
+      },
+      {
+        zh: `你亏损的方式很有仪式感：先说轻仓参与，再让轻仓开始长身体。`,
+        en: "your leak has ritual: call it a small position, then let the small position grow limbs"
+      },
+      {
+        zh: `市场只是提供舞台，真正冲上去表演的是你的确认按钮。`,
+        en: "the market provides the stage; the confirm button does the performance"
+      },
+      {
+        zh: `你的主要亏损来源，是把“错过”看得比“做错”更可怕。`,
+        en: "your main leak is treating missing out as scarier than being wrong"
       }
     ],
     abstract: [
@@ -2023,6 +2222,22 @@ function buildModeLossCause(mode, context) {
       {
         zh: `本金进入梦游状态，醒来时已完成三次授权。`,
         en: "principal enters sleepwalk mode and wakes after three approvals"
+      },
+      {
+        zh: `亏损黑匣子冒烟：叙事进气口过大，风控排气孔疑似堵塞。`,
+        en: "loss black box smoking: narrative intake too wide, risk-control exhaust possibly blocked"
+      },
+      {
+        zh: `钱包进入链上急诊：主诉 FOMO，伴随滑点、嘴硬和轻度复盘冲动。`,
+        en: "wallet enters onchain ER: chief complaint FOMO, with slippage, denial, and mild post-mortem urges"
+      },
+      {
+        zh: `K 线敲门时，大脑说等一下，手指说已上链。`,
+        en: "when candles knock, the brain says wait, the finger says already onchain"
+      },
+      {
+        zh: `该钱包疑似患有退出按钮脸盲症：买入入口很熟，卖出出口像陌生人。`,
+        en: "wallet shows exit-button face blindness: entry is familiar, exit looks like a stranger"
       }
     ],
     kol: [
@@ -2045,14 +2260,171 @@ function buildModeLossCause(mode, context) {
       {
         zh: `这不是亏损黑匣子，这是内容素材仓库，只是成本有点高。`,
         en: "this is less a loss black box and more a content warehouse with expensive rent"
+      },
+      {
+        zh: `这套亏损路径很适合写成长帖：标题叫纪律，正文叫例外，结尾叫成长。`,
+        en: "this loss path makes a great thread: title discipline, body exceptions, ending growth"
+      },
+      {
+        zh: `你最危险的时刻不是亏钱后，而是刚把亏钱解释得很合理之后。`,
+        en: "your most dangerous moment is not after losing, but right after making the loss sound reasonable"
+      },
+      {
+        zh: `如果这钱包开课，第一章是风险控制，第二章就开始解释为什么这次不用。`,
+        en: "if this wallet taught a course, chapter one is risk control and chapter two explains why not this time"
+      },
+      {
+        zh: `主要亏损主因可以包装成一句话：观点很硬，退出很软。`,
+        en: "main leak packaged in one line: strong opinions, soft exits"
       }
     ]
   };
 
-  if (metrics.lowLiquidityTokenCount >= 8 && mode !== "normal") {
-    return pickLocalized(lang, "流动性像地下室，你进去的时候很丝滑，出来的时候开始研究人生。", "liquidity behaves like a basement: easy to enter, philosophical to exit");
-  }
-  return pickStableLocalized(address, `loss-cause-${mode}`, lang, bank[mode] || bank.roast);
+  const featureBank = [];
+  const pushFeature = (condition, entries) => {
+    if (condition) featureBank.push(...entries);
+  };
+  pushFeature(metrics.lowLiquidityTokenCount >= 4, [
+    {
+      zh: "流动性像地下室，你进去的时候很丝滑，出来的时候开始研究人生。",
+      en: "liquidity behaves like a basement: easy to enter, philosophical to exit"
+    },
+    {
+      zh: "买入时像走正门，卖出时像找通风管，滑点负责收门票。",
+      en: "entry feels like a front door, exit like finding an air vent, with slippage selling tickets"
+    },
+    {
+      zh: "你的亏损主因不是判断错，是总在浅池里练深潜。",
+      en: "your leak is not just bad judgment; it is practicing deep diving in shallow pools"
+    },
+    {
+      zh: "低流动性没有骗你，它只是用很小的门欢迎你进来。",
+      en: "illiquidity did not lie; it welcomed you through a very small door"
+    }
+  ]);
+  pushFeature(metrics.memeTokenCount >= 4 || metrics.memeRatio > 0.18, [
+    {
+      zh: "Meme 一发热，你的钱包就像自动打开了急诊挂号。",
+      en: "when memes heat up, your wallet automatically opens emergency registration"
+    },
+    {
+      zh: "你的亏损主因，是把每个新 ticker 都当成命运给的暗号。",
+      en: "your main leak is treating every new ticker as a secret message from destiny"
+    },
+    {
+      zh: "市场给的是笑话，你有时会用本金认真接梗。",
+      en: "the market offers a joke, and sometimes you answer it with principal"
+    },
+    {
+      zh: "土狗不是问题，问题是你每次都觉得这只比较像狼。",
+      en: "dogcoins are not the whole problem; the problem is thinking this one looks like a wolf"
+    }
+  ]);
+  pushFeature(metrics.txPerDay > 1.8 || metrics.methodCounts.swap > 5, [
+    {
+      zh: "交易频率像心率监测，市场一动，你的钱包先心动。",
+      en: "trade frequency looks like a heart monitor; the wallet reacts before the market finishes moving"
+    },
+    {
+      zh: "手续费和情绪一起上班，你负责给它们发工资。",
+      en: "fees and emotions clock in together, and you pay both salaries"
+    },
+    {
+      zh: "你的手速不是优势，是一个没有冷却时间的技能。",
+      en: "your hand speed is not an edge; it is a skill with no cooldown"
+    },
+    {
+      zh: "亏损主因：鼠标比交易计划更像主理人。",
+      en: "main leak: the mouse behaves more like the founder than the trading plan"
+    }
+  ]);
+  pushFeature(metrics.failedRate > 0.08, [
+    {
+      zh: "失败交易已经在替你喊停，但你把它当成网络不好。",
+      en: "failed transactions are trying to stop you, but you call it network issues"
+    },
+    {
+      zh: "Gas 被烧成烟花，钱包还以为这是交互仪式感。",
+      en: "gas burns like fireworks while the wallet calls it interaction ritual"
+    },
+    {
+      zh: "你的合约交互像闯红灯，失败回执像罚单。",
+      en: "your contract interactions look like red-light running, with failed receipts as tickets"
+    }
+  ]);
+  pushFeature(metrics.stableRatio > 0.6 && scores.degen < 55, [
+    {
+      zh: "你不是亏损，你是把牛市坐成了旁听课。",
+      en: "you are not losing; you audited the bull market from the back row"
+    },
+    {
+      zh: "稳定币保护了本金，也顺手保护了你错过热点的能力。",
+      en: "stablecoins protected principal and also protected your ability to miss narratives"
+    },
+    {
+      zh: "你的风险不是冲太快，是等回调等到回调也下班。",
+      en: "your risk is not rushing; it is waiting for a pullback until even the pullback clocks out"
+    }
+  ]);
+  pushFeature(metrics.outgoingTransfers < metrics.incomingTransfers / 5, [
+    {
+      zh: "只进不出不是投资风格，更像钱包给退出按钮放了年假。",
+      en: "entry-only is not an investment style; the wallet put the exit button on annual leave"
+    },
+    {
+      zh: "你会进货，但体面下车这门课还在缓考。",
+      en: "you know how to enter; graceful exits are still pending an exam"
+    },
+    {
+      zh: "仓位像收藏品一样进柜，问题是市场不按博物馆估值。",
+      en: "positions enter the cabinet like collectibles; the market does not price them like museum pieces"
+    }
+  ]);
+  pushFeature(scores.diamond > 68, [
+    {
+      zh: "有些仓位不是信仰，是退出按钮被你修成了摆设。",
+      en: "some positions are not conviction; the exit button became decoration"
+    },
+    {
+      zh: "你拿得住，但亏损黑匣子暂时无法判断这是定力还是忘了卖。",
+      en: "you can hold, though the black box cannot tell whether it is discipline or a forgotten exit"
+    },
+    {
+      zh: "钻石手保护了故事，也偶尔保护了回撤。",
+      en: "diamond hands preserve the story, and sometimes the drawdown too"
+    }
+  ]);
+  pushFeature(scores.airdrop > 62 || metrics.methodCounts.claim > 1 || metrics.methodCounts.bridge > 2, [
+    {
+      zh: "你不是在交互，你像在给每个协议递简历，期待某天发工资。",
+      en: "you are not merely interacting; you are handing resumes to protocols and hoping for payroll"
+    },
+    {
+      zh: "跨链和任务做得很勤快，问题是勤快本身有时候也会收费。",
+      en: "cross-chain quests are diligent, but diligence itself sometimes charges fees"
+    },
+    {
+      zh: "空投雷达很忙，本金偶尔像给任务系统交押金。",
+      en: "the airdrop radar is busy; principal sometimes feels like a deposit for quest systems"
+    }
+  ]);
+  pushFeature(metrics.nftTransferCount > 4, [
+    {
+      zh: "NFT 旧梦还在钱包里回声，地板价负责提醒你青春的成本。",
+      en: "old NFT dreams still echo in the wallet, with floor prices reminding you of youth's cost"
+    },
+    {
+      zh: "你亏损的地方不一定是币，也可能是某个头像时代的余震。",
+      en: "the leak may not be tokens; it may be aftershocks from an avatar era"
+    },
+    {
+      zh: "JPEG 不是原罪，问题是你有时会把社区氛围当成退出流动性。",
+      en: "JPEGs are not the sin; the issue is mistaking community vibes for exit liquidity"
+    }
+  ]);
+
+  const candidates = [...(bank[mode] || bank.roast), ...featureBank];
+  return pickStableLocalized(address, `loss-cause-${mode}`, lang, candidates);
 }
 
 function buildModeAssetPersonality(mode, context) {
@@ -2707,7 +3079,28 @@ function buildLabels(personalityId, metrics, scores, lang) {
   return [...new Set(labels)].slice(0, 6);
 }
 
+function actionableChainErrors(chain) {
+  const rawErrors = Array.isArray(chain.errors) ? chain.errors : (chain.error ? [chain.error] : []);
+  return rawErrors.filter((error) => {
+    const message = String(error || "");
+    return message && !message.includes("BNB Chain uses public RPC only");
+  });
+}
+
 function buildReport(address, chains, lang = "zh", seasonSampleSize = 0) {
+  const generatedAt = new Date().toISOString();
+  const degradedChains = chains
+    .map((chain) => {
+      const errors = actionableChainErrors(chain);
+      return {
+        id: chain.id,
+        name: chain.name,
+        ok: Boolean(chain.ok),
+        error: chain.error || errors[0] || "",
+        errors
+      };
+    })
+    .filter((chain) => !chain.ok || chain.errors.length);
   const metrics = buildMetrics(address, chains);
   const scores = scoreWallet(metrics);
   const personalityId = choosePersonality(metrics, scores, address);
@@ -2718,13 +3111,13 @@ function buildReport(address, chains, lang = "zh", seasonSampleSize = 0) {
   const labels = buildLabels(personalityId, metrics, scores, lang);
   const badges = buildBadges(metrics, scores, address, lang, seasonSampleSize);
   const rarity = buildRarity(metrics, scores, personality, badges, address, lang, seasonSampleSize);
-  const context = { address, lang, metrics, scores, personalityId, personality, lossCause, verdict, labels, badges, rarity };
+  const context = { address, lang, metrics, scores, personalityId, personality, lossCause, verdict, labels, badges, rarity, generatedAt };
   const modes = buildReportModes(context);
   const defaultMode = "abstract";
   const compositeRankScore = rankScore(metrics, scores, address);
 
   return {
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     language: lang,
     address,
     shortAddress: shortAddress(address),
@@ -2732,6 +3125,9 @@ function buildReport(address, chains, lang = "zh", seasonSampleSize = 0) {
     siteHost: SITE_HOST,
     productName: pickLocalized(lang, "链上照妖镜", "Degen DNA"),
     productSubtitle: pickLocalized(lang, "Degen DNA Report", "Onchain Mirror"),
+    reportVersion: REPORT_VERSION,
+    degraded: degradedChains.length > 0,
+    degradedChains,
     personalityId,
     basePersonality,
     personality,
@@ -2769,7 +3165,7 @@ function buildReport(address, chains, lang = "zh", seasonSampleSize = 0) {
       errors: chain.errors || (chain.error ? [chain.error] : [])
     })),
     warnings: chains
-      .flatMap((chain) => chain.errors || (chain.error ? [chain.error] : []))
+      .flatMap((chain) => actionableChainErrors(chain))
       .slice(0, 8)
   };
 }
@@ -2958,7 +3354,7 @@ function publicLeaderboard(entries) {
 
 async function submitLeaderboardEntry({ address, lang, username }) {
   const normalizedAddress = normalizeAddress(address);
-  const profile = buildXProfile(username);
+  const profile = await resolveXProfile(username);
   if (!isAddress(normalizedAddress) || !profile) {
     throw new Error(pickLocalized(lang, "请输入有效的钱包地址和 @X 用户名。", "Enter a valid wallet address and @X username."));
   }
@@ -3011,22 +3407,79 @@ async function leaderboardSampleSize() {
   }
 }
 
+async function safeChainResult(chain, task) {
+  try {
+    return await task();
+  } catch (error) {
+    return {
+      id: chain.id,
+      name: chain.name,
+      nativeSymbol: chain.nativeSymbol,
+      color: chain.color,
+      ok: false,
+      source: chain.explorer ? "Blockscout" : "BNB public RPC",
+      error: error.message || String(error),
+      transactions: [],
+      erc20Transfers: [],
+      nftTransfers: [],
+      tokens: [],
+      nftTokens: [],
+      errors: [error.message || String(error)]
+    };
+  }
+}
+
+async function fetchChainsForAddress(address) {
+  const key = chainCacheKey(address);
+  const cached = getCached(chainCache, key);
+  if (cached) return { chains: cached, cache: "hit" };
+  if (addressInflight.has(key)) {
+    const chains = await addressInflight.get(key);
+    return { chains: clonePayload(chains), cache: "coalesced" };
+  }
+
+  const promise = Promise.all([
+    ...BLOCKSCOUT_CHAINS.map((chain) => safeChainResult(chain, () => fetchBlockscoutChain(chain, address))),
+    safeChainResult(BNB_CHAIN, () => fetchBnbChain(address))
+  ])
+    .then((chains) => {
+      setCached(chainCache, key, chains, CHAIN_CACHE_TTL_MS);
+      return chains;
+    })
+    .finally(() => {
+      addressInflight.delete(key);
+    });
+  addressInflight.set(key, promise);
+  return { chains: clonePayload(await promise), cache: "miss" };
+}
+
 async function analyzeWallet(address, lang = "zh") {
   const normalized = normalizeAddress(address);
   const language = normalizeLang(lang);
-  const seasonSampleSize = await leaderboardSampleSize();
-  const key = `chains:${normalized.toLowerCase()}`;
-  const cached = cache.get(key);
-  if (cached && Date.now() - cached.createdAt < CACHE_TTL_MS) {
-    return { ...buildReport(normalized, cached.chains, language, seasonSampleSize), cache: "hit" };
+  const reportKey = reportCacheKey(normalized, language);
+  const cachedReport = getCached(reportCache, reportKey);
+  if (cachedReport) return { ...cachedReport, cache: "hit" };
+
+  if (analyzeInflight.has(reportKey)) {
+    const report = await analyzeInflight.get(reportKey);
+    return { ...clonePayload(report), cache: "coalesced" };
   }
 
-  const chainResults = await Promise.all([
-    ...BLOCKSCOUT_CHAINS.map((chain) => fetchBlockscoutChain(chain, normalized)),
-    fetchBnbChain(normalized)
-  ]);
-  cache.set(key, { createdAt: Date.now(), chains: chainResults });
-  return { ...buildReport(normalized, chainResults, language, seasonSampleSize), cache: "miss" };
+  const promise = (async () => {
+    const seasonSampleSize = await leaderboardSampleSize();
+    const { chains, cache: chainCacheStatus } = await fetchChainsForAddress(normalized);
+    const report = {
+      ...buildReport(normalized, chains, language, seasonSampleSize),
+      cache: chainCacheStatus === "hit" ? "chain-hit" : "miss"
+    };
+    setCached(reportCache, reportKey, report, cacheTtlForAddress(normalized));
+    return report;
+  })().finally(() => {
+    analyzeInflight.delete(reportKey);
+  });
+
+  analyzeInflight.set(reportKey, promise);
+  return { ...(await promise), cache: "miss" };
 }
 
 function compareReports(a, b, lang = "zh") {
@@ -3060,14 +3513,26 @@ async function handleApi(req, res, pathname, searchParams) {
     return json(res, 200, {
       ok: true,
       service: "onchain-mirror",
+      reportVersion: REPORT_VERSION,
       leaderboard: await leaderboardStorageStatus(),
+      cache: {
+        reports: reportCache.size,
+        chains: chainCache.size,
+        xProfiles: xProfileCache.size,
+        inflightReports: analyzeInflight.size,
+        inflightAddresses: addressInflight.size
+      },
+      integrations: {
+        xApi: Boolean(X_BEARER_TOKEN),
+        supabase: hasSupabaseLeaderboard()
+      },
       chains: [...BLOCKSCOUT_CHAINS.map((chain) => chain.name), BNB_CHAIN.name]
     });
   }
 
   if (pathname === "/api/x-profile") {
     const lang = normalizeLang(searchParams.get("lang"));
-    const profile = buildXProfile(searchParams.get("username"));
+    const profile = await resolveXProfile(searchParams.get("username"));
     if (!profile) {
       return json(res, 400, { error: pickLocalized(lang, "请输入有效的 @X 用户名。", "Enter a valid @X username.") });
     }
@@ -3081,6 +3546,11 @@ async function handleApi(req, res, pathname, searchParams) {
     }
     if (req.method !== "POST") {
       return json(res, 405, { error: "Method not allowed" });
+    }
+    const limited = rateLimit(req, "leaderboard-post", { limit: 10, windowMs: HOUR_MS });
+    if (!limited.ok) {
+      res.setHeader("retry-after", String(limited.retryAfter));
+      return json(res, 429, { error: pickLocalized(lang, RATE_LIMIT_MESSAGE_ZH, RATE_LIMIT_MESSAGE_EN), retryAfter: limited.retryAfter });
     }
     try {
       const body = await readJsonBody(req);
@@ -3096,6 +3566,11 @@ async function handleApi(req, res, pathname, searchParams) {
 
   if (pathname === "/api/analyze") {
     const lang = normalizeLang(searchParams.get("lang"));
+    const limited = rateLimit(req, "analyze", { limit: 5, windowMs: MINUTE_MS });
+    if (!limited.ok) {
+      res.setHeader("retry-after", String(limited.retryAfter));
+      return json(res, 429, { error: pickLocalized(lang, RATE_LIMIT_MESSAGE_ZH, RATE_LIMIT_MESSAGE_EN), retryAfter: limited.retryAfter });
+    }
     const address = normalizeAddress(searchParams.get("address"));
     if (!isAddress(address)) {
       return json(res, 400, { error: pickLocalized(lang, "请输入有效的 EVM 钱包地址。", "Enter a valid EVM wallet address.") });
@@ -3109,6 +3584,11 @@ async function handleApi(req, res, pathname, searchParams) {
 
   if (pathname === "/api/compare") {
     const lang = normalizeLang(searchParams.get("lang"));
+    const limited = rateLimit(req, "compare", { limit: 3, windowMs: MINUTE_MS });
+    if (!limited.ok) {
+      res.setHeader("retry-after", String(limited.retryAfter));
+      return json(res, 429, { error: pickLocalized(lang, RATE_LIMIT_MESSAGE_ZH, RATE_LIMIT_MESSAGE_EN), retryAfter: limited.retryAfter });
+    }
     const addressA = normalizeAddress(searchParams.get("addressA"));
     const addressB = normalizeAddress(searchParams.get("addressB"));
     if (!isAddress(addressA) || !isAddress(addressB)) {
