@@ -658,9 +658,9 @@ function comboRarityDetail(rarity = {}) {
     .replace(/^(组合|combo)\s*[·:：-]\s*/i, "");
 }
 
-function cardRarityLabel(rarity = {}) {
+function cardRarityLabel(rarity = {}, lang = state.lang) {
   const rate = rarity.combo?.appearanceRate;
-  const rateText = rate === undefined || rate === null || rate === "" ? "" : ` · ${state.lang === "zh" ? "组合出现率" : "combo rate"} ${rate}%`;
+  const rateText = rate === undefined || rate === null || rate === "" ? "" : ` · ${lang === "zh" ? "组合出现率" : "combo rate"} ${rate}%`;
   return `${rarity.tierName || "--"}${rateText}`;
 }
 
@@ -889,15 +889,149 @@ function loadImage(src) {
 }
 
 function rarityColorValue(tier) {
+  return rarityThemeValue(tier).accent;
+}
+
+function rarityThemeValue(tier) {
   return {
-    common: "#d8d3ca",
-    uncommon: "#7dff9f",
-    rare: "#64b5ff",
-    epic: "#c27bff",
-    legendary: "#ffd166",
-    mythic: "#ff5b35",
-    unique: "#f7f1e8"
-  }[tier] || "#b8ff5c";
+    common: {
+      accent: "#d8d3ca",
+      secondary: "#8f887e",
+      bg: ["#171512", "#0b0a08", "#201a14"],
+      grid: "rgba(216,211,202,0.055)",
+      panel: "rgba(255,255,255,0.055)",
+      chip: "rgba(216,211,202,0.10)",
+      chipBorder: "rgba(216,211,202,0.30)",
+      quote: "#d8d3ca",
+      foil: "rgba(255,255,255,0.045)"
+    },
+    uncommon: {
+      accent: "#7dff9f",
+      secondary: "#28d17a",
+      bg: ["#071b12", "#060b08", "#122516"],
+      grid: "rgba(125,255,159,0.07)",
+      panel: "rgba(125,255,159,0.075)",
+      chip: "rgba(125,255,159,0.12)",
+      chipBorder: "rgba(125,255,159,0.38)",
+      quote: "#7dff9f",
+      foil: "rgba(125,255,159,0.055)"
+    },
+    rare: {
+      accent: "#64b5ff",
+      secondary: "#4ce0ff",
+      bg: ["#071527", "#05070c", "#101f34"],
+      grid: "rgba(100,181,255,0.08)",
+      panel: "rgba(100,181,255,0.085)",
+      chip: "rgba(100,181,255,0.13)",
+      chipBorder: "rgba(100,181,255,0.42)",
+      quote: "#64b5ff",
+      foil: "rgba(76,224,255,0.06)"
+    },
+    epic: {
+      accent: "#c27bff",
+      secondary: "#ff7adf",
+      bg: ["#201039", "#080611", "#2a1438"],
+      grid: "rgba(194,123,255,0.09)",
+      panel: "rgba(194,123,255,0.10)",
+      chip: "rgba(194,123,255,0.14)",
+      chipBorder: "rgba(255,122,223,0.45)",
+      quote: "#ff7adf",
+      foil: "rgba(194,123,255,0.075)"
+    },
+    legendary: {
+      accent: "#ffd166",
+      secondary: "#ff9f1c",
+      bg: ["#2a1b06", "#090705", "#34250c"],
+      grid: "rgba(255,209,102,0.10)",
+      panel: "rgba(255,209,102,0.11)",
+      chip: "rgba(255,209,102,0.15)",
+      chipBorder: "rgba(255,209,102,0.52)",
+      quote: "#ffd166",
+      foil: "rgba(255,255,255,0.10)"
+    },
+    mythic: {
+      accent: "#ff5b35",
+      secondary: "#ffcf6e",
+      bg: ["#330805", "#050303", "#240b0a"],
+      grid: "rgba(255,91,53,0.095)",
+      panel: "rgba(255,91,53,0.12)",
+      chip: "rgba(255,91,53,0.16)",
+      chipBorder: "rgba(255,207,110,0.48)",
+      quote: "#ffcf6e",
+      foil: "rgba(255,91,53,0.09)"
+    },
+    unique: {
+      accent: "#f7f1e8",
+      secondary: "#00f5ff",
+      bg: ["#f7f1e8", "#111111", "#050505"],
+      grid: "rgba(0,245,255,0.12)",
+      panel: "rgba(247,241,232,0.13)",
+      chip: "rgba(0,245,255,0.13)",
+      chipBorder: "rgba(247,241,232,0.62)",
+      quote: "#00f5ff",
+      foil: "rgba(255,255,255,0.13)"
+    }
+  }[tier] || {
+    accent: "#b8ff5c",
+    secondary: "#ff9b3d",
+    bg: ["#3a140d", "#0b0a08", "#1d160f"],
+    grid: "rgba(255,255,255,0.06)",
+    panel: "rgba(255,255,255,0.06)",
+    chip: "rgba(184,255,92,0.10)",
+    chipBorder: "rgba(184,255,92,0.36)",
+    quote: "#ff4934",
+    foil: "rgba(255,255,255,0.05)"
+  };
+}
+
+function drawRarityTexture(ctx, theme, tier, w, h) {
+  ctx.save();
+  ctx.strokeStyle = theme.foil;
+  ctx.lineWidth = tier === "unique" ? 2 : 1;
+  const spacing = tier === "common" ? 94 : tier === "legendary" || tier === "mythic" || tier === "unique" ? 38 : 62;
+  for (let x = -h; x < w + h; x += spacing) {
+    ctx.beginPath();
+    ctx.moveTo(x, h);
+    ctx.lineTo(x + h, 0);
+    ctx.stroke();
+  }
+  if (tier === "legendary" || tier === "mythic" || tier === "unique") {
+    ctx.globalAlpha = 0.72;
+    for (let i = 0; i < 5; i += 1) {
+      const inset = 76 + i * 14;
+      ctx.strokeStyle = i % 2 ? theme.secondary : theme.accent;
+      ctx.lineWidth = i === 0 ? 2 : 1;
+      roundedRect(ctx, inset, inset, w - inset * 2, h - inset * 2, 18);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 0.92;
+    ctx.strokeStyle = theme.accent;
+    ctx.lineWidth = 5;
+    const corner = 118;
+    for (const [sx, sy] of [[70, 70], [w - 70, 70], [70, h - 70], [w - 70, h - 70]]) {
+      ctx.beginPath();
+      ctx.moveTo(sx, sy + (sy < h / 2 ? corner : -corner));
+      ctx.lineTo(sx, sy);
+      ctx.lineTo(sx + (sx < w / 2 ? corner : -corner), sy);
+      ctx.stroke();
+    }
+  }
+  if (tier === "unique") {
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = "#00f5ff";
+    for (let y = 110; y < h - 110; y += 113) ctx.fillRect(70, y, w - 140, 2);
+    ctx.fillStyle = "#ff3df2";
+    for (let y = 157; y < h - 110; y += 151) ctx.fillRect(120, y, w - 240, 2);
+  }
+  ctx.restore();
+}
+
+function canvasTitleSize(textValue) {
+  const length = charLength(textValue);
+  if (length > 54) return 46;
+  if (length > 44) return 52;
+  if (length > 34) return 60;
+  return 72;
 }
 
 async function drawShareCanvas(report) {
@@ -906,7 +1040,8 @@ async function drawShareCanvas(report) {
   const selected = modeReport(report) || report.report || {};
   const rarity = report.rarity || {};
   const badges = report.badges || [];
-  const rarityColor = rarityColorValue(rarity.tier);
+  const theme = rarityThemeValue(rarity.tier);
+  const rarityColor = theme.accent;
   const canvas = $("#card-canvas");
   const ctx = canvas.getContext("2d");
   const w = canvas.width;
@@ -916,13 +1051,14 @@ async function drawShareCanvas(report) {
     .catch(() => loadImage(STONE_AVATAR_URL));
 
   const bg = ctx.createLinearGradient(0, 0, w, h);
-  bg.addColorStop(0, "#3a140d");
-  bg.addColorStop(0.46, "#0b0a08");
-  bg.addColorStop(1, "#1d160f");
+  bg.addColorStop(0, theme.bg[0]);
+  bg.addColorStop(0.48, theme.bg[1]);
+  bg.addColorStop(1, theme.bg[2]);
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, w, h);
+  drawRarityTexture(ctx, theme, rarity.tier, w, h);
 
-  ctx.strokeStyle = "rgba(255,255,255,0.07)";
+  ctx.strokeStyle = theme.grid;
   ctx.lineWidth = 1;
   for (let x = 0; x < w; x += 56) {
     ctx.beginPath();
@@ -938,7 +1074,7 @@ async function drawShareCanvas(report) {
   }
 
   ctx.strokeStyle = rarityColor;
-  ctx.lineWidth = 4;
+  ctx.lineWidth = rarity.tier === "legendary" || rarity.tier === "mythic" || rarity.tier === "unique" ? 7 : 4;
   roundedRect(ctx, 58, 58, w - 116, h - 116, 24);
   ctx.stroke();
 
@@ -961,7 +1097,7 @@ async function drawShareCanvas(report) {
   ctx.font = "700 22px Microsoft YaHei, Inter, sans-serif";
   ctx.fillText(`${report.siteHost} · @Stone141319`, 176, 150);
 
-  ctx.fillStyle = "#b8ff5c";
+  ctx.fillStyle = rarityColor;
   ctx.font = "800 34px Microsoft YaHei, Inter, sans-serif";
   ctx.textAlign = "right";
   ctx.fillText(tr("card.reportTitle"), 1110, 118);
@@ -974,21 +1110,24 @@ async function drawShareCanvas(report) {
   ctx.font = "28px Consolas, monospace";
   ctx.fillText(report.shortAddress, 92, 238);
 
+  const personalityTitle = `${tr("card.personalityPrefix")}${report.personality}`;
+  const titleSize = canvasTitleSize(personalityTitle);
   ctx.fillStyle = "#f7f1e8";
-  ctx.font = "900 72px Microsoft YaHei, Inter, sans-serif";
-  drawWrappedText(ctx, `${tr("card.personalityPrefix")}${report.personality}`, 92, 338, 980, 82, 2);
+  ctx.font = `900 ${titleSize}px Microsoft YaHei, Inter, sans-serif`;
+  drawWrappedText(ctx, personalityTitle, 92, 330, 980, titleSize + 10, titleSize < 60 ? 3 : 2);
 
-  ctx.fillStyle = "rgba(255,255,255,0.06)";
+  ctx.fillStyle = theme.panel;
   roundedRect(ctx, 92, 506, 1010, 112, 16);
   ctx.fill();
   ctx.strokeStyle = rarityColor;
+  ctx.lineWidth = 2;
   ctx.stroke();
   ctx.fillStyle = "#a99f91";
   ctx.font = "800 26px Microsoft YaHei, Inter, sans-serif";
   ctx.fillText(tr("card.rarity"), 126, 548);
   ctx.fillStyle = rarityColor;
   ctx.font = "900 42px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(`${rarity.tierName || "--"} · ${rarity.combo?.tierName || ""}`, 126, 594);
+  ctx.fillText(cardRarityLabel(rarity, lang), 126, 594, 820);
   ctx.fillStyle = "#f7f1e8";
   ctx.font = "700 24px Microsoft YaHei, Inter, sans-serif";
   ctx.fillText(rarity.combo?.text || "", 600, 574, 470);
@@ -1000,7 +1139,7 @@ async function drawShareCanvas(report) {
     [tr("card.diamond"), `${report.scores.diamond}/100`, "#b8ff5c"]
   ].entries()) {
     const x = 92 + index * (scoreBoxW + 40);
-    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    ctx.fillStyle = theme.panel;
     roundedRect(ctx, x, scoreY, scoreBoxW, 174, 16);
     ctx.fill();
     ctx.fillStyle = "#a99f91";
@@ -1011,14 +1150,14 @@ async function drawShareCanvas(report) {
     ctx.fillText(item[1], x + 34, scoreY + 126);
   }
 
-  ctx.fillStyle = "#ff9b3d";
+  ctx.fillStyle = theme.secondary;
   ctx.font = "900 38px Microsoft YaHei, Inter, sans-serif";
   ctx.fillText(tr("card.loss"), 92, 940);
   ctx.fillStyle = "#f7f1e8";
   ctx.font = "800 44px Microsoft YaHei, Inter, sans-serif";
   drawWrappedText(ctx, selected.lossCause || report.lossCause, 92, 1002, 1000, 58, 3);
 
-  ctx.fillStyle = "#b8ff5c";
+  ctx.fillStyle = rarityColor;
   ctx.font = "800 30px Microsoft YaHei, Inter, sans-serif";
   ctx.fillText(tr("card.tags"), 92, 1162);
   let tagX = 92;
@@ -1031,17 +1170,17 @@ async function drawShareCanvas(report) {
       tagX = 92;
       tagY += 62;
     }
-    ctx.fillStyle = "rgba(184,255,92,0.1)";
+    ctx.fillStyle = theme.chip;
     roundedRect(ctx, tagX, tagY, tagWidth, 44, 22);
     ctx.fill();
-    ctx.strokeStyle = "rgba(184,255,92,0.36)";
+    ctx.strokeStyle = theme.chipBorder;
     ctx.stroke();
-    ctx.fillStyle = "#b8ff5c";
+    ctx.fillStyle = rarityColor;
     ctx.fillText(tag, tagX + 23, tagY + 31, tagWidth - 38);
     tagX += tagWidth + 14;
   }
 
-  ctx.fillStyle = "#ff4934";
+  ctx.fillStyle = theme.quote;
   ctx.fillRect(92, 1340, 6, 158);
   ctx.fillStyle = "#f7f1e8";
   ctx.font = "800 42px Microsoft YaHei, Inter, sans-serif";
@@ -1152,13 +1291,14 @@ async function copyImageToClipboard(blob) {
 async function shareCard() {
   if (!state.currentReport) return;
   const report = state.currentReport;
-  const popup = window.open(buildXIntentUrl(report), "_blank");
+  let popup = null;
+  try {
+    popup = window.open("about:blank", "_blank");
+  } catch {
+    popup = null;
+  }
   if (popup) {
-    try {
-      popup.opener = null;
-    } catch {
-      // Some browsers disallow writing opener. The composer still opens.
-    }
+    openXIntent(report, popup);
   }
   setStatus(t("share.preparing"));
   const canvas = await drawShareCanvas(report);
@@ -1166,7 +1306,7 @@ async function shareCard() {
   const filename = `degendna-${report.address.slice(2, 8)}.png`;
   const copiedImage = await copyImageToClipboard(blob);
   if (!copiedImage) downloadBlob(blob, filename);
-  if (!popup) openXIntent(report);
+  if (!popup || popup.closed) openXIntent(report);
   setStatus(copiedImage ? t("share.imageCopied") : t("share.imageDownloaded"));
   setTimeout(clearStatus, 5200);
 }

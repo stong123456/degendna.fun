@@ -959,23 +959,138 @@ input:focus {
 }
 
 .share-card {
+  --card-accent: #ff4934;
+  --card-secondary: #ff9b3d;
+  --card-border: rgba(255, 73, 52, 0.42);
+  --card-frame: rgba(255, 255, 255, 0.18);
+  --card-panel: rgba(255, 255, 255, 0.07);
+  --card-chip: rgba(255, 73, 52, 0.12);
+  --card-chip-border: rgba(255, 73, 52, 0.36);
+  --card-grid: rgba(255, 255, 255, 0.035);
+  --card-foil: rgba(255, 255, 255, 0.052);
+  --card-bg-a: #2b120c;
+  --card-bg-b: #0c0b09;
+  --card-bg-c: #1b120d;
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 73, 52, 0.38);
+  border: 1px solid var(--card-border);
   border-radius: var(--radius);
   background:
-    linear-gradient(135deg, rgba(255, 73, 52, 0.26), transparent 38%),
-    linear-gradient(180deg, #22110c, #0c0b09 50%, #18120d);
-  box-shadow: var(--shadow);
+    linear-gradient(145deg, color-mix(in srgb, var(--card-accent) 22%, transparent), transparent 34%),
+    linear-gradient(320deg, color-mix(in srgb, var(--card-secondary) 18%, transparent), transparent 36%),
+    linear-gradient(180deg, var(--card-bg-a), var(--card-bg-b) 52%, var(--card-bg-c));
+  box-shadow:
+    0 22px 70px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-.share-card[data-rarity="common"] { border-color: rgba(216, 211, 202, 0.45); }
-.share-card[data-rarity="uncommon"] { border-color: rgba(125, 255, 159, 0.58); }
-.share-card[data-rarity="rare"] { border-color: rgba(100, 181, 255, 0.68); }
-.share-card[data-rarity="epic"] { border-color: rgba(194, 123, 255, 0.75); }
-.share-card[data-rarity="legendary"] { border-color: rgba(255, 209, 102, 0.86); }
-.share-card[data-rarity="mythic"] { border-color: rgba(255, 91, 53, 0.95); }
-.share-card[data-rarity="unique"] { border-color: rgba(247, 241, 232, 0.95); }
+.share-card[data-rarity="common"] {
+  --card-accent: #d8d3ca;
+  --card-secondary: #8f887e;
+  --card-border: rgba(216, 211, 202, 0.45);
+  --card-panel: rgba(255, 255, 255, 0.055);
+  --card-chip: rgba(216, 211, 202, 0.10);
+  --card-chip-border: rgba(216, 211, 202, 0.30);
+  --card-bg-a: #171512;
+  --card-bg-b: #0b0a08;
+  --card-bg-c: #201a14;
+}
+
+.share-card[data-rarity="uncommon"] {
+  --card-accent: #7dff9f;
+  --card-secondary: #28d17a;
+  --card-border: rgba(125, 255, 159, 0.58);
+  --card-panel: rgba(125, 255, 159, 0.075);
+  --card-chip: rgba(125, 255, 159, 0.12);
+  --card-chip-border: rgba(125, 255, 159, 0.38);
+  --card-bg-a: #071b12;
+  --card-bg-b: #060b08;
+  --card-bg-c: #122516;
+}
+
+.share-card[data-rarity="rare"] {
+  --card-accent: #64b5ff;
+  --card-secondary: #4ce0ff;
+  --card-border: rgba(100, 181, 255, 0.68);
+  --card-panel: rgba(100, 181, 255, 0.085);
+  --card-chip: rgba(100, 181, 255, 0.13);
+  --card-chip-border: rgba(100, 181, 255, 0.42);
+  --card-grid: rgba(100, 181, 255, 0.055);
+  --card-bg-a: #071527;
+  --card-bg-b: #05070c;
+  --card-bg-c: #101f34;
+}
+
+.share-card[data-rarity="epic"] {
+  --card-accent: #c27bff;
+  --card-secondary: #ff7adf;
+  --card-border: rgba(194, 123, 255, 0.76);
+  --card-panel: rgba(194, 123, 255, 0.10);
+  --card-chip: rgba(194, 123, 255, 0.14);
+  --card-chip-border: rgba(255, 122, 223, 0.45);
+  --card-grid: rgba(194, 123, 255, 0.06);
+  --card-bg-a: #201039;
+  --card-bg-b: #080611;
+  --card-bg-c: #2a1438;
+}
+
+.share-card[data-rarity="legendary"] {
+  --card-accent: #ffd166;
+  --card-secondary: #ff9f1c;
+  --card-border: rgba(255, 209, 102, 0.9);
+  --card-frame: rgba(255, 209, 102, 0.52);
+  --card-panel: rgba(255, 209, 102, 0.115);
+  --card-chip: rgba(255, 209, 102, 0.16);
+  --card-chip-border: rgba(255, 209, 102, 0.56);
+  --card-grid: rgba(255, 209, 102, 0.075);
+  --card-foil: rgba(255, 255, 255, 0.095);
+  --card-bg-a: #2a1b06;
+  --card-bg-b: #090705;
+  --card-bg-c: #34250c;
+  box-shadow:
+    0 28px 90px rgba(255, 159, 28, 0.18),
+    0 18px 80px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.share-card[data-rarity="mythic"] {
+  --card-accent: #ff5b35;
+  --card-secondary: #ffcf6e;
+  --card-border: rgba(255, 91, 53, 0.95);
+  --card-frame: rgba(255, 207, 110, 0.5);
+  --card-panel: rgba(255, 91, 53, 0.12);
+  --card-chip: rgba(255, 91, 53, 0.16);
+  --card-chip-border: rgba(255, 207, 110, 0.5);
+  --card-grid: rgba(255, 91, 53, 0.07);
+  --card-foil: rgba(255, 91, 53, 0.1);
+  --card-bg-a: #330805;
+  --card-bg-b: #050303;
+  --card-bg-c: #240b0a;
+  box-shadow:
+    0 30px 100px rgba(255, 91, 53, 0.22),
+    0 20px 82px rgba(0, 0, 0, 0.52),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.share-card[data-rarity="unique"] {
+  --card-accent: #f7f1e8;
+  --card-secondary: #00f5ff;
+  --card-border: rgba(247, 241, 232, 0.95);
+  --card-frame: rgba(0, 245, 255, 0.56);
+  --card-panel: rgba(247, 241, 232, 0.13);
+  --card-chip: rgba(0, 245, 255, 0.13);
+  --card-chip-border: rgba(247, 241, 232, 0.62);
+  --card-grid: rgba(0, 245, 255, 0.085);
+  --card-foil: rgba(255, 255, 255, 0.13);
+  --card-bg-a: #171717;
+  --card-bg-b: #030303;
+  --card-bg-c: #101820;
+  box-shadow:
+    0 0 0 1px rgba(255, 61, 242, 0.42),
+    0 32px 110px rgba(0, 245, 255, 0.18),
+    0 20px 82px rgba(0, 0, 0, 0.56),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
 
 .share-card::before {
   content: "";
@@ -983,9 +1098,38 @@ input:focus {
   inset: 0;
   pointer-events: none;
   background:
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(135deg, var(--card-foil) 0 1px, transparent 1px 42px),
+    repeating-linear-gradient(90deg, var(--card-grid) 0 1px, transparent 1px 26px),
     repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.026) 0 1px, transparent 1px 26px);
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.7), transparent);
+}
+
+.share-card::after {
+  content: "";
+  position: absolute;
+  inset: 11px;
+  pointer-events: none;
+  border: 1px solid var(--card-frame);
+  border-radius: 7px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.045),
+    inset 0 0 44px color-mix(in srgb, var(--card-accent) 10%, transparent);
+  opacity: 0.62;
+}
+
+.share-card[data-rarity="legendary"]::after,
+.share-card[data-rarity="mythic"]::after,
+.share-card[data-rarity="unique"]::after {
+  inset: 8px;
+  border-width: 2px;
+  opacity: 0.82;
+}
+
+.share-card[data-rarity="unique"]::before {
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 245, 255, 0.14) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(90deg, rgba(255, 61, 242, 0.105) 0 1px, transparent 1px 55px),
+    repeating-linear-gradient(135deg, var(--card-foil) 0 1px, transparent 1px 28px);
 }
 
 .share-card-top,
@@ -1014,7 +1158,7 @@ input:focus {
 
 .share-card-top b,
 .card-rarity strong {
-  color: var(--green);
+  color: var(--card-accent);
 }
 
 .share-card-body {
@@ -1032,18 +1176,23 @@ input:focus {
 .share-card h2 {
   margin-bottom: 22px;
   color: var(--paper);
-  font-size: 38px;
+  font-size: clamp(28px, 5vw, 38px);
   line-height: 1.04;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
 .card-rarity {
   display: grid;
   gap: 4px;
   margin: -8px 0 14px;
-  border: 1px solid rgba(194, 123, 255, 0.3);
+  border: 1px solid var(--card-chip-border);
   border-radius: 6px;
   padding: 10px 12px;
-  background: rgba(194, 123, 255, 0.08);
+  background:
+    linear-gradient(90deg, var(--card-panel), rgba(255, 255, 255, 0.028)),
+    rgba(0, 0, 0, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .card-rarity span,
@@ -1070,7 +1219,7 @@ input:focus {
 }
 
 .card-score-row strong {
-  color: var(--green);
+  color: var(--card-accent);
   font-size: 22px;
 }
 
@@ -1081,7 +1230,7 @@ input:focus {
 
 .card-loss p {
   margin: 7px 0 0;
-  color: var(--orange);
+  color: var(--card-secondary);
   font-size: 19px;
   font-weight: 900;
   line-height: 1.35;
@@ -1093,7 +1242,7 @@ input:focus {
 
 .share-card blockquote {
   margin: 0;
-  border-left: 3px solid var(--red);
+  border-left: 3px solid var(--card-accent);
   padding-left: 12px;
   color: var(--paper);
   font-size: 18px;
@@ -1110,14 +1259,20 @@ input:focus {
 }
 
 .share-card-foot .card-doctor {
-  color: var(--green);
+  color: var(--card-accent);
   font-size: 12px;
 }
 
 .share-card-foot b {
-  color: var(--paper);
+  color: var(--card-accent);
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-size: 13px;
+}
+
+.share-card .card-tags span {
+  border-color: var(--card-chip-border);
+  background: var(--card-chip);
+  color: var(--card-accent);
 }
 
 .card-owner {
@@ -1131,8 +1286,9 @@ input:focus {
 .card-owner img {
   width: 30px;
   height: 30px;
-  border: 1px solid rgba(184, 255, 92, 0.45);
+  border: 1px solid var(--card-chip-border);
   border-radius: 50%;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--card-accent) 12%, transparent);
   object-fit: cover;
 }
 
