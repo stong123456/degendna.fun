@@ -13,6 +13,9 @@ const SITE_URL = process.env.PUBLIC_SITE_URL || "https://degendna.fun";
 const SITE_HOST = process.env.PUBLIC_SITE_HOST || "degendna.fun";
 const LEADERBOARD_PATH = process.env.LEADERBOARD_PATH || join(tmpdir(), "degendna-leaderboard.json");
 const LEADERBOARD_LIMIT = 100;
+const SUPABASE_URL = String(process.env.SUPABASE_URL || "").replace(/\/+$/, "");
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const SUPABASE_LEADERBOARD_TABLE = process.env.SUPABASE_LEADERBOARD_TABLE || "onchain_leaderboard";
 
 const CACHE_TTL_MS = 3 * 60 * 1000;
 const cache = new Map();
@@ -2063,7 +2066,110 @@ async function readJsonBody(req, maxBytes = 32_768) {
   return JSON.parse(body);
 }
 
+function hasSupabaseLeaderboard() {
+  return Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
+}
+
+function supabaseLeaderboardUrl() {
+  return `${SUPABASE_URL}/rest/v1/${encodeURIComponent(SUPABASE_LEADERBOARD_TABLE)}`;
+}
+
+function supabaseHeaders(extra = {}) {
+  return {
+    apikey: SUPABASE_SERVICE_ROLE_KEY,
+    authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+    ...extra
+  };
+}
+
+function toDbEntry(entry) {
+  return {
+    id: entry.id,
+    username: entry.username,
+    handle: entry.handle,
+    name: entry.name,
+    avatar_url: entry.avatarUrl,
+    profile_url: entry.profileUrl,
+    address: entry.address,
+    short_address: entry.shortAddress,
+    personality: entry.personality,
+    personality_id: entry.personalityId,
+    degen: entry.degen,
+    diamond: entry.diamond,
+    airdrop: entry.airdrop,
+    rank_score: entry.rankScore,
+    degen_band: entry.degenBand,
+    labels: entry.labels || [],
+    generated_at: entry.generatedAt,
+    language: entry.language
+  };
+}
+
+function fromDbRow(row) {
+  return {
+    id: row.id,
+    username: row.username,
+    handle: row.handle,
+    name: row.name,
+    avatarUrl: row.avatar_url,
+    profileUrl: row.profile_url,
+    address: row.address,
+    shortAddress: row.short_address,
+    personality: row.personality,
+    personalityId: row.personality_id,
+    degen: safeNumber(row.degen, 0),
+    diamond: safeNumber(row.diamond, 0),
+    airdrop: safeNumber(row.airdrop, 0),
+    rankScore: safeNumber(row.rank_score, 0),
+    degenBand: row.degen_band,
+    labels: Array.isArray(row.labels) ? row.labels : [],
+    generatedAt: row.generated_at,
+    language: row.language || "zh"
+  };
+}
+
+async function readSupabaseLeaderboard() {
+  const url = new URL(supabaseLeaderboardUrl());
+  url.searchParams.set(
+    "select",
+    "id,username,handle,name,avatar_url,profile_url,address,short_address,personality,personality_id,degen,diamond,airdrop,rank_score,degen_band,labels,generated_at,language"
+  );
+  url.searchParams.set("order", "rank_score.desc,generated_at.desc");
+  url.searchParams.set("limit", String(LEADERBOARD_LIMIT));
+
+  const response = await fetch(url, {
+    headers: supabaseHeaders()
+  });
+  if (!response.ok) {
+    throw new Error(`Supabase leaderboard read failed: ${response.status} ${await response.text()}`);
+  }
+  const rows = await response.json();
+  return Array.isArray(rows) ? rows.map(fromDbRow) : [];
+}
+
+async function writeSupabaseLeaderboard(entries) {
+  const response = await fetch(`${supabaseLeaderboardUrl()}?on_conflict=id`, {
+    method: "POST",
+    headers: supabaseHeaders({
+      "content-type": "application/json",
+      prefer: "resolution=merge-duplicates,return=minimal"
+    }),
+    body: JSON.stringify(entries.map(toDbEntry))
+  });
+  if (!response.ok) {
+    throw new Error(`Supabase leaderboard write failed: ${response.status} ${await response.text()}`);
+  }
+}
+
 async function readLeaderboard() {
+  if (hasSupabaseLeaderboard()) {
+    try {
+      return await readSupabaseLeaderboard();
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
+
   try {
     const data = await readFile(LEADERBOARD_PATH, "utf8");
     const parsed = JSON.parse(data);
@@ -2074,6 +2180,15 @@ async function readLeaderboard() {
 }
 
 async function writeLeaderboard(entries) {
+  if (hasSupabaseLeaderboard()) {
+    try {
+      await writeSupabaseLeaderboard(entries);
+      return;
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
+
   await writeFile(LEADERBOARD_PATH, `${JSON.stringify(entries, null, 2)}\n`, "utf8");
 }
 

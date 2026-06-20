@@ -22,8 +22,29 @@ http://127.0.0.1:8787
 ```text
 GET /api/analyze?address=0x...
 GET /api/compare?addressA=0x...&addressB=0x...
+GET /api/leaderboard
+POST /api/leaderboard
+GET /api/x-profile?username=@Stone141319
 GET /api/health
 ```
+
+## Supabase Leaderboard
+
+The app can run without Supabase. In that mode the public leaderboard is stored in a temporary server file and may reset after deploys.
+
+To make the leaderboard persistent:
+
+1. Open Supabase SQL Editor.
+2. Run [supabase/leaderboard.sql](./supabase/leaderboard.sql).
+3. In Railway service variables, add:
+
+```text
+SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY
+SUPABASE_LEADERBOARD_TABLE=onchain_leaderboard
+```
+
+Use the `service_role` key only in Railway server variables. Do not expose it in browser code.
 
 ## Deploy Notes
 
@@ -37,6 +58,10 @@ GET /api/health
     - `NODE_ENV=production`
     - `PUBLIC_SITE_URL=https://degendna.fun`
     - `PUBLIC_SITE_HOST=degendna.fun`
+    - Optional persistent leaderboard:
+      - `SUPABASE_URL`
+      - `SUPABASE_SERVICE_ROLE_KEY`
+      - `SUPABASE_LEADERBOARD_TABLE=onchain_leaderboard`
 - DNS:
   - Add `degendna.fun` as a custom domain in Railway service settings.
   - Then set the `CNAME` and `TXT` records exactly as Railway shows in its domain screen.
