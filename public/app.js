@@ -1,3 +1,7 @@
+const STONE_X_HANDLE = "@Stone141319";
+const STONE_X_URL = "https://x.com/Stone141319";
+const STONE_AVATAR_URL = "/assets/stone-avatar.png";
+
 const I18N = {
   zh: {
     meta: {
@@ -337,6 +341,203 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+function escapeRegExp(value) {
+  return String(value ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function qrGaloisTables() {
+  if (qrGaloisTables.cache) return qrGaloisTables.cache;
+  const exp = Array(512).fill(0);
+  const log = Array(256).fill(0);
+  let value = 1;
+  for (let i = 0; i < 255; i += 1) {
+    exp[i] = value;
+    log[value] = i;
+    value <<= 1;
+    if (value & 0x100) value ^= 0x11d;
+  }
+  for (let i = 255; i < 512; i += 1) exp[i] = exp[i - 255];
+  qrGaloisTables.cache = { exp, log };
+  return qrGaloisTables.cache;
+}
+
+function qrMultiply(left, right) {
+  if (!left || !right) return 0;
+  const { exp, log } = qrGaloisTables();
+  return exp[log[left] + log[right]];
+}
+
+function qrGeneratorPolynomial(degree) {
+  let result = Array(degree).fill(0);
+  result[degree - 1] = 1;
+  let root = 1;
+  for (let i = 0; i < degree; i += 1) {
+    for (let j = 0; j < degree; j += 1) {
+      result[j] = qrMultiply(result[j], root);
+      if (j + 1 < degree) result[j] ^= result[j + 1];
+    }
+    root = qrMultiply(root, 2);
+  }
+  return result;
+}
+
+function qrReedSolomon(data, degree) {
+  const generator = qrGeneratorPolynomial(degree);
+  const result = Array(degree).fill(0);
+  for (const byte of data) {
+    const factor = byte ^ result.shift();
+    result.push(0);
+    generator.forEach((coefficient, index) => {
+      result[index] ^= qrMultiply(coefficient, factor);
+    });
+  }
+  return result;
+}
+
+function qrFormatBits(mask) {
+  const errorCorrectionLevel = 1;
+  const data = (errorCorrectionLevel << 3) | mask;
+  let remainder = data;
+  for (let i = 0; i < 10; i += 1) {
+    remainder = (remainder << 1) ^ (((remainder >>> 9) & 1) ? 0x537 : 0);
+  }
+  return ((data << 10) | remainder) ^ 0x5412;
+}
+
+function createQrMatrix(text) {
+  const version = 2;
+  const size = version * 4 + 17;
+  const mask = 0;
+  const dataCodewords = 34;
+  const eccCodewords = 10;
+  const modules = Array.from({ length: size }, () => Array(size).fill(false));
+  const reserved = Array.from({ length: size }, () => Array(size).fill(false));
+  const setFunction = (x, y, dark) => {
+    if (x < 0 || y < 0 || x >= size || y >= size) return;
+    modules[y][x] = Boolean(dark);
+    reserved[y][x] = true;
+  };
+
+  const drawFinder = (left, top) => {
+    for (let y = -1; y <= 7; y += 1) {
+      for (let x = -1; x <= 7; x += 1) {
+        const xx = left + x;
+        const yy = top + y;
+        const dark = x >= 0 && x <= 6 && y >= 0 && y <= 6
+          && (x === 0 || x === 6 || y === 0 || y === 6 || (x >= 2 && x <= 4 && y >= 2 && y <= 4));
+        setFunction(xx, yy, dark);
+      }
+    }
+  };
+
+  drawFinder(0, 0);
+  drawFinder(size - 7, 0);
+  drawFinder(0, size - 7);
+
+  for (let i = 8; i < size - 8; i += 1) {
+    setFunction(i, 6, i % 2 === 0);
+    setFunction(6, i, i % 2 === 0);
+  }
+
+  for (let y = -2; y <= 2; y += 1) {
+    for (let x = -2; x <= 2; x += 1) {
+      const distance = Math.max(Math.abs(x), Math.abs(y));
+      setFunction(18 + x, 18 + y, distance === 2 || distance === 0);
+    }
+  }
+
+  setFunction(8, size - 8, true);
+  const format = qrFormatBits(mask);
+  const bit = (index) => ((format >>> index) & 1) !== 0;
+  for (let i = 0; i <= 5; i += 1) setFunction(8, i, bit(i));
+  setFunction(8, 7, bit(6));
+  setFunction(8, 8, bit(7));
+  setFunction(7, 8, bit(8));
+  for (let i = 9; i < 15; i += 1) setFunction(14 - i, 8, bit(i));
+  for (let i = 0; i < 8; i += 1) setFunction(size - 1 - i, 8, bit(i));
+  for (let i = 8; i < 15; i += 1) setFunction(8, size - 15 + i, bit(i));
+
+  const bytes = Array.from(new TextEncoder().encode(text));
+  const bits = [0, 1, 0, 0];
+  for (let i = 7; i >= 0; i -= 1) bits.push((bytes.length >>> i) & 1);
+  bytes.forEach((byte) => {
+    for (let i = 7; i >= 0; i -= 1) bits.push((byte >>> i) & 1);
+  });
+  const capacityBits = dataCodewords * 8;
+  for (let i = 0; i < 4 && bits.length < capacityBits; i += 1) bits.push(0);
+  while (bits.length % 8) bits.push(0);
+  const data = [];
+  for (let i = 0; i < bits.length; i += 8) {
+    data.push(bits.slice(i, i + 8).reduce((acc, current) => (acc << 1) | current, 0));
+  }
+  for (let pad = 0; data.length < dataCodewords; pad += 1) data.push(pad % 2 ? 0x11 : 0xec);
+
+  const codewords = [...data, ...qrReedSolomon(data, eccCodewords)];
+  const codewordBits = [];
+  codewords.forEach((byte) => {
+    for (let i = 7; i >= 0; i -= 1) codewordBits.push((byte >>> i) & 1);
+  });
+
+  let bitIndex = 0;
+  let upward = true;
+  for (let right = size - 1; right >= 1; right -= 2) {
+    if (right === 6) right = 5;
+    for (let vertical = 0; vertical < size; vertical += 1) {
+      const y = upward ? size - 1 - vertical : vertical;
+      for (let x = right; x >= right - 1; x -= 1) {
+        if (reserved[y][x]) continue;
+        const dark = bitIndex < codewordBits.length ? codewordBits[bitIndex] === 1 : false;
+        modules[y][x] = dark !== ((x + y) % 2 === 0);
+        bitIndex += 1;
+      }
+    }
+    upward = !upward;
+  }
+  return { size, modules };
+}
+
+function qrSvgDataUrl(text) {
+  const { size, modules } = createQrMatrix(text);
+  const border = 4;
+  const viewBoxSize = size + border * 2;
+  const rects = [];
+  modules.forEach((row, y) => {
+    row.forEach((dark, x) => {
+      if (dark) rects.push(`<rect x="${x + border}" y="${y + border}" width="1" height="1"/>`);
+    });
+  });
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${viewBoxSize} ${viewBoxSize}" shape-rendering="crispEdges"><path fill="#fff" d="M0 0h${viewBoxSize}v${viewBoxSize}H0z"/><g fill="#090909">${rects.join("")}</g></svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+function renderStoneQr() {
+  const qr = $("#stone-x-qr");
+  if (qr) qr.src = qrSvgDataUrl(STONE_X_URL);
+}
+
+function drawQrOnCanvas(ctx, text, x, y, size) {
+  const { size: moduleCount, modules } = createQrMatrix(text);
+  const border = 4;
+  const tile = size / (moduleCount + border * 2);
+  ctx.save();
+  ctx.fillStyle = "#ffffff";
+  roundedRect(ctx, x, y, size, size, 10);
+  ctx.fill();
+  ctx.fillStyle = "#090909";
+  modules.forEach((row, rowIndex) => {
+    row.forEach((dark, columnIndex) => {
+      if (!dark) return;
+      ctx.fillRect(
+        x + (columnIndex + border) * tile,
+        y + (rowIndex + border) * tile,
+        Math.ceil(tile),
+        Math.ceil(tile)
+      );
+    });
+  });
+  ctx.restore();
+}
+
 function applyLanguage() {
   document.documentElement.lang = state.lang === "zh" ? "zh-CN" : "en";
   document.title = t("meta.title");
@@ -518,16 +719,17 @@ async function renderLeaderboard(providedItems = null) {
       const rarity = item.rarity || {};
       const badges = item.badges || [];
       const badgeText = badges.slice(0, 3).map((badge) => badge.name).join(" / ");
+      const profileUrl = item.profileUrl || `https://x.com/${encodeURIComponent(String(item.username || item.handle || "").replace(/^@/, ""))}`;
       return `
       <div class="board-row" data-rarity="${escapeHtml(rarity.tier || "common")}">
         <div class="board-rank">#${index + 1}</div>
-        <div class="board-user">
+        <a class="board-user" href="${escapeHtml(profileUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escapeHtml(item.handle || item.name || "X user")} on X">
           <img src="${escapeHtml(item.avatarUrl || "/assets/stone-avatar.png")}" alt="${escapeHtml(item.handle || "@X")}" referrerpolicy="no-referrer" />
           <div>
             <b>${escapeHtml(item.handle || item.name || "@X")} · ${escapeHtml(item.personality)}</b>
             <small>${escapeHtml(item.shortAddress)} · ${escapeHtml(t("board.rarity"))} ${escapeHtml(rarity.tierName || "--")} · ${escapeHtml(t("board.composite"))} ${Number(item.rankScore || 0).toFixed(2)}/100 · ${escapeHtml(badgeText)}</small>
           </div>
-        </div>
+        </a>
         <button class="ghost-button" type="button" data-board-address="${escapeHtml(item.address)}" data-board-x="${escapeHtml(item.handle || item.username || "")}">${escapeHtml(t("board.retest"))}</button>
       </div>
     `;
@@ -571,10 +773,25 @@ function renderModeContent(report = state.currentReport) {
 
 function identityForReport(report = state.currentReport) {
   return report?.xProfile || {
-    handle: "@Stone141319",
-    name: "@Stone141319",
-    avatarUrl: "/assets/stone-avatar.png"
+    handle: STONE_X_HANDLE,
+    name: STONE_X_HANDLE,
+    avatarUrl: STONE_AVATAR_URL
   };
+}
+
+function comboRarityDetail(rarity = {}) {
+  const textValue = rarity.combo?.text || "";
+  const tierName = rarity.combo?.tierName || "";
+  if (!textValue) return "";
+  return textValue
+    .replace(new RegExp(`^${escapeRegExp(tierName)}\\s*(组合|combo)?\\s*[·:：-]\\s*`, "i"), "")
+    .replace(/^(组合|combo)\s*[·:：-]\s*/i, "");
+}
+
+function cardRarityLabel(rarity = {}) {
+  const rate = rarity.combo?.appearanceRate;
+  const rateText = rate === undefined || rate === null || rate === "" ? "" : ` · ${state.lang === "zh" ? "组合出现率" : "combo rate"} ${rate}%`;
+  return `${rarity.tierName || "--"}${rateText}`;
 }
 
 function renderXIdentity(report = state.currentReport) {
@@ -599,7 +816,7 @@ function renderRarity(report = state.currentReport) {
   text("#rarity-tier", `${rarity.personality?.tierName || "--"} · ${report?.personality || ""}`);
   text("#rarity-detail", rarity.personality?.text || "");
   text("#combo-rarity", rarity.combo?.tierName || "--");
-  text("#combo-detail", rarity.combo?.text || "");
+  text("#combo-detail", comboRarityDetail(rarity));
   text(
     "#rarity-season",
     `${rarity.season?.name || "DegenDNA Season 0"} · ${t("rarity.seasonPrefix")} ${rarity.season?.sampleSize ?? 0} ${t("rarity.rankedWallets")}`
@@ -616,8 +833,8 @@ function renderRarity(report = state.currentReport) {
 
   const shareCard = $("#share-card");
   if (shareCard) shareCard.dataset.rarity = rarity.tier || "common";
-  text("#card-rarity", `${rarity.tierName || "--"} · ${rarity.combo?.tierName || ""}`);
-  text("#card-rarity-detail", rarity.combo?.text || "");
+  text("#card-rarity", cardRarityLabel(rarity));
+  text("#card-rarity-detail", comboRarityDetail(rarity));
 }
 
 function renderReport(report) {
@@ -676,7 +893,6 @@ function renderReport(report) {
   renderRarity(report);
   text("#card-degen", `${report.scores.degen}/100`);
   text("#card-diamond", `${report.scores.diamond}/100`);
-  text("#card-site", report.siteHost);
   $("#card-tags").innerHTML = (report.badges?.length ? report.badges : report.labels)
     .slice(0, 4)
     .map((item) => `<span>${escapeHtml(item.name || item)}</span>`)
@@ -809,8 +1025,9 @@ async function drawShareCanvas(report) {
   const w = canvas.width;
   const h = canvas.height;
   const identity = identityForReport(report);
-  const avatar = await loadImage(identity.avatarUrl || "/assets/stone-avatar.png")
-    .catch(() => loadImage("/assets/stone-avatar.png"));
+  const avatar = await loadImage(identity.avatarUrl || STONE_AVATAR_URL)
+    .catch(() => loadImage(STONE_AVATAR_URL));
+  const stoneAvatar = await loadImage(STONE_AVATAR_URL);
 
   const bg = ctx.createLinearGradient(0, 0, w, h);
   bg.addColorStop(0, "#3a140d");
@@ -946,10 +1163,21 @@ async function drawShareCanvas(report) {
 
   ctx.fillStyle = "#f7f1e8";
   ctx.font = "700 22px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(`TG: t.me/Stone141319`, 92, 1524);
-  ctx.textAlign = "right";
-  ctx.fillText(tr("card.publicOnly"), 1110, 1510);
-  ctx.textAlign = "left";
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(124, 1510, 30, 0, Math.PI * 2);
+  ctx.clip();
+  ctx.drawImage(stoneAvatar, 94, 1480, 60, 60);
+  ctx.restore();
+  ctx.strokeStyle = "rgba(184,255,92,0.58)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(124, 1510, 30, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.fillStyle = "#f7f1e8";
+  ctx.font = "900 28px Microsoft YaHei, Inter, sans-serif";
+  ctx.fillText(STONE_X_HANDLE, 174, 1520);
+  drawQrOnCanvas(ctx, STONE_X_URL, 1006, 1458, 96);
   return canvas;
 }
 
@@ -1189,6 +1417,7 @@ document.addEventListener("click", (event) => {
   form.requestSubmit();
 });
 
+renderStoneQr();
 applyLanguage();
 renderGate();
 setActiveView("mirror", { scroll: false });
