@@ -149,6 +149,13 @@ button {
   color: var(--green);
 }
 
+.ghost-button.active,
+.nav-actions [data-view].active {
+  border-color: rgba(184, 255, 92, 0.55);
+  background: rgba(184, 255, 92, 0.1);
+  color: var(--green);
+}
+
 .lang-toggle {
   display: inline-flex;
   align-items: center;
@@ -156,6 +163,36 @@ button {
   justify-content: center;
   gap: 7px;
   font-weight: 900;
+}
+
+.view-switcher {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 8px 0 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.view-switcher button {
+  min-height: 42px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.view-switcher button.active {
+  border-color: rgba(184, 255, 92, 0.48);
+  background: rgba(184, 255, 92, 0.11);
+  color: var(--green);
+}
+
+.view-panel[hidden] {
+  display: none !important;
 }
 
 .lang-toggle i {
@@ -607,6 +644,72 @@ input:focus {
   background: linear-gradient(90deg, var(--yellow), var(--orange));
 }
 
+.rarity-panel {
+  border-color: rgba(194, 123, 255, 0.32);
+  background:
+    linear-gradient(135deg, rgba(194, 123, 255, 0.12), transparent 45%),
+    rgba(255, 255, 255, 0.045);
+}
+
+.rarity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.rarity-grid > div {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.rarity-grid span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.rarity-grid strong {
+  display: block;
+  margin-top: 7px;
+  color: var(--green);
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.rarity-grid p {
+  margin: 8px 0 0;
+  color: var(--paper);
+  line-height: 1.45;
+}
+
+.badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.badge-chip {
+  border: 1px solid rgba(184, 255, 92, 0.24);
+  border-radius: 999px;
+  padding: 8px 10px;
+  background: rgba(184, 255, 92, 0.07);
+  color: var(--paper);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.badge-chip small {
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
 .report-section {
   padding: 20px;
 }
@@ -821,6 +924,14 @@ input:focus {
   box-shadow: var(--shadow);
 }
 
+.share-card[data-rarity="common"] { border-color: rgba(216, 211, 202, 0.45); }
+.share-card[data-rarity="uncommon"] { border-color: rgba(125, 255, 159, 0.58); }
+.share-card[data-rarity="rare"] { border-color: rgba(100, 181, 255, 0.68); }
+.share-card[data-rarity="epic"] { border-color: rgba(194, 123, 255, 0.75); }
+.share-card[data-rarity="legendary"] { border-color: rgba(255, 209, 102, 0.86); }
+.share-card[data-rarity="mythic"] { border-color: rgba(255, 91, 53, 0.95); }
+.share-card[data-rarity="unique"] { border-color: rgba(247, 241, 232, 0.95); }
+
 .share-card::before {
   content: "";
   position: absolute;
@@ -845,11 +956,19 @@ input:focus {
   font-weight: 800;
 }
 
-.share-card-top {
+.share-card-top > span:last-child {
+  display: grid;
+  justify-items: end;
+  text-align: right;
   text-transform: uppercase;
 }
 
-.share-card-top b {
+.share-card-top i {
+  font-style: normal;
+}
+
+.share-card-top b,
+.card-rarity strong {
   color: var(--green);
 }
 
@@ -870,6 +989,26 @@ input:focus {
   color: var(--paper);
   font-size: 38px;
   line-height: 1.04;
+}
+
+.card-rarity {
+  display: grid;
+  gap: 4px;
+  margin: -8px 0 14px;
+  border: 1px solid rgba(194, 123, 255, 0.3);
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: rgba(194, 123, 255, 0.08);
+}
+
+.card-rarity span,
+.card-rarity small {
+  color: var(--muted);
+}
+
+.card-rarity strong {
+  font-size: 22px;
+  line-height: 1.1;
 }
 
 .card-score-row {
@@ -934,6 +1073,18 @@ input:focus {
   border: 1px solid rgba(184, 255, 92, 0.45);
   border-radius: 50%;
   object-fit: cover;
+}
+
+.card-owner-top img {
+  width: 42px;
+  height: 42px;
+}
+
+.card-owner-top b {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .mini-panel {
@@ -1066,7 +1217,12 @@ dd {
   .input-row,
   .x-input-row,
   .metric-strip,
+  .rarity-grid,
   .report-split {
+    grid-template-columns: 1fr;
+  }
+
+  .view-switcher {
     grid-template-columns: 1fr;
   }
 

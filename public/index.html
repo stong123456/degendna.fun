@@ -8,7 +8,7 @@
       name="description"
       content="输入钱包地址，生成能晒、能比、能自嘲的链上人格报告。"
     />
-    <link rel="stylesheet" href="/styles.css?v=20260619-xrank" />
+    <link rel="stylesheet" href="/styles.css?v=20260620-rarity" />
   </head>
   <body>
     <div class="app-shell">
@@ -26,8 +26,10 @@
             <i>/</i>
             <span data-lang-option="en">EN</span>
           </button>
-          <button class="ghost-button" data-scroll="#pk-panel" type="button" data-i18n="nav.pk">钱包 PK</button>
-          <button class="ghost-button" data-scroll="#leaderboard" type="button" data-i18n="nav.board">X 排行榜</button>
+          <button class="ghost-button" data-view="mirror" type="button" data-i18n="nav.mirror">照钱包</button>
+          <button class="ghost-button" data-view="pk" type="button" data-i18n="nav.pk">钱包 PK</button>
+          <button class="ghost-button" data-view="board" type="button" data-i18n="nav.board">X 排行榜</button>
+          <a class="ghost-button link-button" href="https://t.me/Stone141319" target="_blank" rel="noreferrer" data-i18n="nav.tg">TG 频道</a>
           <a class="ghost-button link-button" href="https://degendna.fun" target="_blank" rel="noreferrer">degendna.fun</a>
         </nav>
       </header>
@@ -54,6 +56,13 @@
           </div>
         </section>
 
+        <div class="view-switcher" aria-label="页面视图" data-i18n-aria="views.aria">
+          <button class="active" type="button" data-view="mirror" data-i18n="views.mirror">链上精神病历</button>
+          <button type="button" data-view="pk" data-i18n="views.pk">钱包 PK</button>
+          <button type="button" data-view="board" data-i18n="views.board">稀有度排行榜</button>
+        </div>
+
+        <section id="mirror-view" class="view-panel active" data-view-panel="mirror">
         <section class="scanner">
           <div class="scanner-copy">
             <p class="eyebrow" data-i18n="hero.eyebrow">链上精神病历</p>
@@ -146,6 +155,23 @@
               </article>
             </section>
 
+            <section class="report-section rarity-panel">
+              <div class="rarity-grid">
+                <div>
+                  <span data-i18n="rarity.personalityTitle">钱包人格稀有度</span>
+                  <strong id="rarity-tier">--</strong>
+                  <p id="rarity-detail"></p>
+                </div>
+                <div>
+                  <span data-i18n="rarity.comboTitle">组合稀有度</span>
+                  <strong id="combo-rarity">--</strong>
+                  <p id="combo-detail"></p>
+                </div>
+              </div>
+              <div id="badge-list" class="badge-list"></div>
+              <p id="rarity-season" class="section-note"></p>
+            </section>
+
             <section class="report-section">
               <h3 data-i18n="sections.asset">链上资产性格</h3>
               <p id="asset-personality"></p>
@@ -186,12 +212,23 @@
             <section class="share-card-wrap">
               <div id="share-card" class="share-card">
                 <div class="share-card-top">
-                  <span data-i18n="card.reportTitle">链上照妖镜检测报告</span>
-                  <b>Degen DNA</b>
+                  <span class="card-owner card-owner-top">
+                    <img id="card-owner-avatar" src="/assets/stone-avatar.png" alt="@Stone141319" />
+                    <b id="card-owner-name">@Stone141319</b>
+                  </span>
+                  <span>
+                    <i data-i18n="card.reportTitle">链上精神病历</i>
+                    <b>Degen DNA</b>
+                  </span>
                 </div>
                 <div class="share-card-body">
                   <p class="share-wallet" id="card-address">0x...</p>
                   <h2 id="card-personality">钱包人格</h2>
+                  <div class="card-rarity">
+                    <span data-i18n="card.rarity">稀有度</span>
+                    <strong id="card-rarity">--</strong>
+                    <small id="card-rarity-detail">--</small>
+                  </div>
                   <div class="card-score-row">
                     <span data-i18n="card.degen">Degen 指数</span>
                     <strong id="card-degen">--/100</strong>
@@ -208,11 +245,7 @@
                   <blockquote id="card-verdict">你不是没有判断力，你只是太容易相信下一根阳线。</blockquote>
                 </div>
                 <div class="share-card-foot">
-                  <span class="card-owner">
-                    <img id="card-owner-avatar" src="/assets/stone-avatar.png" alt="@Stone141319" />
-                    <b id="card-owner-name">@Stone141319</b>
-                  </span>
-                  <span><b id="card-site">degendna.fun</b> · <b>@Stone141319</b></span>
+                  <span><b id="card-site">degendna.fun</b> · @Stone141319 · t.me/Stone141319</span>
                 </div>
               </div>
               <div class="share-actions">
@@ -238,8 +271,9 @@
             </section>
           </aside>
         </section>
+        </section>
 
-        <section id="pk-panel" class="pk-panel">
+        <section id="pk-panel" class="pk-panel view-panel" data-view-panel="pk" hidden>
           <div>
             <h2 data-i18n="pk.title">钱包 PK</h2>
             <p data-i18n="pk.copy">你说你比我会交易？地址拿来。链上照妖镜帮你们打一架。</p>
@@ -252,7 +286,7 @@
           <div id="pk-result" class="pk-result" hidden></div>
         </section>
 
-        <section id="leaderboard" class="leaderboard">
+        <section id="leaderboard" class="leaderboard view-panel" data-view-panel="board" hidden>
           <div class="section-title-row">
             <div>
               <h2 data-i18n="board.title">X 用户名排行榜</h2>
@@ -276,6 +310,6 @@
       </main>
     </div>
     <canvas id="card-canvas" width="1200" height="1600" hidden></canvas>
-    <script src="/app.js?v=20260619-xrank" type="module"></script>
+    <script src="/app.js?v=20260620-rarity" type="module"></script>
   </body>
 </html>

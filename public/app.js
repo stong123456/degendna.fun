@@ -5,7 +5,8 @@ const I18N = {
       description: "输入钱包地址，生成能晒、能比、能自嘲的链上人格报告。"
     },
     brand: { aria: "链上照妖镜", mark: "照", name: "链上照妖镜", sub: "Degen DNA Report" },
-    nav: { aria: "工具入口", pk: "钱包 PK", board: "X 排行榜" },
+    nav: { aria: "工具入口", mirror: "照钱包", pk: "钱包 PK", board: "X 排行榜", tg: "TG 频道" },
+    views: { aria: "页面视图", mirror: "链上精神病历", pk: "钱包 PK", board: "稀有度排行榜" },
     gate: {
       aria: "关注任务",
       avatarAlt: "Stone141319 头像",
@@ -52,6 +53,12 @@ const I18N = {
       random: "照随机 Degen 钱包"
     },
     metrics: { aria: "核心指数", degen: "Degen 指数", diamond: "钻石手指数", airdrop: "空投雷达" },
+    rarity: {
+      personalityTitle: "钱包人格稀有度",
+      comboTitle: "组合稀有度",
+      seasonPrefix: "赛季样本",
+      rankedWallets: "个上榜钱包"
+    },
     sections: {
       asset: "链上资产性格",
       loss: "亏损黑匣子",
@@ -74,7 +81,8 @@ const I18N = {
       degen: "Degen 指数",
       diamond: "钻石手指数",
       loss: "亏损主因",
-      tags: "链上标签",
+      tags: "核心徽章",
+      rarity: "稀有度",
       share: "生成晒图并发到 X",
       defaultVerdict: "你不是没有判断力，你只是太容易相信下一根阳线。",
       publicOnly: "不签名 · 只看公开数据"
@@ -105,6 +113,7 @@ const I18N = {
       retest: "重测",
       diamond: "钻石手",
       composite: "综合处刑分",
+      rarity: "稀有度",
       submitted: "已自动加入排行榜。",
       submitFailed: "排行榜提交失败，但报告已生成。",
       loading: "正在读取公开排行榜...",
@@ -129,6 +138,7 @@ const I18N = {
       imageCopied: "已打开 X 发帖页，晒图已复制到剪贴板，直接粘贴即可。",
       imageDownloaded: "已打开 X 发帖页，浏览器不支持复制图片，PNG 已自动下载。",
       text: (report) => `我的链上 Degen 基因检测结果出来了：${report.personality}
+稀有度：${report.rarity?.tierName || "链上异类"} · 组合出现率 ${report.rarity?.combo?.appearanceRate || "--"}%
 Degen 指数 ${report.scores.degen}/100，钻石手 ${report.scores.diamond}/100。
 ${report.verdict}
 
@@ -141,7 +151,8 @@ ${report.verdict}
       description: "Paste a wallet address and generate a shareable onchain personality report."
     },
     brand: { aria: "Degen DNA", mark: "DNA", name: "Degen DNA", sub: "链上照妖镜" },
-    nav: { aria: "Tool navigation", pk: "Wallet PK", board: "X Leaderboard" },
+    nav: { aria: "Tool navigation", mirror: "Scan", pk: "Wallet PK", board: "X Leaderboard", tg: "TG Channel" },
+    views: { aria: "Page views", mirror: "Onchain Medical File", pk: "Wallet PK", board: "Rarity Leaderboard" },
     gate: {
       aria: "Follow gate",
       avatarAlt: "Stone141319 avatar",
@@ -188,6 +199,12 @@ ${report.verdict}
       random: "Scan a random Degen"
     },
     metrics: { aria: "Core scores", degen: "Degen Index", diamond: "Diamond Hands", airdrop: "Airdrop Radar" },
+    rarity: {
+      personalityTitle: "Personality Rarity",
+      comboTitle: "Combo Rarity",
+      seasonPrefix: "Season sample",
+      rankedWallets: "ranked wallets"
+    },
     sections: {
       asset: "Asset Personality",
       loss: "Loss Black Box",
@@ -210,7 +227,8 @@ ${report.verdict}
       degen: "Degen Index",
       diamond: "Diamond Hands",
       loss: "Main Leak",
-      tags: "Onchain Tags",
+      tags: "Core Badges",
+      rarity: "Rarity",
       share: "Create card and share to X",
       defaultVerdict: "You do have judgment. It simply melts whenever the next candle turns green.",
       publicOnly: "No signature · public data only"
@@ -224,7 +242,7 @@ ${report.verdict}
     stats: { title: "Sample Data", portfolio: "Est. Assets", tx: "Transactions", token: "Token Sample", meme: "Meme Exposure" },
     pk: {
       title: "Wallet PK",
-      copy: "My Degen Index is 82. Dare to compare? Put two wallets in the ring and see who chases bull markets, who survives bear markets.",
+      copy: "You say you trade better? Drop the addresses. Degen DNA will let the wallets fight it out.",
       a: "Wallet A: 0x...",
       b: "Wallet B: 0x...",
       submit: "Start PK",
@@ -241,6 +259,7 @@ ${report.verdict}
       retest: "Retest",
       diamond: "Diamond",
       composite: "Composite",
+      rarity: "Rarity",
       submitted: "Added to the leaderboard.",
       submitFailed: "Leaderboard submission failed, but the report is ready.",
       loading: "Loading public leaderboard...",
@@ -266,6 +285,7 @@ ${report.verdict}
       imageDownloaded: "X composer opened. This browser cannot copy images, so the PNG was downloaded.",
       text: (report) => `My Degen DNA: ${report.scores.degen}/100
 Type: ${report.personality}
+Rarity: ${report.rarity?.tierName || "Rare"} · combo occurrence ${report.rarity?.combo?.appearanceRate || "--"}%
 Diamond Hands: ${report.scores.diamond}/100
 ${report.verdict}
 
@@ -279,7 +299,8 @@ const state = {
   xProfile: null,
   unlocked: localStorage.getItem("onchainMirrorFollowUnlocked") === "1",
   lang: localStorage.getItem("onchainMirrorLang") === "en" ? "en" : "zh",
-  reportMode: localStorage.getItem("onchainMirrorReportMode") || "abstract"
+  reportMode: localStorage.getItem("onchainMirrorReportMode") || "abstract",
+  activeView: "mirror"
 };
 
 const RANDOM_SAMPLES = [
@@ -375,6 +396,23 @@ function requireUnlocked() {
   setStatus(t("form.mustFollow"), "error");
   followGate.scrollIntoView({ behavior: "smooth", block: "center" });
   return false;
+}
+
+function setActiveView(view, { scroll = true } = {}) {
+  const next = ["mirror", "pk", "board"].includes(view) ? view : "mirror";
+  state.activeView = next;
+  $$("[data-view-panel]").forEach((panel) => {
+    panel.hidden = panel.dataset.viewPanel !== next;
+    panel.classList.toggle("active", panel.dataset.viewPanel === next);
+  });
+  $$("[data-view]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.view === next);
+  });
+  if (next === "board") renderLeaderboard();
+  if (scroll) {
+    const target = $(`[data-view-panel="${next}"]`) || document.body;
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
 function isAddress(value) {
@@ -475,19 +513,24 @@ async function renderLeaderboard(providedItems = null) {
 
   renderList(
     board,
-    items.sort((a, b) => Number(b.rankScore || 0) - Number(a.rankScore || 0)),
-    (item) => `
-      <div class="board-row">
+    items.sort((a, b) => Number(b.rarity?.score || 0) - Number(a.rarity?.score || 0) || Number(b.rankScore || 0) - Number(a.rankScore || 0)),
+    (item) => {
+      const rarity = item.rarity || {};
+      const badges = item.badges || [];
+      const badgeText = badges.slice(0, 3).map((badge) => badge.name).join(" / ");
+      return `
+      <div class="board-row" data-rarity="${escapeHtml(rarity.tier || "common")}">
         <div class="board-user">
           <img src="${escapeHtml(item.avatarUrl || "/assets/stone-avatar.png")}" alt="${escapeHtml(item.handle || "@X")}" referrerpolicy="no-referrer" />
           <div>
             <b>${escapeHtml(item.handle || item.name || "@X")} · ${escapeHtml(item.personality)}</b>
-            <small>${escapeHtml(item.shortAddress)} · ${escapeHtml(t("board.composite"))} ${Number(item.rankScore || 0).toFixed(2)}/100 · Degen ${item.degen}/100 · ${escapeHtml(t("board.diamond"))} ${item.diamond}/100</small>
+            <small>${escapeHtml(item.shortAddress)} · ${escapeHtml(t("board.rarity"))} ${escapeHtml(rarity.tierName || "--")} · ${escapeHtml(t("board.composite"))} ${Number(item.rankScore || 0).toFixed(2)}/100 · ${escapeHtml(badgeText)}</small>
           </div>
         </div>
         <button class="ghost-button" type="button" data-board-address="${escapeHtml(item.address)}" data-board-x="${escapeHtml(item.handle || item.username || "")}">${escapeHtml(t("board.retest"))}</button>
       </div>
-    `
+    `;
+    }
   );
 }
 
@@ -549,6 +592,33 @@ function renderXIdentity(report = state.currentReport) {
   text("#card-owner-name", identity.handle || identity.name || "@X");
 }
 
+function renderRarity(report = state.currentReport) {
+  const rarity = report?.rarity || {};
+  const badges = report?.badges || [];
+  text("#rarity-tier", `${rarity.personality?.tierName || "--"} · ${report?.personality || ""}`);
+  text("#rarity-detail", rarity.personality?.text || "");
+  text("#combo-rarity", rarity.combo?.tierName || "--");
+  text("#combo-detail", rarity.combo?.text || "");
+  text(
+    "#rarity-season",
+    `${rarity.season?.name || "DegenDNA Season 0"} · ${t("rarity.seasonPrefix")} ${rarity.season?.sampleSize ?? 0} ${t("rarity.rankedWallets")}`
+  );
+  const badgeList = $("#badge-list");
+  if (badgeList) {
+    badgeList.innerHTML = badges.map((badge) => `
+      <span class="badge-chip" title="${escapeHtml(badge.description || "")}">
+        ${escapeHtml(badge.name)}
+        <small>${escapeHtml(badge.tierName || "")} · ${escapeHtml(badge.appearanceRate ?? "--")}%</small>
+      </span>
+    `).join("");
+  }
+
+  const shareCard = $("#share-card");
+  if (shareCard) shareCard.dataset.rarity = rarity.tier || "common";
+  text("#card-rarity", `${rarity.tierName || "--"} · ${rarity.combo?.tierName || ""}`);
+  text("#card-rarity-detail", rarity.combo?.text || "");
+}
+
 function renderReport(report) {
   state.currentReport = report;
   if (report.defaultMode && !report.modes?.[state.reportMode]) {
@@ -602,10 +672,14 @@ function renderReport(report) {
 
   text("#card-address", report.shortAddress);
   text("#card-personality", `${t("card.personalityPrefix")}${report.personality}`);
+  renderRarity(report);
   text("#card-degen", `${report.scores.degen}/100`);
   text("#card-diamond", `${report.scores.diamond}/100`);
   text("#card-site", report.siteHost);
-  $("#card-tags").innerHTML = report.labels.slice(0, 4).map((label) => `<span>${escapeHtml(label)}</span>`).join("");
+  $("#card-tags").innerHTML = (report.badges?.length ? report.badges : report.labels)
+    .slice(0, 4)
+    .map((item) => `<span>${escapeHtml(item.name || item)}</span>`)
+    .join("");
   renderXIdentity(report);
 
   text("#stat-portfolio", report.metrics.portfolioUsdText);
@@ -621,8 +695,8 @@ function renderReport(report) {
         setTimeout(clearStatus, 1800);
       }
     })
-    .catch(() => {
-      setStatus(t("board.submitFailed"), "error");
+    .catch((error) => {
+      setStatus(error.message || t("board.submitFailed"), "error");
       setTimeout(clearStatus, 2400);
     });
   reportView.scrollIntoView({ block: "start", behavior: "smooth" });
@@ -651,6 +725,7 @@ async function handleScan(event) {
     setStatus(t("form.loading"));
     const report = await analyze(address);
     report.xProfile = profile;
+    setActiveView("mirror", { scroll: false });
     renderReport(report);
     clearStatus();
   } catch (error) {
@@ -709,10 +784,25 @@ function loadImage(src) {
   });
 }
 
+function rarityColorValue(tier) {
+  return {
+    common: "#d8d3ca",
+    uncommon: "#7dff9f",
+    rare: "#64b5ff",
+    epic: "#c27bff",
+    legendary: "#ffd166",
+    mythic: "#ff5b35",
+    unique: "#f7f1e8"
+  }[tier] || "#b8ff5c";
+}
+
 async function drawShareCanvas(report) {
   const lang = report.language || state.lang;
   const tr = (key) => getText(lang, key);
   const selected = modeReport(report) || report.report || {};
+  const rarity = report.rarity || {};
+  const badges = report.badges || [];
+  const rarityColor = rarityColorValue(rarity.tier);
   const canvas = $("#card-canvas");
   const ctx = canvas.getContext("2d");
   const w = canvas.width;
@@ -743,27 +833,63 @@ async function drawShareCanvas(report) {
     ctx.stroke();
   }
 
-  ctx.strokeStyle = "#ff4934";
+  ctx.strokeStyle = rarityColor;
   ctx.lineWidth = 4;
   roundedRect(ctx, 58, 58, w - 116, h - 116, 24);
   ctx.stroke();
 
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(126, 126, 34, 0, Math.PI * 2);
+  ctx.clip();
+  ctx.drawImage(avatar, 92, 92, 68, 68);
+  ctx.restore();
+  ctx.strokeStyle = rarityColor;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(126, 126, 34, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.fillStyle = "#f7f1e8";
+  ctx.font = "800 28px Microsoft YaHei, Inter, sans-serif";
+  ctx.fillText(identity.handle || identity.name || "@X", 176, 116);
+  ctx.fillStyle = "#a99f91";
+  ctx.font = "700 22px Microsoft YaHei, Inter, sans-serif";
+  ctx.fillText(`${report.siteHost} · @Stone141319`, 176, 150);
+
   ctx.fillStyle = "#b8ff5c";
   ctx.font = "800 34px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(tr("card.reportTitle"), 92, 132);
+  ctx.textAlign = "right";
+  ctx.fillText(tr("card.reportTitle"), 1110, 118);
   ctx.fillStyle = "#a99f91";
   ctx.font = "700 24px Consolas, monospace";
-  ctx.fillText(lang === "zh" ? "Degen DNA Report" : "Onchain Mirror", 92, 174);
+  ctx.fillText(lang === "zh" ? "Degen DNA Report" : "Onchain Mirror", 1110, 154);
+  ctx.textAlign = "left";
 
   ctx.fillStyle = "#a99f91";
   ctx.font = "28px Consolas, monospace";
-  ctx.fillText(report.shortAddress, 92, 248);
+  ctx.fillText(report.shortAddress, 92, 238);
 
   ctx.fillStyle = "#f7f1e8";
   ctx.font = "900 72px Microsoft YaHei, Inter, sans-serif";
-  drawWrappedText(ctx, `${tr("card.personalityPrefix")}${report.personality}`, 92, 348, 980, 82, 2);
+  drawWrappedText(ctx, `${tr("card.personalityPrefix")}${report.personality}`, 92, 338, 980, 82, 2);
 
-  const scoreY = 550;
+  ctx.fillStyle = "rgba(255,255,255,0.06)";
+  roundedRect(ctx, 92, 506, 1010, 112, 16);
+  ctx.fill();
+  ctx.strokeStyle = rarityColor;
+  ctx.stroke();
+  ctx.fillStyle = "#a99f91";
+  ctx.font = "800 26px Microsoft YaHei, Inter, sans-serif";
+  ctx.fillText(tr("card.rarity"), 126, 548);
+  ctx.fillStyle = rarityColor;
+  ctx.font = "900 42px Microsoft YaHei, Inter, sans-serif";
+  ctx.fillText(`${rarity.tierName || "--"} · ${rarity.combo?.tierName || ""}`, 126, 594);
+  ctx.fillStyle = "#f7f1e8";
+  ctx.font = "700 24px Microsoft YaHei, Inter, sans-serif";
+  ctx.fillText(rarity.combo?.text || "", 600, 574, 470);
+
+  const scoreY = 668;
   const scoreBoxW = 482;
   for (const [index, item] of [
     [tr("card.degen"), `${report.scores.degen}/100`, "#ff4934"],
@@ -783,18 +909,19 @@ async function drawShareCanvas(report) {
 
   ctx.fillStyle = "#ff9b3d";
   ctx.font = "900 38px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(tr("card.loss"), 92, 822);
+  ctx.fillText(tr("card.loss"), 92, 940);
   ctx.fillStyle = "#f7f1e8";
   ctx.font = "800 44px Microsoft YaHei, Inter, sans-serif";
-  drawWrappedText(ctx, selected.lossCause || report.lossCause, 92, 884, 1000, 58, 3);
+  drawWrappedText(ctx, selected.lossCause || report.lossCause, 92, 1002, 1000, 58, 3);
 
   ctx.fillStyle = "#b8ff5c";
   ctx.font = "800 30px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(tr("card.tags"), 92, 1054);
+  ctx.fillText(tr("card.tags"), 92, 1162);
   let tagX = 92;
-  let tagY = 1092;
+  let tagY = 1200;
   ctx.font = "800 28px Microsoft YaHei, Inter, sans-serif";
-  for (const tag of report.labels.slice(0, 5)) {
+  for (const item of (badges.length ? badges : report.labels).slice(0, 5)) {
+    const tag = item.name || item;
     const tagWidth = Math.min(980, ctx.measureText(tag).width + 46);
     if (tagX + tagWidth > 1090) {
       tagX = 92;
@@ -811,29 +938,14 @@ async function drawShareCanvas(report) {
   }
 
   ctx.fillStyle = "#ff4934";
-  ctx.fillRect(92, 1260, 6, 178);
+  ctx.fillRect(92, 1340, 6, 158);
   ctx.fillStyle = "#f7f1e8";
   ctx.font = "800 42px Microsoft YaHei, Inter, sans-serif";
-  drawWrappedText(ctx, selected.verdict || report.verdict, 122, 1322, 940, 58, 3);
-
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(126, 1498, 34, 0, Math.PI * 2);
-  ctx.clip();
-  ctx.drawImage(avatar, 92, 1464, 68, 68);
-  ctx.restore();
-  ctx.strokeStyle = "#b8ff5c";
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.arc(126, 1498, 34, 0, Math.PI * 2);
-  ctx.stroke();
+  drawWrappedText(ctx, selected.verdict || report.verdict, 122, 1402, 940, 54, 3);
 
   ctx.fillStyle = "#f7f1e8";
-  ctx.font = "800 28px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(identity.handle || identity.name || "@X", 176, 1490);
-  ctx.fillStyle = "#a99f91";
   ctx.font = "700 22px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(`${report.siteHost} · @Stone141319`, 176, 1524);
+  ctx.fillText(`TG: t.me/Stone141319`, 92, 1524);
   ctx.textAlign = "right";
   ctx.fillText(tr("card.publicOnly"), 1110, 1510);
   ctx.textAlign = "left";
@@ -984,6 +1096,7 @@ async function setLanguage(lang) {
   localStorage.setItem("onchainMirrorLang", lang);
   applyLanguage();
   renderGate();
+  setActiveView(state.activeView, { scroll: false });
   renderLeaderboard();
 
   if (!state.currentReport) return;
@@ -1004,6 +1117,9 @@ $("#pk-form").addEventListener("submit", handlePk);
 $("#share-card-button").addEventListener("click", shareCard);
 $("#copy-tweet").addEventListener("click", copyTweet);
 $("#language-toggle").addEventListener("click", () => setLanguage(state.lang === "zh" ? "en" : "zh"));
+$$("[data-view]").forEach((button) => {
+  button.addEventListener("click", () => setActiveView(button.dataset.view));
+});
 $$("[data-report-mode]").forEach((button) => {
   button.addEventListener("click", () => {
     state.reportMode = button.dataset.reportMode;
@@ -1035,21 +1151,15 @@ $$("[data-sample], [data-sample-random]").forEach((button) => {
   });
 });
 
-$$("[data-scroll]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const target = document.querySelector(button.dataset.scroll);
-    target?.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-});
-
 document.addEventListener("click", (event) => {
   const button = event.target.closest("[data-board-address]");
   if (!button) return;
   addressInput.value = button.dataset.boardAddress;
   if (button.dataset.boardX) xInput.value = button.dataset.boardX;
+  setActiveView("mirror");
   form.requestSubmit();
 });
 
 applyLanguage();
-renderLeaderboard();
 renderGate();
+setActiveView("mirror", { scroll: false });

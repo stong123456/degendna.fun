@@ -13,6 +13,7 @@ const SITE_URL = process.env.PUBLIC_SITE_URL || "https://degendna.fun";
 const SITE_HOST = process.env.PUBLIC_SITE_HOST || "degendna.fun";
 const LEADERBOARD_PATH = process.env.LEADERBOARD_PATH || join(tmpdir(), "degendna-leaderboard.json");
 const LEADERBOARD_LIMIT = 100;
+const LEADERBOARD_READ_LIMIT = 1000;
 const SUPABASE_URL = String(process.env.SUPABASE_URL || "").replace(/\/+$/, "");
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 const SUPABASE_LEADERBOARD_TABLE = process.env.SUPABASE_LEADERBOARD_TABLE || "onchain_leaderboard";
@@ -1917,10 +1918,13 @@ function buildModeStrategy(mode, context) {
 }
 
 function buildTweetText(mode, context) {
-  const { lang, personality, scores, lossCause, verdict } = context;
+  const { lang, personality, scores, lossCause, verdict, rarity, badges = [] } = context;
+  const badgeLine = badges.slice(0, 3).map((badge) => badge.name).join(" / ");
   if (lang === "en") {
     return `My Degen DNA report is out.
 Type: ${personality}
+Rarity: ${rarity?.tierName || "Rare"} · combo occurrence ${rarity?.combo?.appearanceRate || "--"}%
+Badges: ${badgeLine}
 Degen Index: ${scores.degen}/100
 Diamond Hands: ${scores.diamond}/100
 Main leak: ${lossCause}
@@ -1932,6 +1936,8 @@ degendna.fun`;
   }
   return `我刚用链上照妖镜测了一下钱包。
 钱包人格：${personality}
+稀有度：${rarity?.tierName || "链上异类"} · 组合出现率 ${rarity?.combo?.appearanceRate || "--"}%
+核心徽章：${badgeLine}
 Degen 指数：${scores.degen}/100
 钻石手指数：${scores.diamond}/100
 亏损主因：${lossCause}
@@ -1944,6 +1950,189 @@ degendna.fun`;
 
 function trimSentenceEnd(text) {
   return String(text || "").replace(/[。.!！?？]+$/u, "");
+}
+
+const RARITY_ORDER = ["common", "uncommon", "rare", "epic", "legendary", "mythic", "unique"];
+
+function rarityTier(rate) {
+  if (rate <= 0.08) return "unique";
+  if (rate <= 0.8) return "mythic";
+  if (rate <= 2.4) return "legendary";
+  if (rate <= 5.5) return "epic";
+  if (rate <= 12) return "rare";
+  if (rate <= 28) return "uncommon";
+  return "common";
+}
+
+function rarityTierName(tier, lang) {
+  const names = {
+    common: ["普通韭菜", "Common"],
+    uncommon: ["小有抽象", "Uncommon"],
+    rare: ["链上异类", "Rare"],
+    epic: ["重度 Degen", "Epic"],
+    legendary: ["币圈怪物", "Legendary"],
+    mythic: ["精神状态存疑", "Mythic"],
+    unique: ["1/1 链上异常体", "1/1 Onchain Anomaly"]
+  };
+  const [zh, en] = names[tier] || names.common;
+  return pickLocalized(lang, zh, en);
+}
+
+function rarityColor(tier) {
+  return {
+    common: "#d8d3ca",
+    uncommon: "#7dff9f",
+    rare: "#64b5ff",
+    epic: "#c27bff",
+    legendary: "#ffd166",
+    mythic: "#ff5b35",
+    unique: "#f7f1e8"
+  }[tier] || "#d8d3ca";
+}
+
+function rateFromScore(score, floor = 0.05) {
+  const normalized = Math.max(0, Math.min(99.95, score)) / 100;
+  const rate = floor + 42 * Math.pow(1 - normalized, 2.15);
+  return Number(Math.max(floor, Math.min(65, rate)).toFixed(rate < 1 ? 2 : 1));
+}
+
+function rarityFromRate(rate, lang) {
+  const tier = rarityTier(rate);
+  return {
+    tier,
+    tierName: rarityTierName(tier, lang),
+    color: rarityColor(tier),
+    appearanceRate: rate,
+    percentile: Number(Math.max(0, 100 - rate).toFixed(1))
+  };
+}
+
+function makeBadge(id, lang, zh, en, descriptionZh, descriptionEn, rate) {
+  const base = rarityFromRate(rate, lang);
+  return {
+    id,
+    name: pickLocalized(lang, zh, en),
+    description: pickLocalized(lang, descriptionZh, descriptionEn),
+    ...base
+  };
+}
+
+function buildBadges(metrics, scores, address, lang, seasonSampleSize) {
+  const badges = [];
+  const add = (id, zh, en, descriptionZh, descriptionEn, rate) => {
+    if (badges.some((badge) => badge.id === id)) return;
+    const jitter = stableIndex(address, `badge-${id}`, 80) / 100;
+    badges.push(makeBadge(id, lang, zh, en, descriptionZh, descriptionEn, Math.max(0.05, Number((rate + jitter).toFixed(2)))));
+  };
+
+  if (Number.isFinite(metrics.sampledHoldDays) && metrics.sampledHoldDays < 8) {
+    add("paper-king", "纸手之王", "Paper Hands Royalty", "平均持仓很短，叙事还没讲完，仓位已经换台。", "Holding windows are short; the narrative is still talking while the position has left.", 8.4);
+  }
+  if (scores.diamond > 76 || (Number.isFinite(metrics.sampledHoldDays) && metrics.sampledHoldDays > 120)) {
+    add("diamond-elder", "钻石手老登", "Ancient Diamond Hands", "有些资产拿得很久，可能是信仰，也可能是忘了卖。", "Some assets stayed for a long time: conviction, or a forgotten exit.", 6.7);
+  }
+  if (scores.degen > 66 && metrics.methodCounts.swap > 4) {
+    add("green-candle-chaser", "阳线追击者", "Green Candle Chaser", "行情一热，钱包就开始相信自己被市场点名。", "When candles turn green, the wallet assumes the market called its name.", 5.8);
+  }
+  if (scores.diamond > 64 && scores.degen > 55) {
+    add("red-candle-amnesia", "阴线失忆症", "Red Candle Amnesia", "下跌后记忆自动清空，只剩一句“我长期看好”。", "After a drop, memory clears itself and only 'long-term bullish' remains.", 7.2);
+  }
+  if (metrics.lowLiquidityTokenCount >= 5) {
+    add("microcap-sampler", "土狗采样员", "Microcap Sampler", "低流动性代币采样明显，像在链上逛夜市。", "Low-liquidity token sampling is obvious; the wallet shops at the onchain night market.", 4.1);
+  }
+  if (scores.airdrop > 64 && metrics.chainsWithActivity >= 4) {
+    add("airdrop-migratory", "空投候鸟", "Airdrop Migratory Bird", "多链、多协议、多任务痕迹明显，像给协议挨个敲门。", "Multi-chain, multi-protocol, multi-quest traces. It knocks on every protocol door.", 7.8);
+  }
+  if (metrics.stableRatio > 0.55 && metrics.txPerDay < 1.3) {
+    add("stable-zen", "稳定币禅师", "Stablecoin Zen Master", "仓位像在打坐，市场再吵也先躺平。", "The allocation meditates; the market screams and the wallet stays horizontal.", 9.5);
+  }
+  if (metrics.sampleWindowDays > 720) {
+    add("cycle-survivor", "牛熊穿越者", "Cycle Survivor", "钱包年龄跨过多个市场阶段，至少见过几次叙事换皮。", "The wallet crossed multiple market phases and saw narratives change costumes.", 4.6);
+  }
+  if (metrics.sampleWindowDays > 1460) {
+    add("ancient-address", "远古地址", "Ancient Address", "这个地址的链上年龄已经有点考古价值。", "This wallet age has archaeological value.", 1.9);
+  }
+  if (metrics.txPerDay > 2.4) {
+    add("faster-than-brain", "手速比脑子快", "Fingers Faster Than Brain", "交易频率说明：手指上线速度经常领先风控系统。", "Trading frequency suggests the fingers log in before risk control.", 8.4);
+  }
+  if (metrics.failedRate > 0.12) {
+    add("stoploss-missing", "止损按钮失踪", "Stop-Loss Button Missing", "失败交易和高压交互痕迹明显，止损按钮疑似离家出走。", "Failed transactions and pressure traces suggest the stop-loss button left home.", 6.9);
+  }
+  if (scores.degen > 78 || metrics.memeRatio > 0.28) {
+    add("narrative-intoxicated", "看见叙事就上头", "Narrative Intoxication", "叙事浓度一上来，钱包就开始自动脑补下一根阳线。", "Once narrative density rises, the wallet hallucinates the next green candle.", 5.2);
+  }
+  if (scores.degen > 72 && scores.diamond < 45) {
+    add("mental-questionable", "钱包活着，精神可疑", "Wallet Alive, Sanity Questionable", "钱包还在动，但精神状态需要链上复查。", "The wallet is alive, but its mental state needs onchain follow-up.", 2.7);
+  }
+  if (seasonSampleSize < 1000) {
+    add("genesis-tester", "第一批照妖者", "Genesis Tester", "Season 0 早期照妖记录，适合以后拿出来嘴硬。", "An early Season 0 scan, useful for future bragging rights.", 2.2);
+  }
+
+  const fillers = [
+    ["market-educated", "被市场教育过，但没完全服", "Educated, Not Convinced", "市场讲过课，但钱包还在补考。", "The market gave lessons; the wallet is still retaking the exam.", 13.5],
+    ["wallet-autopsy", "链上精神病历在逃页", "Escaped Medical File Page", "这个钱包不一定离谱，但很适合截图会诊。", "The wallet is not always absurd, but it is excellent screenshot material.", 10.8],
+    ["exit-button-tourist", "退出按钮游客", "Exit Button Tourist", "知道哪里是出口，但经常只是路过。", "It knows where the exit is, but often just walks past.", 11.6],
+    ["groupchat-echo", "群友回声定位", "Groupchat Echolocation", "交易信号和群聊情绪之间存在神秘同步。", "Trading signals and group-chat mood show suspicious synchronization.", 9.9]
+  ];
+  while (badges.length < 3) {
+    const next = fillers[stableIndex(address, `badge-filler-${badges.length}`, fillers.length)];
+    add(...next);
+  }
+
+  return badges
+    .sort((a, b) => a.appearanceRate - b.appearanceRate)
+    .slice(0, 5);
+}
+
+function buildRarity(metrics, scores, personality, badges, address, lang, seasonSampleSize) {
+  const behaviorScore =
+    scores.degen * 0.18 +
+    scores.diamond * 0.14 +
+    scores.airdrop * 0.14 +
+    Math.min(12, metrics.chainsWithActivity * 2) +
+    Math.min(11, Math.log10(metrics.uniqueTokenCount + 1) * 5) +
+    Math.min(9, Math.log10(metrics.txCount + 1) * 2.4) +
+    Math.min(8, metrics.lowLiquidityTokenCount * 0.7) +
+    Math.min(7, metrics.memeTokenCount * 0.8) +
+    Math.min(7, metrics.nftTransferCount / 12) +
+    Math.min(6, metrics.sampleWindowDays / 365) +
+    stableIndex(address, "personality-rarity", 900) / 100;
+  const personalityRarity = rarityFromRate(rateFromScore(behaviorScore, 0.12), lang);
+  const badgeAverageRate = badges.reduce((sum, badge) => sum + badge.appearanceRate, 0) / badges.length;
+  const comboRate = Number(Math.max(0.05, Math.min(24, personalityRarity.appearanceRate * badgeAverageRate / 11 + stableIndex(address, "combo-rate", 70) / 100)).toFixed(2));
+  const combo = rarityFromRate(comboRate, lang);
+  const tierIndex = Math.max(RARITY_ORDER.indexOf(personalityRarity.tier), RARITY_ORDER.indexOf(combo.tier));
+  const topTier = RARITY_ORDER[Math.max(0, tierIndex)];
+  const score = Number(Math.max(0, Math.min(100, 100 - combo.appearanceRate + stableIndex(address, "rarity-score", 100) / 1000)).toFixed(2));
+
+  return {
+    season: {
+      id: "season-0",
+      name: pickLocalized(lang, "DegenDNA Season 0 · Genesis Wallets", "DegenDNA Season 0 · Genesis Wallets"),
+      sampleSize: seasonSampleSize
+    },
+    tier: topTier,
+    tierName: rarityTierName(topTier, lang),
+    color: rarityColor(topTier),
+    score,
+    personality: {
+      ...personalityRarity,
+      title: personality,
+      text: pickLocalized(
+        lang,
+        `${personalityRarity.tierName} · 全站出现率约 ${personalityRarity.appearanceRate}%，超过 ${personalityRarity.percentile}% 的已上榜钱包。`,
+        `${personalityRarity.tierName} · estimated appearance ${personalityRarity.appearanceRate}%, ahead of ${personalityRarity.percentile}% of ranked wallets.`
+      )
+    },
+    combo: {
+      ...combo,
+      text: pickLocalized(
+        lang,
+        `${combo.tierName} 组合 · 类似徽章组合出现率约 ${combo.appearanceRate}%。`,
+        `${combo.tierName} combo · similar badge stack appears around ${combo.appearanceRate}%.`
+      )
+    }
+  };
 }
 
 function buildReportModes(context) {
@@ -1995,7 +2184,7 @@ function buildLabels(personalityId, metrics, scores, lang) {
   return [...new Set(labels)].slice(0, 6);
 }
 
-function buildReport(address, chains, lang = "zh") {
+function buildReport(address, chains, lang = "zh", seasonSampleSize = 0) {
   const metrics = buildMetrics(address, chains);
   const scores = scoreWallet(metrics);
   const personalityId = choosePersonality(metrics, scores, address);
@@ -2003,7 +2192,9 @@ function buildReport(address, chains, lang = "zh") {
   const lossCause = buildLossCause(metrics, scores, lang);
   const verdict = buildVerdict(personalityId, metrics, scores, lang);
   const labels = buildLabels(personalityId, metrics, scores, lang);
-  const context = { address, lang, metrics, scores, personalityId, personality, lossCause, verdict, labels };
+  const badges = buildBadges(metrics, scores, address, lang, seasonSampleSize);
+  const rarity = buildRarity(metrics, scores, personality, badges, address, lang, seasonSampleSize);
+  const context = { address, lang, metrics, scores, personalityId, personality, lossCause, verdict, labels, badges, rarity };
   const modes = buildReportModes(context);
   const defaultMode = "abstract";
   const compositeRankScore = rankScore(metrics, scores, address);
@@ -2022,6 +2213,8 @@ function buildReport(address, chains, lang = "zh") {
     verdict,
     lossCause,
     labels,
+    badges,
+    rarity,
     modes,
     defaultMode,
     degenBand: degenBand(scores.degen, lang),
@@ -2099,13 +2292,19 @@ function toDbEntry(entry) {
     airdrop: entry.airdrop,
     rank_score: entry.rankScore,
     degen_band: entry.degenBand,
-    labels: entry.labels || [],
+    labels: {
+      tags: entry.labels || [],
+      badges: entry.badges || [],
+      rarity: entry.rarity || null
+    },
     generated_at: entry.generatedAt,
     language: entry.language
   };
 }
 
 function fromDbRow(row) {
+  const labelPayload = row.labels && typeof row.labels === "object" ? row.labels : [];
+  const legacyLabels = Array.isArray(labelPayload) ? labelPayload : [];
   return {
     id: row.id,
     username: row.username,
@@ -2122,7 +2321,9 @@ function fromDbRow(row) {
     airdrop: safeNumber(row.airdrop, 0),
     rankScore: safeNumber(row.rank_score, 0),
     degenBand: row.degen_band,
-    labels: Array.isArray(row.labels) ? row.labels : [],
+    labels: Array.isArray(labelPayload.tags) ? labelPayload.tags : legacyLabels,
+    badges: Array.isArray(labelPayload.badges) ? labelPayload.badges : [],
+    rarity: labelPayload.rarity || null,
     generatedAt: row.generated_at,
     language: row.language || "zh"
   };
@@ -2134,8 +2335,8 @@ async function readSupabaseLeaderboard() {
     "select",
     "id,username,handle,name,avatar_url,profile_url,address,short_address,personality,personality_id,degen,diamond,airdrop,rank_score,degen_band,labels,generated_at,language"
   );
-  url.searchParams.set("order", "rank_score.desc,generated_at.desc");
-  url.searchParams.set("limit", String(LEADERBOARD_LIMIT));
+  url.searchParams.set("order", "generated_at.desc");
+  url.searchParams.set("limit", String(LEADERBOARD_READ_LIMIT));
 
   const response = await fetch(url, {
     headers: supabaseHeaders()
@@ -2209,7 +2410,11 @@ async function leaderboardStorageStatus() {
 function publicLeaderboard(entries) {
   return entries
     .slice()
-    .sort((a, b) => safeNumber(b.rankScore) - safeNumber(a.rankScore) || String(b.generatedAt).localeCompare(String(a.generatedAt)))
+    .sort((a, b) =>
+      safeNumber(b.rarity?.score, 0) - safeNumber(a.rarity?.score, 0) ||
+      safeNumber(b.rankScore) - safeNumber(a.rankScore) ||
+      String(b.generatedAt).localeCompare(String(a.generatedAt))
+    )
     .slice(0, LEADERBOARD_LIMIT);
 }
 
@@ -2221,6 +2426,13 @@ async function submitLeaderboardEntry({ address, lang, username }) {
   }
 
   const report = await analyzeWallet(normalizedAddress, lang);
+  if (report.metrics.txCount < 20 || report.metrics.sampleWindowDays < 30) {
+    throw new Error(pickLocalized(
+      lang,
+      "这个钱包样本太薄，可以生成链上精神病历，但暂时不能进入稀有度排行榜。",
+      "This wallet can generate a report, but the sample is too thin for the rarity leaderboard."
+    ));
+  }
   const entry = {
     id: `${profile.username.toLowerCase()}:${normalizedAddress.toLowerCase()}`,
     username: profile.username,
@@ -2238,6 +2450,8 @@ async function submitLeaderboardEntry({ address, lang, username }) {
     rankScore: report.rankScore,
     degenBand: report.degenBand,
     labels: report.labels.slice(0, 4),
+    badges: report.badges.slice(0, 5),
+    rarity: report.rarity,
     generatedAt: new Date().toISOString(),
     language: lang
   };
@@ -2251,13 +2465,22 @@ async function submitLeaderboardEntry({ address, lang, username }) {
   return { entry, entries: next, profile };
 }
 
+async function leaderboardSampleSize() {
+  try {
+    return (await readLeaderboard()).length;
+  } catch {
+    return 0;
+  }
+}
+
 async function analyzeWallet(address, lang = "zh") {
   const normalized = normalizeAddress(address);
   const language = normalizeLang(lang);
+  const seasonSampleSize = await leaderboardSampleSize();
   const key = `chains:${normalized.toLowerCase()}`;
   const cached = cache.get(key);
   if (cached && Date.now() - cached.createdAt < CACHE_TTL_MS) {
-    return { ...buildReport(normalized, cached.chains, language), cache: "hit" };
+    return { ...buildReport(normalized, cached.chains, language, seasonSampleSize), cache: "hit" };
   }
 
   const chainResults = await Promise.all([
@@ -2265,7 +2488,7 @@ async function analyzeWallet(address, lang = "zh") {
     fetchBnbChain(normalized)
   ]);
   cache.set(key, { createdAt: Date.now(), chains: chainResults });
-  return { ...buildReport(normalized, chainResults, language), cache: "miss" };
+  return { ...buildReport(normalized, chainResults, language, seasonSampleSize), cache: "miss" };
 }
 
 function compareReports(a, b, lang = "zh") {
