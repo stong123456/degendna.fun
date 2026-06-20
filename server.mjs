@@ -17,6 +17,7 @@ const LEADERBOARD_READ_LIMIT = 1000;
 const SUPABASE_URL = String(process.env.SUPABASE_URL || "").replace(/\/+$/, "");
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 const SUPABASE_LEADERBOARD_TABLE = process.env.SUPABASE_LEADERBOARD_TABLE || "onchain_leaderboard";
+const SUPABASE_TIMEOUT_MS = 3500;
 
 const CACHE_TTL_MS = 3 * 60 * 1000;
 const cache = new Map();
@@ -2275,6 +2276,19 @@ function supabaseHeaders(extra = {}) {
   };
 }
 
+async function fetchSupabase(url, options = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), options.timeout || SUPABASE_TIMEOUT_MS);
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 function toDbEntry(entry) {
   return {
     id: entry.id,
@@ -2338,7 +2352,7 @@ async function readSupabaseLeaderboard() {
   url.searchParams.set("order", "generated_at.desc");
   url.searchParams.set("limit", String(LEADERBOARD_READ_LIMIT));
 
-  const response = await fetch(url, {
+  const response = await fetchSupabase(url, {
     headers: supabaseHeaders()
   });
   if (!response.ok) {
@@ -2349,7 +2363,7 @@ async function readSupabaseLeaderboard() {
 }
 
 async function writeSupabaseLeaderboard(entries) {
-  const response = await fetch(`${supabaseLeaderboardUrl()}?on_conflict=id`, {
+  const response = await fetchSupabase(`${supabaseLeaderboardUrl()}?on_conflict=id`, {
     method: "POST",
     headers: supabaseHeaders({
       "content-type": "application/json",
