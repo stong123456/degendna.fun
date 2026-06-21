@@ -136,6 +136,10 @@
                 <button type="button" data-report-mode="abstract" data-i18n="mode.abstract">抽象版</button>
                 <button type="button" data-report-mode="kol" data-i18n="mode.kol">KOL 版</button>
               </div>
+              <div class="medical-note">
+                <b data-i18n="medical.title">链上精神病历（娱乐版）</b>
+                <span data-i18n="medical.copy">这是一份只看钱包行为的娱乐诊断，不是医学诊断。照妖镜可以补刀，但真实的人要被好好照顾。</span>
+              </div>
             </section>
 
             <section class="metric-strip" aria-label="核心指数" data-i18n-aria="metrics.aria">
@@ -300,13 +304,23 @@
           <div class="auth-teaser">
             <span data-i18n="board.teaser">上榜后会显示：X 头像 / @handle / 钱包人格 / Degen 指数 / 钻石手指数 / 综合处刑分</span>
           </div>
+          <div class="lighthouse-card">
+            <div>
+              <b data-i18n="board.lighthouseTitle">灯塔蓝 V 入口</b>
+              <p data-i18n="board.lighthouseCopy">1000 粉以上蓝 V / KOL 如果已经被照妖镜照出来，可以顺手加入灯塔，把链上人格样本带进更大的社交实验。</p>
+            </div>
+            <div class="lighthouse-actions">
+              <a class="ghost-button" href="https://x.com/Lighthouse_2026" target="_blank" rel="noopener noreferrer" data-i18n="board.lighthouseFollow">关注灯塔 @Lighthouse_2026</a>
+              <a class="primary-button" href="https://app.lhdao.top/?ref=cmkamdijn000cc94wijye0uz7" target="_blank" rel="noopener noreferrer" data-i18n="board.lighthouseJoin">加入灯塔</a>
+            </div>
+          </div>
           <div class="rank-prompts" aria-label="排行榜分类" data-i18n-aria="board.rankAria">
-            <span data-i18n="board.rankDegen">本周最高 Degen 指数</span>
-            <span data-i18n="board.rankDiamond">本周最强钻石手</span>
-            <span data-i18n="board.rankAirdrop">本周最像空投猎人</span>
-            <span data-i18n="board.rankTop">本周最惨接盘侠</span>
-            <span data-i18n="board.rankCivil">本周最像链上公务员</span>
-            <span data-i18n="board.rankUninstall">本周最有可能卸载钱包</span>
+            <button class="active" type="button" data-board-rank="composite" data-i18n="board.tabComposite">综合处刑榜</button>
+            <button type="button" data-board-rank="degen" data-i18n="board.tabDegen">Degen 冲锋榜</button>
+            <button type="button" data-board-rank="diamond" data-i18n="board.tabDiamond">钻石手榜</button>
+            <button type="button" data-board-rank="airdrop" data-i18n="board.tabAirdrop">空投游牧榜</button>
+            <button type="button" data-board-rank="rarity" data-i18n="board.tabRarity">稀有人格榜</button>
+            <button type="button" data-board-rank="medical" data-i18n="board.tabMedical">精神病历榜</button>
           </div>
           <div id="leaderboard-list" class="leaderboard-list"></div>
         </section>
@@ -335,6 +349,6 @@
       </footer>
     </div>
     <canvas id="card-canvas" width="1200" height="1600" hidden></canvas>
-    <script src="/app.js?v=20260621-personality-v4" type="module"></script>
+    <script src="/app.js?v=20260621-board-lighthouse-v5" type="module"></script>
   </body>
 </html>

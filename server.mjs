@@ -21,7 +21,7 @@ const SUPABASE_TIMEOUT_MS = 3500;
 const X_BEARER_TOKEN = process.env.X_BEARER_TOKEN || process.env.X_API_BEARER_TOKEN || process.env.TWITTER_BEARER_TOKEN || "";
 const X_PROFILE_TIMEOUT_MS = 3500;
 
-const REPORT_VERSION = "20260621-personality-v4";
+const REPORT_VERSION = "20260621-board-lighthouse-v5";
 const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;
 const ANALYZE_CACHE_TTL_MS = 6 * HOUR_MS;
@@ -3493,6 +3493,34 @@ function publicLeaderboard(entries) {
     .slice(0, LEADERBOARD_LIMIT);
 }
 
+function leaderboardCategories(entries) {
+  const list = entries.slice();
+  const rankers = {
+    composite: (item) => safeNumber(item.rankScore, 0),
+    degen: (item) => safeNumber(item.degen, 0),
+    diamond: (item) => safeNumber(item.diamond, 0),
+    airdrop: (item) => safeNumber(item.airdrop, 0),
+    rarity: (item) => safeNumber(item.rarity?.score, 0),
+    medical: (item) => {
+      const degen = safeNumber(item.degen, 0);
+      const rarity = safeNumber(item.rarity?.score, 0);
+      const paper = 100 - safeNumber(item.diamond, 0);
+      return Number((degen * 0.42 + rarity * 0.38 + paper * 0.2).toFixed(2));
+    }
+  };
+  return Object.fromEntries(Object.entries(rankers).map(([key, score]) => [
+    key,
+    list
+      .slice()
+      .sort((a, b) =>
+        score(b) - score(a) ||
+        safeNumber(b.rankScore, 0) - safeNumber(a.rankScore, 0) ||
+        String(b.generatedAt).localeCompare(String(a.generatedAt))
+      )
+      .slice(0, 30)
+  ]));
+}
+
 async function submitLeaderboardEntry({ address, lang, username }) {
   const normalizedAddress = normalizeAddress(address);
   const profile = await resolveXProfile(username);
@@ -3509,7 +3537,7 @@ async function submitLeaderboardEntry({ address, lang, username }) {
     ));
   }
   const entry = {
-    id: `${profile.username.toLowerCase()}:${normalizedAddress.toLowerCase()}`,
+    id: `${profile.username.toLowerCase()}:${normalizedAddress.toLowerCase()}:${normalizeLang(lang)}`,
     username: profile.username,
     handle: profile.handle,
     name: profile.name,
@@ -3688,7 +3716,8 @@ async function handleApi(req, res, pathname, searchParams) {
   if (pathname === "/api/leaderboard") {
     const lang = normalizeLang(searchParams.get("lang"));
     if (req.method === "GET") {
-      return json(res, 200, { entries: publicLeaderboard(await readLeaderboard()) });
+      const entries = publicLeaderboard(await readLeaderboard());
+      return json(res, 200, { entries, categories: leaderboardCategories(entries) });
     }
     if (req.method !== "POST") {
       return json(res, 405, { error: "Method not allowed" });

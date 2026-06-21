@@ -1,5 +1,7 @@
 const STONE_X_HANDLE = "@Stone141319";
 const STONE_AVATAR_URL = "/assets/stone-avatar.png";
+const LIGHTHOUSE_X_HANDLE = "@Lighthouse_2026";
+const LIGHTHOUSE_INVITE_URL = "https://app.lhdao.top/?ref=cmkamdijn000cc94wijye0uz7";
 
 const I18N = {
   zh: {
@@ -79,7 +81,7 @@ const I18N = {
       kol: "KOL 版"
     },
     card: {
-      reportTitle: "链上精神状态评估",
+      reportTitle: "链上精神病历",
       personalityPrefix: "钱包人格：",
       degen: "Degen 指数",
       diamond: "钻石手指数",
@@ -125,6 +127,10 @@ const I18N = {
       failed: "复制失败，可以手动选中文案。"
     },
     stats: { title: "样本数据", portfolio: "估算资产", tx: "交易次数", token: "Token 样本", meme: "Meme 暴露" },
+    medical: {
+      title: "链上精神病历（娱乐版）",
+      copy: "这是一份只看钱包行为的娱乐诊断，不是医学诊断。照妖镜可以补刀，但真实的人要被好好照顾。"
+    },
     pk: {
       title: "钱包 PK",
       copy: "你说你比我会交易？地址拿来。链上照妖镜帮你们打一架。",
@@ -137,24 +143,40 @@ const I18N = {
     },
     board: {
       title: "X 用户名排行榜",
-      copy: "填 @X 用户名生成报告后，头像、名字、钱包人格和综合评分会自动上榜。",
+      copy: "填 @X 用户名生成报告后，头像、名字、钱包人格、报告语言和综合评分会自动上榜。中文报告和英文报告同榜展示，各自保留原文。",
       refresh: "刷新榜单",
-      teaser: "上榜后会显示：X 头像 / @handle / 钱包人格 / Degen 指数 / 钻石手指数 / 综合处刑分",
+      teaser: "上榜后会显示：X 头像 / @handle / 钱包人格 / 报告语言 / Degen 指数 / 钻石手指数 / 综合处刑分",
       empty: "还没有公开记录。填 @X 用户名生成报告，第一份 Degen DNA 报告就会自动上榜。",
       retest: "重测",
       diamond: "钻石手",
       composite: "综合处刑分",
       rarity: "稀有度",
+      degen: "Degen",
+      airdrop: "空投",
+      language: "语言",
+      langZh: "中文报告",
+      langEn: "English",
       submitted: "已自动加入排行榜。",
       submitFailed: "排行榜提交失败，但报告已生成。",
       loading: "正在读取公开排行榜...",
       rankAria: "排行榜分类",
-      rankDegen: "本周最高 Degen 指数",
-      rankDiamond: "本周最强钻石手",
-      rankAirdrop: "本周最像空投猎人",
-      rankTop: "本周最惨接盘侠",
-      rankCivil: "本周最像链上公务员",
-      rankUninstall: "本周最有可能卸载钱包"
+      tabComposite: "综合处刑榜",
+      tabDegen: "Degen 冲锋榜",
+      tabDiamond: "钻石手榜",
+      tabAirdrop: "空投游牧榜",
+      tabRarity: "稀有人格榜",
+      tabMedical: "精神病历榜",
+      rankSummary: "当前榜单按 {metric} 排序，中文/英文报告同场公开处刑。",
+      metricComposite: "综合评分",
+      metricDegen: "Degen 指数",
+      metricDiamond: "钻石手指数",
+      metricAirdrop: "空投雷达",
+      metricRarity: "人格稀有度",
+      metricMedical: "链上精神病历分",
+      lighthouseTitle: "灯塔蓝 V 入口",
+      lighthouseCopy: "1000 粉以上蓝 V / KOL 如果已经被照妖镜照出来，可以顺手加入灯塔，把链上人格样本带进更大的社交实验。",
+      lighthouseFollow: "关注灯塔 @Lighthouse_2026",
+      lighthouseJoin: "加入灯塔"
     },
     about: {
       title: "为什么我做链上照妖镜？",
@@ -267,7 +289,7 @@ ${report.verdict}
       kol: "KOL"
     },
     card: {
-      reportTitle: "Degen DNA Report",
+      reportTitle: "Onchain Psych Chart",
       personalityPrefix: "DNA Type: ",
       degen: "Degen Index",
       diamond: "Diamond Hands",
@@ -311,6 +333,10 @@ ${report.verdict}
       failed: "Copy failed. Select the text manually."
     },
     stats: { title: "Sample Data", portfolio: "Est. Assets", tx: "Transactions", token: "Token Sample", meme: "Meme Exposure" },
+    medical: {
+      title: "Onchain Psych Chart (for fun)",
+      copy: "This is an entertainment diagnosis of wallet behavior only, not a medical diagnosis. The mirror can roast the wallet; the person still deserves care."
+    },
     pk: {
       title: "Wallet PK",
       copy: "You say you trade better? Drop the addresses. Degen DNA will let the wallets fight it out.",
@@ -323,24 +349,40 @@ ${report.verdict}
     },
     board: {
       title: "X Handle Leaderboard",
-      copy: "Add an @X handle before generating a report, and the avatar, name, wallet type, and composite score rank automatically.",
+      copy: "Add an @X handle before generating a report. Avatar, name, wallet type, report language, and composite score enter the public board. Chinese and English reports stay in their original language.",
       refresh: "Refresh board",
-      teaser: "Leaderboard identity: X avatar / @handle / wallet type / Degen Index / Diamond Hands / Composite Score",
+      teaser: "Leaderboard identity: X avatar / @handle / wallet type / report language / Degen Index / Diamond Hands / Composite Score",
       empty: "No public records yet. Add an @X handle and generate the first Degen DNA report.",
       retest: "Retest",
       diamond: "Diamond",
       composite: "Composite",
       rarity: "Rarity",
+      degen: "Degen",
+      airdrop: "Airdrop",
+      language: "Language",
+      langZh: "中文",
+      langEn: "English report",
       submitted: "Added to the leaderboard.",
       submitFailed: "Leaderboard submission failed, but the report is ready.",
       loading: "Loading public leaderboard...",
       rankAria: "Leaderboard categories",
-      rankDegen: "Highest Degen Index this week",
-      rankDiamond: "Strongest Diamond Hands",
-      rankAirdrop: "Most Airdrop Hunter",
-      rankTop: "Most Tragic Top Buyer",
-      rankCivil: "Most Onchain Civil Servant",
-      rankUninstall: "Most Likely to Uninstall Wallet"
+      tabComposite: "Overall Board",
+      tabDegen: "Degen Board",
+      tabDiamond: "Diamond Board",
+      tabAirdrop: "Airdrop Board",
+      tabRarity: "Rarity Board",
+      tabMedical: "Psych Chart Board",
+      rankSummary: "Sorted by {metric}. Chinese and English reports share the same arena.",
+      metricComposite: "Composite Score",
+      metricDegen: "Degen Index",
+      metricDiamond: "Diamond Hands",
+      metricAirdrop: "Airdrop Radar",
+      metricRarity: "Personality Rarity",
+      metricMedical: "Onchain Psych Score",
+      lighthouseTitle: "Lighthouse Blue-V Entry",
+      lighthouseCopy: "If you are a 1,000+ follower Blue-V / KOL and your wallet has been mirrored, join Lighthouse and bring this onchain personality experiment into a wider social graph.",
+      lighthouseFollow: "Follow Lighthouse @Lighthouse_2026",
+      lighthouseJoin: "Join Lighthouse"
     },
     about: {
       title: "Why I Built Degen DNA",
@@ -385,7 +427,40 @@ const state = {
   unlocked: localStorage.getItem("onchainMirrorFollowUnlocked") === "1",
   lang: localStorage.getItem("onchainMirrorLang") === "en" ? "en" : "zh",
   reportMode: localStorage.getItem("onchainMirrorReportMode") || "abstract",
-  activeView: "mirror"
+  activeView: "mirror",
+  boardCategory: localStorage.getItem("onchainMirrorBoardCategory") || "composite"
+};
+
+const BOARD_RANKS = {
+  composite: {
+    labelKey: "board.metricComposite",
+    score: (item) => Number(item.rankScore || 0)
+  },
+  degen: {
+    labelKey: "board.metricDegen",
+    score: (item) => Number(item.degen || 0)
+  },
+  diamond: {
+    labelKey: "board.metricDiamond",
+    score: (item) => Number(item.diamond || 0)
+  },
+  airdrop: {
+    labelKey: "board.metricAirdrop",
+    score: (item) => Number(item.airdrop || 0)
+  },
+  rarity: {
+    labelKey: "board.metricRarity",
+    score: (item) => Number(item.rarity?.score || 0)
+  },
+  medical: {
+    labelKey: "board.metricMedical",
+    score: (item) => {
+      const degen = Number(item.degen || 0);
+      const rarity = Number(item.rarity?.score || 0);
+      const paper = 100 - Number(item.diamond || 0);
+      return Number((degen * 0.42 + rarity * 0.38 + paper * 0.2).toFixed(2));
+    }
+  }
 };
 
 const RANDOM_SAMPLES = [
@@ -584,10 +659,14 @@ async function saveToLeaderboard(report) {
 async function renderLeaderboard(providedItems = null) {
   const board = $("#leaderboard-list");
   let items = providedItems;
+  if (!BOARD_RANKS[state.boardCategory]) {
+    state.boardCategory = "composite";
+  }
+  updateBoardRankButtons();
   if (!items) {
     board.innerHTML = `<div class="empty">${escapeHtml(t("board.loading"))}</div>`;
     try {
-      const response = await fetch(`/api/leaderboard?lang=${state.lang}`);
+      const response = await fetch("/api/leaderboard");
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || t("form.failed"));
       items = payload.entries || [];
@@ -600,29 +679,61 @@ async function renderLeaderboard(providedItems = null) {
     return;
   }
 
-  renderList(
-    board,
-    items.sort((a, b) => Number(b.rarity?.score || 0) - Number(a.rarity?.score || 0) || Number(b.rankScore || 0) - Number(a.rankScore || 0)),
-    (item, index) => {
-      const rarity = item.rarity || {};
-      const badges = item.badges || [];
-      const badgeText = badges.slice(0, 3).map((badge) => badge.name).join(" / ");
-      const profileUrl = item.profileUrl || `https://x.com/${encodeURIComponent(String(item.username || item.handle || "").replace(/^@/, ""))}`;
-      return `
+  const rankConfig = BOARD_RANKS[state.boardCategory] || BOARD_RANKS.composite;
+  const metricName = t(rankConfig.labelKey);
+  const sortedItems = items
+    .slice()
+    .sort((a, b) =>
+      rankConfig.score(b) - rankConfig.score(a) ||
+      Number(b.rankScore || 0) - Number(a.rankScore || 0) ||
+      Number(b.rarity?.score || 0) - Number(a.rarity?.score || 0) ||
+      String(b.generatedAt || "").localeCompare(String(a.generatedAt || ""))
+    )
+    .slice(0, 30);
+
+  board.innerHTML = `
+    <div class="board-summary">${escapeHtml(t("board.rankSummary").replace("{metric}", metricName))}</div>
+    ${sortedItems.map((item, index) => renderBoardRow(item, index, rankConfig, metricName)).join("")}
+  `;
+}
+
+function updateBoardRankButtons() {
+  $$("[data-board-rank]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.boardRank === state.boardCategory);
+  });
+}
+
+function boardLanguageLabel(item) {
+  return item.language === "en" ? t("board.langEn") : t("board.langZh");
+}
+
+function renderBoardRow(item, index, rankConfig, metricName) {
+  const rarity = item.rarity || {};
+  const badges = item.badges || [];
+  const badgeText = badges.slice(0, 3).map((badge) => badge.name).join(" / ");
+  const profileUrl = item.profileUrl || `https://x.com/${encodeURIComponent(String(item.username || item.handle || "").replace(/^@/, ""))}`;
+  const displayName = formatXName(item);
+  const scoreValue = rankConfig.score(item);
+  return `
       <div class="board-row" data-rarity="${escapeHtml(rarity.tier || "common")}">
         <div class="board-rank">#${index + 1}</div>
         <a class="board-user" href="${escapeHtml(profileUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escapeHtml(item.handle || item.name || "X user")} on X">
           <img src="${escapeHtml(item.avatarUrl || "/assets/stone-avatar.png")}" alt="${escapeHtml(item.handle || "@X")}" referrerpolicy="no-referrer" />
           <div>
-            <b>${escapeHtml(item.handle || item.name || "@X")} · ${escapeHtml(item.personality)}</b>
-            <small>${escapeHtml(item.shortAddress)} · ${escapeHtml(t("board.rarity"))} ${escapeHtml(rarity.tierName || "--")} · ${escapeHtml(t("board.composite"))} ${Number(item.rankScore || 0).toFixed(2)}/100 · ${escapeHtml(badgeText)}</small>
+            <b>${escapeHtml(displayName)} · ${escapeHtml(item.personality)}</b>
+            <small>
+              <span class="board-lang">${escapeHtml(boardLanguageLabel(item))}</span>
+              ${escapeHtml(item.shortAddress)}
+              · ${escapeHtml(metricName)} ${scoreValue.toFixed(2)}/100
+              · ${escapeHtml(t("board.composite"))} ${Number(item.rankScore || 0).toFixed(2)}/100
+              · ${escapeHtml(t("board.rarity"))} ${escapeHtml(rarity.tierName || "--")}
+              ${badgeText ? ` · ${escapeHtml(badgeText)}` : ""}
+            </small>
           </div>
         </a>
         <button class="ghost-button" type="button" data-board-address="${escapeHtml(item.address)}" data-board-x="${escapeHtml(item.handle || item.username || "")}">${escapeHtml(t("board.retest"))}</button>
       </div>
     `;
-    }
-  );
 }
 
 function modeReport(report = state.currentReport) {
@@ -1552,6 +1663,13 @@ $$("[data-report-mode]").forEach((button) => {
     state.reportMode = button.dataset.reportMode;
     localStorage.setItem("onchainMirrorReportMode", state.reportMode);
     renderModeContent(state.currentReport);
+  });
+});
+$$("[data-board-rank]").forEach((button) => {
+  button.addEventListener("click", () => {
+    state.boardCategory = BOARD_RANKS[button.dataset.boardRank] ? button.dataset.boardRank : "composite";
+    localStorage.setItem("onchainMirrorBoardCategory", state.boardCategory);
+    renderLeaderboard();
   });
 });
 $("#unlock-follow").addEventListener("click", () => {
