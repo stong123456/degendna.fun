@@ -18,10 +18,10 @@ const SUPABASE_URL = String(process.env.SUPABASE_URL || "").replace(/\/+$/, "");
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 const SUPABASE_LEADERBOARD_TABLE = process.env.SUPABASE_LEADERBOARD_TABLE || "onchain_leaderboard";
 const SUPABASE_TIMEOUT_MS = 3500;
-const X_BEARER_TOKEN = process.env.X_BEARER_TOKEN || process.env.TWITTER_BEARER_TOKEN || "";
+const X_BEARER_TOKEN = process.env.X_BEARER_TOKEN || process.env.X_API_BEARER_TOKEN || process.env.TWITTER_BEARER_TOKEN || "";
 const X_PROFILE_TIMEOUT_MS = 3500;
 
-const REPORT_VERSION = "20260620-rarity-v3";
+const REPORT_VERSION = "20260621-personality-v4";
 const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;
 const ANALYZE_CACHE_TTL_MS = 6 * HOUR_MS;
@@ -1106,6 +1106,94 @@ for (const [poolName, entries] of Object.entries(PERSONALITY_POOL_SECOND_WAVE)) 
   ];
 }
 
+const CURATED_PERSONALITY_POOLS = {
+  meme: [
+    expandedPersonality("meme-frontline-captain", "Meme 冲锋队长", "Meme Frontline Captain", "这个钱包不是在交易，它是在参加表情包战争。", "This wallet is not trading; it is enlisted in a meme war."),
+    expandedPersonality("hotspot-wind-runner", "热点追风少年", "Narrative Wind Runner", "风往哪吹，你的钱包就往哪签名。", "Where the wind blows, this wallet signs."),
+    expandedPersonality("fomo-perpetual-engine", "FOMO 永动机", "FOMO Perpetual Engine", "你的钱包可能没有开关，只有 FOMO 触发器。", "This wallet may not have a switch, only a FOMO trigger."),
+    expandedPersonality("bull-market-charger", "牛市冲锋兵", "Bull-Market Charger", "只要市场一热，这个钱包就像听见了冲锋号。", "When the market heats up, this wallet hears a charge horn.")
+  ],
+  memeLowLiquidity: [
+    expandedPersonality("microcap-survivor", "土狗幸存者", "Microcap Survivor", "你的钱包经常出现在理智下线后的第一现场。", "This wallet often appears at the first scene after reason logs off."),
+    expandedPersonality("cold-ticker-collector", "冷门收藏家", "Obscure Ticker Collector", "你的钱包里有些币，连行情软件都想假装没看见。", "Some tokens in this wallet make chart apps pretend not to notice."),
+    expandedPersonality("liquidity-contributor", "流动性贡献者", "Liquidity Contributor", "你看起来在交易，实际更像在维持市场生态。", "It looks like trading; it also looks like donating liquidity to the ecosystem."),
+    expandedPersonality("late-ticket-buyer", "错过大师", "Late Ticket Buyer", "你的钱包总能在故事最精彩的时候买到片尾票。", "This wallet often buys a ticket right as the credits begin.")
+  ],
+  airdrop: [
+    expandedPersonality("airdrop-nomad-pro", "空投游牧民", "Airdrop Nomad", "这个钱包像背着行囊在链上赶集。", "This wallet looks like it carries a backpack across onchain markets."),
+    expandedPersonality("crosschain-migratory-bird", "跨链候鸟", "Crosschain Migratory Bird", "这个钱包没有故乡，只有下一个生态入口。", "This wallet has no hometown, only the next ecosystem entrance."),
+    expandedPersonality("small-interaction-ranger", "小额交互侠", "Small-Interaction Ranger", "你的钱包像在链上到处盖章。", "This wallet stamps passports across protocols."),
+    expandedPersonality("protocol-taste-tester", "链上试吃员", "Protocol Taste Tester", "每个新协议都点一下，主打一个链上自助餐。", "Every new protocol gets a bite; this wallet treats onchain like a buffet.")
+  ],
+  defi: [
+    expandedPersonality("defi-farm-owner", "DeFi 农场主", "DeFi Farm Owner", "你的钱包看起来像在链上承包了一片地。", "This wallet looks like it leased a field onchain."),
+    expandedPersonality("yield-soil-tiller", "收益率翻土机", "Yield Soil Tiller", "APR 一亮，这个钱包就开始松土。", "When APR glows, this wallet starts tilling."),
+    expandedPersonality("liquidity-garden-keeper", "流动性花园管理员", "Liquidity Garden Keeper", "你的 LP 小票像园艺标签，整齐但不一定都开花。", "Your LP receipts look like garden labels: neat, not always blooming."),
+    expandedPersonality("protocol-qa-worker", "协议体验官", "Protocol QA Worker", "你的钱包交互过的协议，比很多人下载过的 App 还多。", "This wallet has tested more protocols than many people have apps.")
+  ],
+  diamond: [
+    expandedPersonality("diamond-old-timer-safe", "钻石手老登", "Ancient Diamond Hands", "你不是拿得住，你像是忘了还有卖出按钮。", "This is not only conviction; it may have forgotten the sell button exists."),
+    expandedPersonality("onchain-sweep-monk", "链上扫地僧", "Onchain Silent Master", "这个钱包平时不说话，但链上资历很硬。", "This wallet is quiet, but its onchain seniority is loud."),
+    expandedPersonality("wallet-sleep-master", "链上装死大师", "Onchain Possum Master", "你的钱包不是冷静，它像是开启了飞行模式。", "This wallet is not calm; it looks like airplane mode."),
+    expandedPersonality("cycle-survivor-core", "链上幸存者", "Onchain Survivor", "这个钱包不一定优雅，但它确实活到了现在。", "This wallet may not be graceful, but it survived until now.")
+  ],
+  stable: [
+    expandedPersonality("stablecoin-hermit", "稳定币修仙者", "Stablecoin Hermit", "你的钱包已经进入低欲望链上生活。", "This wallet has entered a low-desire onchain lifestyle."),
+    expandedPersonality("empty-position-philosopher", "空仓哲学家", "Sideline Philosopher", "你看起来错过了很多，也避开了不少教育。", "It looks like you missed a lot, and also dodged a lot of lessons."),
+    expandedPersonality("maincoin-conservative", "主流币保守派", "Major-Coin Conservative", "这个钱包看起来像币圈里少数还想活久一点的人。", "This wallet looks like it is trying to survive longer than one cycle."),
+    expandedPersonality("low-frequency-hermit", "低频隐士", "Low-Frequency Hermit", "这个钱包最大的优点，是很少打扰市场。", "This wallet's strongest skill is not disturbing the market often.")
+  ],
+  bluechip: [
+    expandedPersonality("bluechip-conservative-tourist", "主流币保守派", "Major-Coin Conservative", "主流资产让钱包显得体面，手指偶尔还是想去热点区散步。", "Major assets keep the wallet respectable; the finger still wanders toward heat."),
+    expandedPersonality("smart-money-copycat", "聪明钱模仿犯", "Smart-Money Copycat", "你不是没有作业，你只是经常最后一个交卷。", "The homework exists; this wallet just often submits it late."),
+    expandedPersonality("risk-seatbelt-inspector", "本金安全带检查员", "Capital Seatbelt Inspector", "这个钱包知道安全带在哪，只是偶尔会偷偷解开。", "This wallet knows where the seatbelt is; sometimes it quietly unbuckles."),
+    expandedPersonality("quiet-capital-clerk", "本金值班员", "Capital Desk Clerk", "行情再吵，本金也想按时下班。", "No matter how loud the market gets, principal wants to clock out on time.")
+  ],
+  widePortfolio: [
+    expandedPersonality("cyber-hamster", "赛博仓鼠", "Cyber Hamster", "你不是在配置资产，你是在链上囤冬粮。", "This is not allocation; it is onchain winter hoarding."),
+    expandedPersonality("altcoin-cabinet", "山寨收藏柜", "Altcoin Cabinet", "这个钱包像一个山寨币博物馆，门票还挺贵。", "This wallet is an altcoin museum with expensive admission."),
+    expandedPersonality("asset-spread-anxiety", "资产分散焦虑型", "Diversification Anxiety", "这个钱包的资产分布，像一场还没整理完的情绪。", "This wallet's allocation looks like an emotion that never finished sorting itself."),
+    expandedPersonality("onchain-grocery-owner", "链上杂货铺老板", "Onchain Grocery Owner", "这个钱包像杂货铺，进货逻辑只有老板知道。", "This wallet is a grocery store; only the owner knows the stocking logic.")
+  ],
+  collector: [
+    expandedPersonality("wallet-amnesia-safe", "钱包健忘症", "Wallet Amnesia", "这个钱包里有些资产，可能连你自己都忘了。", "Some assets in this wallet may have been forgotten even by the owner."),
+    expandedPersonality("entry-only-collector", "只买不卖型收藏家", "Buy-Only Collector", "买入入口很熟，卖出出口像陌生人。", "The entry is familiar; the exit looks like a stranger."),
+    expandedPersonality("onchain-archaeologist", "链上考古学家", "Onchain Archaeologist", "这个钱包打开后，像翻到上一轮牛市的遗址。", "Opening this wallet feels like uncovering ruins from the last bull market."),
+    expandedPersonality("old-narrative-keeper", "旧叙事收藏者", "Old-Narrative Keeper", "钱包里还保留着旧时代的回声。", "This wallet still preserves echoes from older narratives.")
+  ],
+  failed: [
+    expandedPersonality("gas-burning-master", "Gas 燃烧大师", "Gas Burning Master", "你的钱包对生态最大的贡献，可能是 Gas。", "This wallet's biggest contribution to the ecosystem may be gas."),
+    expandedPersonality("confirm-button-fighter-safe", "确认按钮搏击手", "Confirm Button Fighter", "你和钱包弹窗打了很多回合，战绩主要写在手续费里。", "You fought wallet popups often; the score is written in fees."),
+    expandedPersonality("revert-souvenir-collector", "失败交易纪念品收藏家", "Revert Souvenir Collector", "失败不是终点，它在这个钱包里变成了小票。", "Failure is not the end; in this wallet it becomes a receipt."),
+    expandedPersonality("gas-incense-keeper", "Gas 香火供奉者", "Gas Incense Keeper", "手续费像香火，烧得不算少，愿望也挺多。", "Gas burns like incense: not little, and with many wishes attached.")
+  ],
+  swapHeavy: [
+    expandedPersonality("high-frequency-shaky-hand", "高频手抖型选手", "High-Frequency Shaky Hand", "这个钱包最忙的时候，可能连自己都不知道在忙什么。", "When this wallet is busy, even it may not know why."),
+    expandedPersonality("side-switch-trader", "反复横跳交易员", "Side-Switch Trader", "这个钱包每天都在和昨天的自己辩论。", "This wallet debates yesterday's self every day."),
+    expandedPersonality("contract-pressure-worker", "合约压力怪", "Contract Pressure Worker", "你的钱包看起来不缺机会，缺的是睡眠。", "This wallet does not lack opportunities; it lacks sleep."),
+    expandedPersonality("event-button-drummer", "事件按钮鼓手", "Event Button Drummer", "事件一来，钱包像在给区块打鼓。", "When events arrive, this wallet drums for the block.")
+  ],
+  extremeDegen: [
+    expandedPersonality("onchain-anomaly-soft", "链上异常体", "Onchain Anomaly", "这不是普通钱包，更像一段链上异常现象。", "This is not a normal wallet; it is closer to an onchain anomaly."),
+    expandedPersonality("risk-reactor-operator", "风险反应堆操作员", "Risk Reactor Operator", "能量很大，但冷却系统需要认真上班。", "The energy is huge; the cooling system needs to show up for work."),
+    expandedPersonality("degen-stage-monster", "币圈怪物样本", "Crypto Monster Sample", "照妖镜多看了两眼，主要是行为组合太有节目效果。", "The mirror looked twice because the behavior combo has serious show value."),
+    expandedPersonality("abstract-wallet-core", "抽象钱包核心", "Absurd Wallet Core", "钱包行为已经超出普通解释，但仍然只是娱乐报告。", "The wallet behavior exceeds normal explanation, but this is still entertainment.")
+  ],
+  fallback: [
+    expandedPersonality("small-balance-big-dreamer", "小额大梦想家", "Small Balance, Big Dreamer", "这个钱包资金有限，但想象力很充足。", "The capital is limited; the imagination is not."),
+    expandedPersonality("onchain-vagrant", "链上流浪钱包", "Onchain Wanderer", "这个钱包像一张没有导航的链上旅行地图。", "This wallet is an onchain travel map with no navigation."),
+    expandedPersonality("narrative-allergy-safe", "叙事过敏体质", "Narrative Allergy", "这个钱包对新叙事没有免疫力。", "This wallet has no immunity to new narratives."),
+    expandedPersonality("standard-retail-survivor", "正常韭菜幸存样本", "Standard Retail Survivor", "懂一点，冲一点，最后还愿意复盘一点。", "Knows a little, clicks a little, still willing to review a little.")
+  ]
+};
+
+for (const [poolName, entries] of Object.entries(CURATED_PERSONALITY_POOLS)) {
+  PERSONALITY_POOL_EXPANSIONS[poolName] = [
+    ...(PERSONALITY_POOL_EXPANSIONS[poolName] || []),
+    ...entries
+  ];
+}
+
 for (const entries of Object.values(PERSONALITY_POOL_EXPANSIONS)) {
   for (const entry of entries) {
     PERSONALITY_TEXT[entry.id] = {
@@ -1118,6 +1206,13 @@ for (const entries of Object.values(PERSONALITY_POOL_EXPANSIONS)) {
 
 function addPersonalityPool(picks, poolName) {
   picks.push(...(PERSONALITY_POOL_EXPANSIONS[poolName] || []).map((entry) => entry.id));
+}
+
+function isShareSafePersonality(id) {
+  const text = PERSONALITY_TEXT[id];
+  if (!text) return false;
+  const joined = `${text.zh || ""} ${text.en || ""} ${text.verdict?.zh || ""} ${text.verdict?.en || ""}`;
+  return !/(病历|患者|急诊|诊断|精神科|精神病|重症|心内科|候诊|门诊|医疗|autopsy|medical|patient|clinic|hospital|psychiatry|cardiology|intensive|emergency|psych ward|diagnosis)/i.test(joined);
 }
 
 function json(res, status, body) {
@@ -1274,6 +1369,10 @@ function normalizeXUsername(input) {
   return /^[A-Za-z0-9_]{1,15}$/.test(value) ? value : "";
 }
 
+function xAvatarPath(username) {
+  return `/api/x-avatar?username=${encodeURIComponent(username)}`;
+}
+
 function buildXProfile(username) {
   const normalized = normalizeXUsername(username);
   if (!normalized) return null;
@@ -1281,7 +1380,8 @@ function buildXProfile(username) {
     username: normalized,
     handle: `@${normalized}`,
     name: normalized,
-    avatarUrl: `https://unavatar.io/x/${encodeURIComponent(normalized)}`,
+    avatarUrl: xAvatarPath(normalized),
+    rawAvatarUrl: `https://unavatar.io/x/${encodeURIComponent(normalized)}`,
     profileUrl: `https://x.com/${encodeURIComponent(normalized)}`,
     source: "fallback"
   };
@@ -1309,7 +1409,8 @@ async function fetchOfficialXProfile(username) {
     username: data.username,
     handle: `@${data.username}`,
     name: data.name || data.username,
-    avatarUrl: fullSizeXAvatar(data.profile_image_url) || `https://unavatar.io/x/${encodeURIComponent(data.username)}`,
+    avatarUrl: xAvatarPath(data.username),
+    rawAvatarUrl: fullSizeXAvatar(data.profile_image_url) || `https://unavatar.io/x/${encodeURIComponent(data.username)}`,
     profileUrl: `https://x.com/${encodeURIComponent(data.username)}`,
     verified: Boolean(data.verified),
     verifiedType: data.verified_type || "",
@@ -1333,6 +1434,44 @@ async function resolveXProfile(username) {
 
   setCached(xProfileCache, key, profile, X_PROFILE_CACHE_TTL_MS);
   return profile;
+}
+
+async function serveXAvatar(res, username) {
+  const fallbackPath = join(publicDir, "assets", "stone-avatar.png");
+  const fallback = async () => {
+    const body = await readFile(fallbackPath);
+    res.writeHead(200, {
+      "content-type": "image/png",
+      "cache-control": "public, max-age=3600"
+    });
+    res.end(body);
+  };
+
+  const profile = await resolveXProfile(username);
+  const source = profile?.rawAvatarUrl || "";
+  if (!source || !/^https:\/\/(unavatar\.io|pbs\.twimg\.com|abs\.twimg\.com)\//i.test(source)) {
+    await fallback();
+    return;
+  }
+
+  try {
+    const response = await fetch(source, {
+      headers: {
+        "accept": "image/avif,image/webp,image/png,image/jpeg,image/*,*/*",
+        "user-agent": "OnchainMirror/0.1"
+      },
+      signal: AbortSignal.timeout(X_PROFILE_TIMEOUT_MS)
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    res.writeHead(200, {
+      "content-type": response.headers.get("content-type") || "image/jpeg",
+      "cache-control": "public, max-age=86400"
+    });
+    res.end(buffer);
+  } catch {
+    await fallback();
+  }
 }
 
 function shortAddress(address) {
@@ -1931,12 +2070,14 @@ function choosePersonality(metrics, scores, address) {
     picks.push(PERSONALITIES.normal, PERSONALITIES.groupChatIndicator, PERSONALITIES.halfThesisBeliever, EXTRA_PERSONALITIES.thesisAfterBuy, EXTRA_PERSONALITIES.narrativeHostage, EXTRA_PERSONALITIES.kolShadowTrader, EXTRA_PERSONALITIES.reverseIndicatorOracle, EXTRA_PERSONALITIES.pnlFogMachine, EXTRA_PERSONALITIES.candleWorshipper);
     addPersonalityPool(picks, "fallback");
   }
-  return pickByAddress(address, [...new Set(picks)]);
+  const uniquePicks = [...new Set(picks)];
+  const safePicks = uniquePicks.filter(isShareSafePersonality);
+  return pickByAddress(address, safePicks.length ? safePicks : uniquePicks);
 }
 
 function personalizedPersonalityName(baseName, address, lang) {
-  const zhPrefix = ["夜盘", "复盘", "滑点", "冷启动", "阳线", "阴线", "Gas", "叙事", "风控", "空投", "链上", "回撤", "手续费", "流动性", "截图", "止损", "清算", "授权", "桥接", "Mint", "APR", "冷钱包", "热钱包", "监控器", "买入键", "卖出键", "观察席", "候诊室", "仓位", "本金", "群聊", "K线"];
-  const zhSuffix = ["过敏", "失忆", "梦游", "考古", "补刀", "会诊", "漂移", "开香槟", "打坐", "失联", "热成像", "候诊", "走火", "封印", "低功耗", "加班", "静音", "漏电", "折返", "离线", "急诊", "巡航", "摆烂", "过载", "熬夜", "翻车", "续命", "冷冻", "抽样", "幻听", "延迟", "自证"];
+  const zhPrefix = ["夜盘", "复盘", "滑点", "冷启动", "阳线", "阴线", "Gas", "叙事", "风控", "空投", "链上", "回撤", "手续费", "流动性", "截图", "止损", "清算", "授权", "桥接", "Mint", "APR", "冷钱包", "热钱包", "监控器", "买入键", "卖出键", "观察席", "仓位", "本金", "群聊", "K线", "雷达", "剧场"];
+  const zhSuffix = ["过敏", "失忆", "梦游", "考古", "补刀", "复盘", "漂移", "开香槟", "打坐", "失联", "热成像", "走火", "封印", "低功耗", "加班", "静音", "漏电", "折返", "离线", "巡航", "摆烂", "过载", "熬夜", "翻车", "续命", "冷冻", "抽样", "延迟", "自证", "打转", "上头"];
   const enPrefix = ["Night-Desk", "Postmortem", "Slippage", "Cold-Start", "Green-Candle", "Red-Candle", "Gas", "Narrative", "Risk-Control", "Airdrop", "Onchain", "Drawdown", "Fee", "Liquidity", "Screenshot", "Stop-Loss", "Liquidation", "Approval", "Bridge", "Mint", "APR", "Cold-Wallet", "Hot-Wallet", "Monitor", "Buy-Key", "Sell-Key", "Observer-Seat", "Waiting-Room", "Position", "Principal", "Groupchat", "Candle"];
   const enSuffix = ["Allergy", "Amnesia", "Sleepwalk", "Archaeology", "Roast", "Consultation", "Drift", "Champagne", "Meditation", "Missing", "Thermal Scan", "Waiting Room", "Misfire", "Sealed Mode", "Low Power", "Overtime", "Silent Mode", "Leakage", "U-Turn", "Offline", "Emergency", "Cruise", "Tilt", "Overload", "Insomnia", "Crash", "Life Support", "Cryosleep", "Sampling", "Auditory Glitch", "Latency", "Self-Proof"];
   const prefixIndex = stableIndex(address, "personality-variant-prefix", zhPrefix.length);
@@ -2072,8 +2213,8 @@ function holdingSummary(metrics, address, lang, mode) {
   if (!Number.isFinite(metrics.sampledHoldDays)) {
     return pickStableLocalized(address, `holding-empty-${mode}`, lang, [
       {
-        zh: "样本里还看不出稳定持仓周期，像刚挂号还没进诊室。",
-        en: "The sample does not reveal a stable holding period yet; the wallet is checked in but not examined."
+        zh: "样本里还看不出稳定持仓周期，像刚打开图表还没决定先看哪根线。",
+        en: "The sample does not reveal a stable holding period yet; the wallet has opened the chart but not chosen a candle to stare at."
       },
       {
         zh: "持仓周期数据还太薄，暂时只能判断：这个钱包刚开始在链上留下鞋印。",
@@ -2106,12 +2247,12 @@ function buildModeVerdict(mode, context) {
   ]);
   const abstract = pickStableLocalized(address, "verdict-abstract", lang, [
     {
-      zh: `钱包状态：阳线过敏，阴线失忆，止损功能疑似离家出走。Degen 指数 ${scores.degen}/100，建议挂链上精神科。`,
+      zh: `钱包状态：阳线过敏，阴线失忆，止损功能疑似离家出走。Degen 指数 ${scores.degen}/100，建议先做链上冷静复盘。`,
       en: `Wallet status: allergic to green candles, amnesiac on red candles, stop-loss missing. Degen Index ${scores.degen}/100.`
     },
     {
-      zh: `这不是财务报告，这是链上精神病历：症状稳定，病因复杂，复发概率取决于群友截图。`,
-      en: "This is not a financial report. It is an onchain medical file: stable symptoms, complex causes, relapse triggered by screenshots."
+      zh: `这不是财务报告，这是链上精神状态评估：行为稳定抽象，复发概率取决于群友截图。`,
+      en: "This is not a financial report. It is an onchain state check: stable absurdity, relapse triggered by screenshots."
     },
     {
       zh: `你的钱包像一台情绪矿机，输入叙事，输出手续费，副产品是嘴硬。`,
@@ -2228,16 +2369,16 @@ function buildModeLossCause(mode, context) {
         en: "loss black box smoking: narrative intake too wide, risk-control exhaust possibly blocked"
       },
       {
-        zh: `钱包进入链上急诊：主诉 FOMO，伴随滑点、嘴硬和轻度复盘冲动。`,
-        en: "wallet enters onchain ER: chief complaint FOMO, with slippage, denial, and mild post-mortem urges"
+        zh: `钱包进入链上观察室：核心表现是 FOMO，伴随滑点、嘴硬和轻度复盘冲动。`,
+        en: "wallet enters the onchain observation room: main signal FOMO, with slippage, denial, and mild review urges"
       },
       {
         zh: `K 线敲门时，大脑说等一下，手指说已上链。`,
         en: "when candles knock, the brain says wait, the finger says already onchain"
       },
       {
-        zh: `该钱包疑似患有退出按钮脸盲症：买入入口很熟，卖出出口像陌生人。`,
-        en: "wallet shows exit-button face blindness: entry is familiar, exit looks like a stranger"
+        zh: `该钱包疑似对退出按钮识别困难：买入入口很熟，卖出出口像陌生人。`,
+        en: "wallet appears to struggle recognizing exits: entry is familiar, exit looks like a stranger"
       }
     ],
     kol: [
@@ -2304,8 +2445,8 @@ function buildModeLossCause(mode, context) {
   ]);
   pushFeature(metrics.memeTokenCount >= 4 || metrics.memeRatio > 0.18, [
     {
-      zh: "Meme 一发热，你的钱包就像自动打开了急诊挂号。",
-      en: "when memes heat up, your wallet automatically opens emergency registration"
+      zh: "Meme 一发热，你的钱包就像自动打开了冲锋入口。",
+      en: "when memes heat up, your wallet automatically opens the charge gate"
     },
     {
       zh: "你的亏损主因，是把每个新 ticker 都当成命运给的暗号。",
@@ -2466,8 +2607,8 @@ function buildModeAssetPersonality(mode, context) {
         en: "Asset personality: chart-possessed, narrative-intoxicated, occasionally visited by short bursts of clarity."
       },
       {
-        zh: `钱包像一张链上精神病历，主诉是“我再也不追高了”，复诊记录是“又追了”。`,
-        en: "The wallet reads like an onchain medical file: chief complaint 'never chasing again', follow-up note 'chased again'."
+        zh: `钱包像一次链上照镜子，上一句是“我再也不追高了”，下一笔是“又追了”。`,
+        en: "The wallet reads like an onchain mirror: one line says 'never chasing again', the next transaction chases again."
       },
       {
         zh: `资产组合呈现出一种抽象的自洽：哪里能讲故事，哪里就能住一点本金。`,
@@ -2478,8 +2619,8 @@ function buildModeAssetPersonality(mode, context) {
         en: "Wallet aura: principal is at work, emotions are at the club, risk control is waiting outside."
       },
       {
-        zh: `这份组合像一张链上脑电图，波形主要由群聊和阳线共同驱动。`,
-        en: "This portfolio reads like an onchain EEG, driven mostly by group chats and green candles."
+        zh: `这份组合像一张链上情绪热力图，波形主要由群聊和阳线共同驱动。`,
+        en: "This portfolio reads like an onchain emotion heatmap, driven mostly by group chats and green candles."
       },
       {
         zh: `资产性格疑似多线程运行：一边想保命，一边想封神。`,
@@ -2647,8 +2788,8 @@ function buildModeFate(metrics, scores, address, lang, mode) {
     ],
     abstract: [
       {
-        zh: "链上精神病历新增一页：阳线过敏复发，止损按钮继续失联。",
-        en: "the onchain medical file gains a new page: green-candle allergy relapsed, stop-loss still missing"
+        zh: "链上状态评估新增一页：阳线过敏复发，止损按钮继续失联。",
+        en: "the onchain state check gains a new page: green-candle allergy relapsed, stop-loss still missing"
       },
       {
         zh: "钱包进入薛定谔盈利状态：不打开组合就永远没亏。",
@@ -2722,8 +2863,8 @@ function buildModeStrategy(mode, context) {
         en: "Green-candle desensitization + low-frequency possum mode. Treat hand speed before optimizing returns."
       },
       {
-        zh: `链上精神科建议：趋势跟随可以，叙事上头时需要 Hermes 做第二监护人。`,
-        en: "Onchain psychiatry suggests: trend following is fine; Hermes should supervise during narrative intoxication."
+        zh: `链上照妖镜建议：趋势跟随可以，叙事上头时需要 Hermes 做第二确认。`,
+        en: "Degen DNA suggests: trend following is fine; Hermes should provide second confirmation during narrative heat."
       },
       {
         zh: `交易系统建议：先把钱包从群聊震动里隔离，再让 Hermes 接管二次确认。`,
@@ -2770,7 +2911,7 @@ function tweetOpener(mode, lang) {
   const openers = {
     normal: ["我的 Degen DNA 报告出来了。", "My Degen DNA scan is out."],
     roast: ["我的钱包刚被链上照妖镜公开补刀。", "My wallet just got roasted by Degen DNA."],
-    abstract: ["链上精神科给我开诊断了。", "Onchain diagnosis just dropped."],
+    abstract: ["链上照妖镜把我的钱包照出来了。", "Degen DNA just exposed my wallet."],
     kol: ["如果这个钱包有账号简介，大概是这样。", "If this wallet had a bio, it would be this."]
   };
   const [zh, en] = openers[mode] || openers.abstract;
@@ -2944,14 +3085,14 @@ function buildBadges(metrics, scores, address, lang, seasonSampleSize) {
 
   const fillers = [
     ["market-educated", "被市场教育过，但没完全服", "Educated, Not Convinced", "市场讲过课，但钱包还在补考。", "The market gave lessons; the wallet is still retaking the exam.", 13.5],
-    ["wallet-autopsy", "链上精神病历在逃页", "Escaped Medical File Page", "这个钱包不一定离谱，但很适合截图会诊。", "The wallet is not always absurd, but it is excellent screenshot material.", 10.8],
+    ["wallet-autopsy", "链上照镜子样本", "Onchain Mirror Sample", "这个钱包不一定离谱，但很适合截图锐评。", "The wallet is not always absurd, but it is excellent screenshot material.", 10.8],
     ["exit-button-tourist", "退出按钮游客", "Exit Button Tourist", "知道哪里是出口，但经常只是路过。", "It knows where the exit is, but often just walks past.", 11.6],
     ["groupchat-echo", "群友回声定位", "Groupchat Echolocation", "交易信号和群聊情绪之间存在神秘同步。", "Trading signals and group-chat mood show suspicious synchronization.", 9.9],
     ["candle-stare-contest", "K 线对视冠军", "Candle Stare Champion", "看盘时间很足，眼神比策略更稳定。", "Chart-watching time is high; the stare is more stable than the strategy.", 12.1],
     ["bag-holder-poetry", "套牢诗歌朗诵者", "Bagholder Poetry Reader", "回撤之后开始讲格局，语言组织能力有所提升。", "After drawdown, it starts speaking philosophy with improved language skills.", 8.8],
     ["slippage-tuition-payer", "滑点学费缴纳者", "Slippage Tuition Payer", "每次成交都像交一点链上学费。", "Each fill feels like paying a little onchain tuition.", 10.4],
     ["narrative-compass-spinning", "叙事指南针打转", "Narrative Compass Spinning", "方向感不是没有，只是热点一多就开始原地转圈。", "Direction exists; it starts spinning when narratives multiply.", 11.2],
-    ["portfolio-sleep-talker", "仓位梦话患者", "Portfolio Sleep Talker", "不操作的时候也像在梦里给仓位找理由。", "Even without trading, it seems to dream excuses for positions.", 12.8],
+    ["portfolio-sleep-talker", "仓位梦话翻译员", "Portfolio Sleep Talk Translator", "不操作的时候也像在梦里给仓位找理由。", "Even without trading, it seems to dream excuses for positions.", 12.8],
     ["profit-screenshot-allergy", "盈利截图过敏", "Profit Screenshot Allergy", "别人一晒收益，钱包就开始出现轻微冲动反应。", "Someone posts gains and the wallet develops mild impulse symptoms.", 8.9],
     ["gas-incense-burner", "Gas 香火供奉者", "Gas Incense Burner", "手续费像香火，烧得不算少，愿望也挺多。", "Gas burns like incense: not little, and with many wishes attached.", 10.7],
     ["exit-theory-professor", "退出理论教授", "Exit Theory Professor", "退出逻辑很会讲，实际按钮不常按。", "Exit logic is well explained; the button is rarely pressed.", 9.4],
@@ -3059,7 +3200,7 @@ function buildLabels(personalityId, metrics, scores, lang) {
   if (metrics.stableRatio > 0.6) labels.push(pickLocalized(lang, "稳定币躺平派", "Stablecoin Couch"));
   if (scores.diamond > 70) labels.push(pickLocalized(lang, "钻石手老登", "Ancient Diamond Hands"));
   if (metrics.methodCounts.swap > 4) labels.push(pickLocalized(lang, "合约压力怪", "Contract Stress Tester"));
-  if (scores.degen > 80) labels.push(pickLocalized(lang, "链上精神病历", "Onchain Medical File"));
+  if (scores.degen > 80) labels.push(pickLocalized(lang, "链上精神状态评估样本", "Onchain State Check"));
   if (scores.degen > 75 && metrics.memeTokenCount >= 4) labels.push(pickLocalized(lang, "阳线过敏", "Green Candle Allergy"));
   if (metrics.failedRate > 0.12) labels.push(pickLocalized(lang, "止损失联", "Stop-Loss Missing"));
   if (metrics.lowLiquidityTokenCount >= 8) labels.push(pickLocalized(lang, "流动性黑洞", "Liquidity Black Hole"));
@@ -3502,8 +3643,8 @@ function compareReports(a, b, lang = "zh") {
     ),
     survival: pickLocalized(
       lang,
-      `${bearWinner} 更像熊市能苟到下一轮的人。${otherBear} 建议不要互相抄作业，容易一起写进链上精神病历。`,
-      `${bearWinner} looks more likely to survive a bear market. ${otherBear} should not copy-trade this; both could end up in the onchain medical file.`
+      `${bearWinner} 更像熊市能苟到下一轮的人。${otherBear} 建议不要互相抄作业，容易一起变成链上反面教材。`,
+      `${bearWinner} looks more likely to survive a bear market. ${otherBear} should not copy-trade this; both could become onchain cautionary material.`
     )
   };
 }
@@ -3537,6 +3678,11 @@ async function handleApi(req, res, pathname, searchParams) {
       return json(res, 400, { error: pickLocalized(lang, "请输入有效的 @X 用户名。", "Enter a valid @X username.") });
     }
     return json(res, 200, profile);
+  }
+
+  if (pathname === "/api/x-avatar") {
+    await serveXAvatar(res, searchParams.get("username"));
+    return;
   }
 
   if (pathname === "/api/leaderboard") {

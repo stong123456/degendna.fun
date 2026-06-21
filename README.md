@@ -71,12 +71,12 @@ Use the `service_role` key only in Railway server variables. Do not expose it in
   - `PUBLIC_SITE_URL=https://degendna.fun`
   - `PUBLIC_SITE_HOST=degendna.fun`
 - Add `ETHERSCAN_API_KEY` or `BSCSCAN_API_KEY` to improve BNB Chain coverage.
-- Add `X_BEARER_TOKEN` to resolve real X display names and profile images for cards and leaderboards. Without it, the app falls back to the entered `@username` and public avatar lookup.
+- Add `X_BEARER_TOKEN` to resolve real X display names and profile images for cards and leaderboards. Aliases `X_API_BEARER_TOKEN` and `TWITTER_BEARER_TOKEN` are also supported. Without a token, the app falls back to the entered `@username` and public avatar lookup.
 
 ## Data Sources
 
 - Blockscout v2 REST API for EVM chains with public Blockscout instances.
 - Public BNB Chain RPC for native balance and nonce when no BscScan/Etherscan key is configured.
-- Optional X API v2 user lookup when `X_BEARER_TOKEN` is configured.
+- Optional X API v2 user lookup when `X_BEARER_TOKEN` or its aliases are configured.
 
 The report text is rule-generated from real sampled data. It is designed for social sharing and behavior hints, not financial advice.

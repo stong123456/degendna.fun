@@ -105,7 +105,17 @@ const I18N = {
         "交易可以慢慢来，人要先稳住。",
         "别把所有情绪都交给涨跌。",
         "今天没赚钱，也可以好好睡觉。",
-        "照妖镜负责补刀，你负责好好生活。"
+        "照妖镜负责补刀，你负责好好生活。",
+        "你有多久没有照过自己的钱包了？也许更该问的是，你有多久没有认真看看自己了。",
+        "市场一直开着，但你不用一直紧绷。",
+        "你不是账户余额，你是一个需要被好好照顾的人。",
+        "难受的时候，找朋友说说话，不要一个人扛太久。",
+        "必要的时候，寻求专业帮助也是一种勇气。",
+        "钱包里的亏损可以复盘，心里的压力也需要出口。",
+        "世界很吵，你可以先把自己照顾好。",
+        "错过行情不等于错过人生。",
+        "不要把一次交易失败，写成对自己的判决。",
+        "愿你赚到钱，也愿你睡得着。"
       ]
     },
     tweet: {
@@ -283,7 +293,15 @@ ${report.verdict}
         "Trading can wait. Your nervous system comes first.",
         "Do not hand every feeling to price action.",
         "No profit today can still end with decent sleep.",
-        "The mirror can roast. You still get to live gently."
+        "The mirror can roast. You still get to live gently.",
+        "The market is always open. You do not have to stay tense forever.",
+        "You are not your account balance. You are a person worth caring for.",
+        "If today feels heavy, talk to someone. You do not have to carry it alone.",
+        "Getting professional help when needed is courage too.",
+        "Wallet losses can be reviewed. Pressure needs an outlet too.",
+        "Missing a trade is not missing your life.",
+        "Do not turn one bad trade into a verdict on yourself.",
+        "May you make money, and may you still sleep well."
       ]
     },
     tweet: {
@@ -1053,7 +1071,129 @@ function canvasTitleSize(textValue) {
   return 66;
 }
 
+function collectDocumentCss() {
+  const chunks = [];
+  for (const sheet of document.styleSheets) {
+    try {
+      chunks.push([...sheet.cssRules].map((rule) => rule.cssText).join("\n"));
+    } catch {
+      // Cross-origin stylesheets are ignored. The app stylesheet is same-origin.
+    }
+  }
+  return chunks.join("\n");
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+function textToDataUrl(textValue, mimeType = "text/plain") {
+  const encoded = new TextEncoder().encode(textValue);
+  let binary = "";
+  for (let index = 0; index < encoded.length; index += 1) {
+    binary += String.fromCharCode(encoded[index]);
+  }
+  return `data:${mimeType};base64,${btoa(binary)}`;
+}
+
+async function imageSourceToDataUrl(src) {
+  if (!src || src.startsWith("data:")) return src;
+  const response = await fetch(src, { cache: "force-cache" });
+  if (!response.ok) throw new Error("image fetch failed");
+  return blobToDataUrl(await response.blob());
+}
+
+async function inlineCloneImages(clone) {
+  const images = [...clone.querySelectorAll("img")];
+  await Promise.all(images.map(async (image) => {
+    const src = image.getAttribute("src") || image.src;
+    try {
+      image.setAttribute("src", await imageSourceToDataUrl(src));
+    } catch {
+      try {
+        image.setAttribute("src", await imageSourceToDataUrl(STONE_AVATAR_URL));
+      } catch {
+        image.removeAttribute("src");
+      }
+    }
+  }));
+}
+
+async function captureShareCardCanvas() {
+  const element = $("#share-card");
+  const canvas = $("#card-canvas");
+  if (!element || !canvas) throw new Error("share card missing");
+  await document.fonts?.ready?.catch?.(() => {});
+
+  const rect = element.getBoundingClientRect();
+  const width = Math.ceil(rect.width);
+  const height = Math.ceil(rect.height);
+  const bleed = 36;
+  const scale = Math.min(3, Math.max(2, window.devicePixelRatio || 2));
+  const clone = element.cloneNode(true);
+  clone.style.width = `${width}px`;
+  clone.style.minWidth = `${width}px`;
+  clone.style.maxWidth = `${width}px`;
+  clone.style.height = `${height}px`;
+  clone.style.margin = `${bleed}px`;
+  clone.style.transform = "none";
+  await inlineCloneImages(clone);
+
+  const css = collectDocumentCss();
+  const serialized = new XMLSerializer().serializeToString(clone);
+  const svgWidth = width + bleed * 2;
+  const svgHeight = height + bleed * 2;
+  const xhtml = `
+    <div xmlns="http://www.w3.org/1999/xhtml" class="capture-stage">
+      <style>
+        ${css}
+        .capture-stage {
+          width: ${svgWidth}px;
+          min-height: ${svgHeight}px;
+          margin: 0;
+          background: transparent;
+          color: #f7f1e8;
+          font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+        }
+        .capture-stage .share-card {
+          width: ${width}px;
+          min-width: ${width}px;
+          max-width: ${width}px;
+        }
+      </style>
+      ${serialized}
+    </div>
+  `;
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}">
+      <foreignObject width="100%" height="100%">${xhtml}</foreignObject>
+    </svg>
+  `;
+  const image = await loadImage(textToDataUrl(svg, "image/svg+xml;charset=utf-8"));
+  canvas.width = Math.ceil(svgWidth * scale);
+  canvas.height = Math.ceil(svgHeight * scale);
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  ctx.clearRect(0, 0, svgWidth, svgHeight);
+  ctx.drawImage(image, 0, 0, svgWidth, svgHeight);
+  return canvas;
+}
+
 async function drawShareCanvas(report) {
+  try {
+    return await captureShareCardCanvas();
+  } catch (error) {
+    console.warn("Falling back to synthetic share card", error);
+    return drawSyntheticShareCanvas(report);
+  }
+}
+
+async function drawSyntheticShareCanvas(report) {
   const lang = report.language || state.lang;
   const tr = (key) => getText(lang, key);
   const selected = modeReport(report) || report.report || {};
