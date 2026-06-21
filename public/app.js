@@ -10,7 +10,7 @@ const I18N = {
       description: "输入钱包地址，生成能晒、能比、能自嘲的链上人格报告。"
     },
     brand: { aria: "链上照妖镜", mark: "照", name: "链上照妖镜", sub: "Degen DNA Report" },
-    nav: { aria: "工具入口", mirror: "照钱包", pk: "钱包 PK", board: "X 排行榜", mental: "心理自测", about: "关于", tg: "TG 频道" },
+    nav: { aria: "工具入口", mirror: "照钱包", pk: "钱包 PK", board: "稀有度排行榜", mental: "心理自测", about: "关于", tg: "TG 频道" },
     views: { aria: "页面视图", mirror: "钱包检测", pk: "钱包 PK", board: "稀有度排行榜", mental: "心理自测" },
     gate: {
       aria: "关注任务",
@@ -166,8 +166,8 @@ const I18N = {
       failed: "PK 失败。"
     },
     board: {
-      title: "X 用户名排行榜",
-      copy: "填 @X 用户名生成报告后，头像、名字、钱包人格、报告语言和综合评分会自动上榜。中文报告和英文报告同榜展示，各自保留原文。",
+      title: "稀有度排行榜",
+      copy: "输入钱包地址生成报告后会自动进入稀有度排行榜；如果填 @X 用户名，榜单会显示头像和名字。中文报告和英文报告同榜展示，各自保留原文。",
       refresh: "刷新榜单",
       teaser: "上榜后会显示：X 头像 / @handle / 钱包人格 / 报告语言 / Degen 指数 / 钻石手指数 / 综合处刑分",
       empty: "还没有公开记录。填 @X 用户名生成报告，第一份 Degen DNA 报告就会自动上榜。",
@@ -243,7 +243,7 @@ ${report.verdict}
       description: "Paste a wallet address and generate a shareable onchain personality report."
     },
     brand: { aria: "Degen DNA", mark: "DNA", name: "Degen DNA", sub: "链上照妖镜" },
-    nav: { aria: "Tool navigation", mirror: "Scan", pk: "Wallet PK", board: "X Leaderboard", mental: "Self-check", about: "About", tg: "TG Channel" },
+    nav: { aria: "Tool navigation", mirror: "Scan", pk: "Wallet PK", board: "Rarity Board", mental: "Self-check", about: "About", tg: "TG Channel" },
     views: { aria: "Page views", mirror: "Wallet Scan", pk: "Wallet PK", board: "Rarity Leaderboard", mental: "Self-check" },
     gate: {
       aria: "Follow gate",
@@ -397,8 +397,8 @@ ${report.verdict}
       failed: "PK failed."
     },
     board: {
-      title: "X Handle Leaderboard",
-      copy: "Add an @X handle before generating a report. Avatar, name, wallet type, report language, and composite score enter the public board. Chinese and English reports stay in their original language.",
+      title: "Rarity Leaderboard",
+      copy: "Generate a wallet report to enter the rarity leaderboard. Add an @X handle if you want avatar and name shown on the board. Chinese and English reports stay in their original language.",
       refresh: "Refresh board",
       teaser: "Leaderboard identity: X avatar / @handle / wallet type / report language / Degen Index / Diamond Hands / Composite Score",
       empty: "No public records yet. Add an @X handle and generate the first Degen DNA report.",

@@ -319,7 +319,7 @@ p {
 h1 {
   max-width: 780px;
   margin-bottom: 18px;
-  font-size: clamp(44px, 5.2vw, 82px);
+  font-size: 82px;
   line-height: 0.98;
   font-weight: 950;
 }
@@ -530,7 +530,7 @@ input:focus {
 .diagnosis-heading h2 {
   margin-bottom: 0;
   color: var(--ink);
-  font-size: clamp(32px, 4vw, 54px);
+  font-size: 54px;
   line-height: 1;
   font-weight: 950;
 }
@@ -1433,7 +1433,7 @@ input:focus {
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-size: 11px;
   font-weight: 900;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
 }
 
 .medical-card-head b {
@@ -1467,7 +1467,7 @@ input:focus {
   color: var(--card-accent);
   font-size: 10px;
   font-weight: 950;
-  letter-spacing: 0.16em;
+  letter-spacing: 0;
 }
 
 .medical-scan strong {
@@ -1527,7 +1527,7 @@ input:focus {
 .share-card h2 {
   margin-bottom: 15px;
   color: var(--paper);
-  font-size: clamp(25px, 4.4vw, 34px);
+  font-size: 34px;
   line-height: 1.14;
   overflow-wrap: anywhere;
   text-wrap: balance;
@@ -1933,6 +1933,277 @@ dd {
   }
 }
 
+/* Cyber Medical Polish v3: sharper clinic terminal finish */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, transparent 0 41%, rgba(0, 240, 255, 0.035) 41.2% 41.5%, transparent 41.8% 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 5px);
+  opacity: 0.55;
+  mix-blend-mode: screen;
+}
+
+.topbar,
+.scanner,
+.leaderboard,
+.pk-panel,
+.diagnosis-panel,
+.about-panel,
+.mental-hero,
+.mental-safe-card,
+.mental-test-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.topbar::before,
+.leaderboard::before,
+.pk-panel::before,
+.diagnosis-panel::before,
+.about-panel::before,
+.mental-hero::before,
+.mental-test-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0, 240, 255, 0.42), transparent 16%, transparent 84%, rgba(178, 34, 255, 0.34)) top / 100% 1px no-repeat,
+    linear-gradient(90deg, rgba(178, 34, 255, 0.32), transparent 18%, transparent 82%, rgba(0, 240, 255, 0.30)) bottom / 100% 1px no-repeat;
+  opacity: 0.72;
+}
+
+.scanner {
+  border-color: rgba(0, 240, 255, 0.36);
+  box-shadow:
+    inset 0 0 36px rgba(0, 240, 255, 0.06),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035),
+    0 0 0 1px rgba(178, 34, 255, 0.12),
+    0 34px 110px rgba(0, 0, 0, 0.74);
+}
+
+.scanner-copy {
+  position: relative;
+  z-index: 2;
+}
+
+.portal-titleplate {
+  width: min(650px, 100%);
+  padding: 18px 22px;
+  clip-path: polygon(0 0, calc(100% - 34px) 0, 100% 34px, 100% 100%, 0 100%);
+}
+
+.portal-titleplate::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 22px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0, 240, 255, 0.72), transparent);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.50);
+}
+
+.portal-subline {
+  max-width: 760px;
+  padding-left: 16px;
+  border-left: 2px solid rgba(178, 34, 255, 0.72);
+  text-shadow: 0 0 18px rgba(0, 240, 255, 0.14);
+}
+
+.portal-visual {
+  z-index: 1;
+  opacity: 0.92;
+}
+
+.portal-visual::before {
+  content: "";
+  position: absolute;
+  inset: 7% -5% 18%;
+  border: 1px solid rgba(0, 240, 255, 0.24);
+  background:
+    linear-gradient(rgba(0, 240, 255, 0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.10) 1px, transparent 1px);
+  background-size: 28px 28px;
+  clip-path: polygon(8% 0, 92% 0, 100% 12%, 100% 88%, 92% 100%, 8% 100%, 0 88%, 0 12%);
+  opacity: 0.62;
+}
+
+.portal-brain {
+  transform: translateZ(0);
+  animation: clinicPulse 5.5s ease-in-out infinite;
+}
+
+@keyframes clinicPulse {
+  0%,
+  100% {
+    filter: saturate(1.04) brightness(1);
+  }
+
+  50% {
+    filter: saturate(1.35) brightness(1.14);
+  }
+}
+
+.scan-form {
+  position: relative;
+  z-index: 3;
+  max-width: 520px;
+  margin-left: auto;
+  padding: 42px 28px 30px;
+  border-color: rgba(0, 240, 255, 0.45);
+  background:
+    linear-gradient(135deg, rgba(0, 240, 255, 0.11), transparent 32%),
+    linear-gradient(315deg, rgba(178, 34, 255, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(4, 12, 20, 0.94), rgba(1, 4, 9, 0.98));
+  box-shadow:
+    inset 0 0 28px rgba(0, 240, 255, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035),
+    0 0 34px rgba(0, 240, 255, 0.14),
+    0 24px 70px rgba(0, 0, 0, 0.68);
+}
+
+.scan-form::before {
+  content: "SCAN TERMINAL";
+  position: absolute;
+  top: 13px;
+  left: 28px;
+  color: var(--neon-cyan);
+  font-family: "Space Grotesk", "Courier New", monospace;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.56);
+}
+
+.scan-form::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  width: 64px;
+  height: 9px;
+  background:
+    linear-gradient(90deg, rgba(0, 240, 255, 0.88) 0 16%, transparent 16% 24%, rgba(0, 240, 255, 0.58) 24% 42%, transparent 42% 52%, rgba(255, 215, 0, 0.82) 52% 64%, transparent 64% 72%, rgba(178, 34, 255, 0.72) 72% 100%);
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.30);
+}
+
+.scan-form label,
+.x-label {
+  color: rgba(0, 240, 255, 0.94);
+  letter-spacing: 0;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.35);
+}
+
+.input-row,
+.x-input-row {
+  position: relative;
+}
+
+.scan-form input,
+.pk-form input,
+#tweet-text {
+  min-height: 52px;
+  border-color: rgba(0, 240, 255, 0.34);
+  color: #f7fdff;
+  background:
+    linear-gradient(90deg, rgba(0, 240, 255, 0.07), transparent),
+    rgba(0, 8, 13, 0.90);
+}
+
+.scan-form input::placeholder,
+.pk-form input::placeholder {
+  color: rgba(138, 155, 179, 0.74);
+}
+
+.input-row .primary-button {
+  min-width: 118px;
+  font-weight: 950;
+}
+
+.quick-row,
+.trust-list {
+  position: relative;
+  z-index: 2;
+}
+
+.sample-title {
+  color: rgba(255, 215, 0, 0.82);
+  letter-spacing: 0;
+}
+
+.board-row {
+  cursor: pointer;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+}
+
+.board-row:hover {
+  transform: translateX(3px);
+  border-color: rgba(0, 240, 255, 0.46);
+  background:
+    linear-gradient(90deg, rgba(0, 240, 255, 0.12), rgba(178, 34, 255, 0.08)),
+    rgba(3, 10, 15, 0.82);
+  box-shadow:
+    inset 0 0 20px rgba(0, 240, 255, 0.06),
+    0 0 24px rgba(0, 240, 255, 0.12);
+}
+
+.leaderboard .lighthouse-card {
+  border-color: rgba(178, 34, 255, 0.36);
+  background:
+    radial-gradient(circle at 5% 50%, rgba(0, 240, 255, 0.16), transparent 16%),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.075), rgba(178, 34, 255, 0.12)),
+    rgba(7, 10, 20, 0.82);
+}
+
+@media (max-width: 1080px) {
+  .scan-form {
+    max-width: none;
+    margin-left: 0;
+  }
+
+  h1 {
+    font-size: 64px;
+  }
+
+  .diagnosis-heading h2,
+  .mental-hero h2 {
+    font-size: 44px;
+  }
+}
+
+@media (max-width: 720px) {
+  .portal-titleplate {
+    padding: 14px 16px;
+    clip-path: none;
+  }
+
+  .scan-form {
+    padding: 40px 16px 18px;
+  }
+
+  .scan-form::before {
+    left: 16px;
+  }
+
+  .scan-form::after {
+    right: 16px;
+  }
+
+  .input-row,
+  .x-input-row {
+    grid-template-columns: 1fr;
+  }
+
+  .input-row .primary-button {
+    width: 100%;
+  }
+}
+
 /* Cyber Clinic redesign */
 :root {
   --clinic-bg: #020406;
@@ -2000,7 +2271,7 @@ body::after {
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-size: 18px;
   font-weight: 900;
-  letter-spacing: 0.5em;
+  letter-spacing: 0;
   writing-mode: vertical-rl;
   text-orientation: mixed;
   transform: translateY(-50%);
@@ -2039,7 +2310,7 @@ body::after {
 
 .brand strong {
   color: #fff;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
 }
 
 .brand small,
@@ -2050,7 +2321,7 @@ body::after {
 .medical-card-head,
 .nft-claim-head span {
   color: var(--clinic-cyan);
-  letter-spacing: 0.12em;
+  letter-spacing: 0;
 }
 
 .ghost-button,
@@ -2345,7 +2616,7 @@ input:focus {
   color: var(--clinic-cyan);
   font-size: 12px;
   font-weight: 900;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
 }
 
 .nft-claim-row {
@@ -2428,7 +2699,7 @@ input:focus {
 .mental-hero h2 {
   margin: 8px 0 10px;
   color: #f8fbff;
-  font-size: clamp(34px, 5vw, 58px);
+  font-size: 58px;
   letter-spacing: 0;
 }
 
@@ -2531,7 +2802,7 @@ input:focus {
   color: #9deff5;
   font-size: 12px;
   font-weight: 900;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -2618,7 +2889,7 @@ input:focus {
   color: #9deff5;
   font-size: 12px;
   font-weight: 900;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -2790,7 +3061,7 @@ input:focus {
 .portal-cta b {
   color: #f8fbff;
   font-size: 17px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
 }
 
 .portal-visual {
@@ -2869,7 +3140,7 @@ input:focus {
   font-size: 14px;
   font-weight: 850;
   text-align: right;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
 }
 
 .symptom-marquee {
@@ -3037,5 +3308,480 @@ input:focus {
   .gate-actions .primary-button,
   .gate-actions .ghost-button {
     width: 100%;
+  }
+}
+
+/* Cyber Medical Polish v2 */
+:root {
+  --bg-main: #05050a;
+  --bg-panel: rgba(10, 15, 25, 0.62);
+  --neon-cyan: #00f0ff;
+  --neon-purple: #b222ff;
+  --neon-gold: #ffd700;
+  --text-primary: #ffffff;
+  --text-secondary: #8a9bb3;
+  --text-code: #00f0ff;
+  --clinic-bg: var(--bg-main);
+  --clinic-panel: var(--bg-panel);
+  --clinic-panel-2: rgba(7, 13, 23, 0.78);
+  --clinic-cyan: var(--neon-cyan);
+  --clinic-purple: var(--neon-purple);
+  --clinic-gold: var(--neon-gold);
+  --clinic-muted: var(--text-secondary);
+  --clinic-line: rgba(0, 240, 255, 0.22);
+  --bg: var(--bg-main);
+  --bg-2: #090b14;
+  --ink: var(--text-primary);
+  --paper: var(--text-primary);
+  --muted: var(--text-secondary);
+  --green: var(--neon-cyan);
+  --yellow: var(--neon-gold);
+  --blue: #72d7ff;
+  --shadow: 0 28px 90px rgba(0, 0, 0, 0.62);
+}
+
+html,
+body {
+  background: var(--bg-main);
+}
+
+body {
+  background:
+    radial-gradient(circle at 88% 8%, rgba(0, 240, 255, 0.14), transparent 28%),
+    radial-gradient(circle at 12% 16%, rgba(178, 34, 255, 0.15), transparent 30%),
+    linear-gradient(180deg, rgba(5, 5, 10, 0.96), rgba(3, 5, 9, 1)),
+    var(--bg-main);
+  color: var(--text-primary);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0, 240, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(0, 240, 255, 0.035) 1px, transparent 1px),
+    radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.04), transparent 22%);
+  background-size: 48px 48px, 48px 48px, auto;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.20));
+}
+
+.app-shell {
+  width: min(1500px, calc(100% - 28px));
+}
+
+.topbar {
+  align-items: center;
+  margin-top: 14px;
+  border: 1px solid rgba(0, 240, 255, 0.32);
+  border-radius: 0;
+  padding: 12px 14px;
+  background:
+    linear-gradient(90deg, rgba(178, 34, 255, 0.16), transparent 18%, transparent 82%, rgba(0, 240, 255, 0.13)),
+    linear-gradient(180deg, rgba(10, 15, 25, 0.82), rgba(3, 8, 14, 0.92));
+  box-shadow:
+    inset 0 0 18px rgba(0, 240, 255, 0.07),
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 12px 46px rgba(0, 0, 0, 0.55);
+  clip-path: polygon(0 0, 96% 0, 100% 22%, 100% 100%, 4% 100%, 0 78%);
+}
+
+.brand-mark {
+  border-color: rgba(0, 240, 255, 0.55);
+  background:
+    radial-gradient(circle, rgba(0, 240, 255, 0.18), transparent 62%),
+    rgba(4, 12, 18, 0.88);
+  color: var(--neon-cyan);
+  box-shadow:
+    0 0 22px rgba(0, 240, 255, 0.24),
+    inset 0 0 18px rgba(0, 240, 255, 0.08);
+}
+
+.brand strong,
+h1,
+.portal-titleplate span,
+.diagnosis-heading h2,
+.share-card h2,
+.leaderboard h2,
+.pk-panel h2,
+.mental-hero h2 {
+  font-family: "Space Grotesk", "Orbitron", "Courier New", "Microsoft YaHei", monospace;
+  letter-spacing: 0;
+}
+
+.brand small,
+.eyebrow,
+.section-kicker,
+.medical-card-head,
+.portal-visual small,
+.clinic-flow span,
+.rank-prompts button,
+.mental-test-head span,
+.mental-test-head small {
+  color: var(--text-code);
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.35);
+}
+
+.nav-actions {
+  flex: 1;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.nav-actions::-webkit-scrollbar {
+  display: none;
+}
+
+.ghost-button,
+.primary-button,
+.quick-row button,
+.rank-prompts button,
+.mental-tabs button,
+.portal-cta,
+.lighthouse-button {
+  border-radius: 0;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease, color 0.22s ease;
+}
+
+.ghost-button,
+.quick-row button,
+.rank-prompts button,
+.mental-tabs button {
+  border-color: rgba(0, 240, 255, 0.24);
+  color: #d7eef4;
+  background:
+    linear-gradient(180deg, rgba(10, 15, 25, 0.72), rgba(3, 8, 14, 0.84));
+  box-shadow: inset 0 0 14px rgba(0, 240, 255, 0.035);
+}
+
+.ghost-button:hover,
+.quick-row button:hover,
+.rank-prompts button:hover,
+.mental-tabs button:hover {
+  transform: translateY(-1px);
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  background-color: rgba(0, 240, 255, 0.1);
+  box-shadow:
+    0 0 15px rgba(0, 240, 255, 0.34),
+    inset 0 0 18px rgba(0, 240, 255, 0.08);
+}
+
+.nav-actions [data-view].active,
+.rank-prompts button.active,
+.mental-tabs button.active {
+  border-color: rgba(0, 240, 255, 0.86);
+  color: #071113;
+  background:
+    linear-gradient(135deg, rgba(0, 240, 255, 0.96), rgba(114, 215, 255, 0.76));
+  box-shadow:
+    0 0 22px rgba(0, 240, 255, 0.42),
+    inset 0 0 12px rgba(255, 255, 255, 0.28);
+}
+
+.primary-button,
+.portal-cta.primary {
+  border-color: rgba(255, 215, 0, 0.82);
+  color: #120e05;
+  background:
+    linear-gradient(135deg, #ffe37a, #ffd700 45%, #b222ff 150%);
+  box-shadow:
+    0 0 28px rgba(255, 215, 0, 0.24),
+    0 0 36px rgba(178, 34, 255, 0.16),
+    inset 0 0 16px rgba(255, 255, 255, 0.20);
+}
+
+.primary-button:hover,
+.portal-cta.primary:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 32px rgba(255, 215, 0, 0.40),
+    0 0 44px rgba(178, 34, 255, 0.24),
+    inset 0 0 18px rgba(255, 255, 255, 0.26);
+}
+
+.follow-gate,
+.scanner,
+.diagnosis-panel,
+.report-section,
+.mini-panel,
+.pk-panel,
+.leaderboard,
+.about-panel,
+.share-card,
+.scan-form,
+.tweet-box,
+.nft-claim-panel,
+.lighthouse-card,
+.mental-hero,
+.mental-safe-card,
+.mental-test-card,
+.mental-support {
+  border: 1px solid rgba(0, 240, 255, 0.22);
+  border-radius: 0;
+  background:
+    linear-gradient(135deg, rgba(0, 240, 255, 0.055), transparent 34%),
+    linear-gradient(315deg, rgba(178, 34, 255, 0.075), transparent 30%),
+    var(--bg-panel);
+  box-shadow:
+    inset 0 0 15px rgba(0, 240, 255, 0.055),
+    0 4px 20px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 30px 100%, 0 calc(100% - 30px));
+}
+
+.scanner {
+  margin-top: 28px;
+  min-height: 760px;
+  padding: 54px;
+  grid-template-columns: minmax(0, 0.95fr) minmax(420px, 0.55fr);
+  background:
+    radial-gradient(circle at 66% 46%, rgba(0, 240, 255, 0.18), transparent 24%),
+    radial-gradient(circle at 70% 42%, rgba(178, 34, 255, 0.14), transparent 33%),
+    linear-gradient(90deg, rgba(178, 34, 255, 0.20), transparent 12%, transparent 88%, rgba(0, 240, 255, 0.18)),
+    linear-gradient(180deg, rgba(8, 12, 22, 0.94), rgba(2, 5, 10, 0.96));
+}
+
+.scanner::before {
+  background:
+    linear-gradient(90deg, rgba(178, 34, 255, 0.95), transparent 13%, transparent 87%, rgba(0, 240, 255, 0.92)),
+    repeating-linear-gradient(90deg, rgba(0, 240, 255, 0.12) 0 1px, transparent 1px 56px),
+    repeating-linear-gradient(0deg, rgba(0, 240, 255, 0.09) 0 1px, transparent 1px 56px);
+  opacity: 0.8;
+}
+
+.scanner::after {
+  inset: 10px;
+  border: 1px solid rgba(0, 240, 255, 0.30);
+  clip-path: polygon(2% 0, 77% 0, 83% 5%, 97% 5%, 100% 10%, 100% 92%, 97% 100%, 12% 100%, 7% 95%, 0 95%, 0 8%);
+}
+
+.portal-titleplate {
+  border-color: rgba(0, 240, 255, 0.26);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.09), rgba(0, 240, 255, 0.06), transparent 88%),
+    rgba(5, 10, 18, 0.58);
+  box-shadow:
+    inset 0 0 22px rgba(0, 240, 255, 0.08),
+    0 0 28px rgba(178, 34, 255, 0.08);
+}
+
+.portal-titleplate span,
+h1 {
+  color: #ffffff;
+  text-shadow:
+    0 0 14px rgba(0, 240, 255, 0.18),
+    0 0 26px rgba(178, 34, 255, 0.12);
+}
+
+h1 {
+  max-width: 860px;
+  font-size: 88px;
+  line-height: 0.96;
+}
+
+.portal-subline,
+.scanner-copy > p:not(.eyebrow) {
+  color: #c0cad8;
+  font-weight: 760;
+}
+
+.portal-visual {
+  top: 168px;
+  right: 460px;
+  width: min(42vw, 560px);
+  filter:
+    drop-shadow(0 0 28px rgba(0, 240, 255, 0.42))
+    drop-shadow(0 0 34px rgba(178, 34, 255, 0.26));
+}
+
+.portal-brain {
+  background:
+    radial-gradient(circle at 53% 49%, rgba(255, 215, 0, 0.72), transparent 7%),
+    radial-gradient(ellipse at 46% 48%, rgba(255, 255, 255, 0.72), rgba(0, 240, 255, 0.28) 31%, rgba(178, 34, 255, 0.22) 44%, transparent 61%);
+}
+
+.portal-actions {
+  width: min(620px, 100%);
+}
+
+.portal-cta {
+  min-height: 76px;
+  border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - 52px) 0, 100% 50%, calc(100% - 52px) 100%, 0 100%, 42px 50%);
+}
+
+.portal-cta:not(.primary) {
+  border-color: rgba(0, 240, 255, 0.72);
+  color: #a8fbff;
+  background:
+    linear-gradient(90deg, rgba(0, 240, 255, 0.22), rgba(0, 240, 255, 0.04)),
+    rgba(0, 12, 16, 0.82);
+}
+
+.clinic-flow div,
+.mental-question,
+.card-rarity,
+.card-score-row,
+.card-loss,
+.metric-strip article,
+.rarity-grid > div,
+.chain-row,
+.token-row,
+.board-row {
+  border-color: rgba(0, 240, 255, 0.18);
+  border-radius: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 240, 255, 0.055), rgba(255, 255, 255, 0.018)),
+    rgba(3, 10, 15, 0.70);
+  box-shadow: inset 0 0 14px rgba(0, 240, 255, 0.035);
+}
+
+.scan-form {
+  align-self: stretch;
+  border-color: rgba(0, 240, 255, 0.28);
+  background:
+    linear-gradient(180deg, rgba(5, 10, 18, 0.90), rgba(2, 5, 10, 0.94)),
+    rgba(0, 0, 0, 0.34);
+}
+
+.scan-form input,
+.pk-form input,
+.mental-support textarea,
+#tweet-text {
+  border-radius: 0;
+  border-color: rgba(0, 240, 255, 0.18);
+  color: #ffffff;
+  background:
+    linear-gradient(180deg, rgba(0, 240, 255, 0.045), rgba(255, 255, 255, 0.018)),
+    rgba(2, 8, 13, 0.74);
+  box-shadow: inset 0 0 16px rgba(0, 240, 255, 0.035);
+}
+
+.scan-form input:focus,
+.pk-form input:focus,
+#tweet-text:focus {
+  border-color: rgba(0, 240, 255, 0.82);
+  box-shadow:
+    0 0 18px rgba(0, 240, 255, 0.20),
+    inset 0 0 18px rgba(0, 240, 255, 0.08);
+}
+
+.leaderboard h2::after,
+.pk-panel h2::after,
+.mental-hero h2::after,
+.about-panel h2::after {
+  content: "";
+  display: block;
+  width: 180px;
+  height: 1px;
+  margin-top: 12px;
+  background: linear-gradient(90deg, var(--neon-cyan), transparent);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.54);
+}
+
+.board-row[data-rarity="epic"],
+.share-card[data-rarity="epic"],
+.cyber-panel-epic {
+  border-color: rgba(178, 34, 255, 0.42);
+  box-shadow:
+    inset 0 0 20px rgba(178, 34, 255, 0.10),
+    0 0 15px rgba(178, 34, 255, 0.20),
+    0 14px 44px rgba(0, 0, 0, 0.42);
+}
+
+.symptom-marquee span,
+.trust-list span,
+.label-list span,
+.badge-chip,
+.card-tags span {
+  border-color: rgba(0, 240, 255, 0.32);
+  border-radius: 999px;
+  color: #b8fbff;
+  background: rgba(0, 240, 255, 0.07);
+  box-shadow: inset 0 0 12px rgba(0, 240, 255, 0.035);
+}
+
+@media (max-width: 1080px) {
+  .topbar {
+    align-items: stretch;
+  }
+
+  .nav-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .scanner {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .portal-visual {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: min(520px, 100%);
+    margin: -10px auto 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-shell {
+    width: min(100% - 16px, 1500px);
+  }
+
+  .topbar {
+    clip-path: none;
+    border-radius: 0;
+  }
+
+  .nav-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+
+  .nav-actions .ghost-button,
+  .nav-actions .link-button {
+    width: 100%;
+  }
+
+  .scanner {
+    clip-path: none;
+    padding: 18px;
+  }
+
+  h1 {
+    font-size: 34px;
+    line-height: 1.08;
+  }
+
+  .portal-cta {
+    clip-path: none;
+    padding-left: 70px;
+  }
+
+  .follow-gate,
+  .diagnosis-panel,
+  .report-section,
+  .mini-panel,
+  .pk-panel,
+  .leaderboard,
+  .about-panel,
+  .share-card,
+  .scan-form,
+  .tweet-box,
+  .nft-claim-panel,
+  .lighthouse-card,
+  .mental-hero,
+  .mental-safe-card,
+  .mental-test-card,
+  .mental-support {
+    clip-path: none;
   }
 }
