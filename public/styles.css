@@ -1813,12 +1813,17 @@ dd {
   }
 
   .nav-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
+    overflow: visible;
+    padding-bottom: 0;
   }
 
   .nav-actions .ghost-button,
   .nav-actions .link-button {
-    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 13px;
   }
 
   .scanner {
@@ -1830,7 +1835,9 @@ dd {
   }
 
   h1 {
-    font-size: 44px;
+    font-size: 40px;
+    line-height: 1.06;
+    overflow-wrap: anywhere;
   }
 
   .input-row,
@@ -1911,5 +1918,533 @@ dd {
   .lighthouse-actions a {
     min-width: min(100%, 210px);
     justify-content: center;
+  }
+}
+
+/* Cyber Clinic redesign */
+:root {
+  --clinic-bg: #020406;
+  --clinic-panel: rgba(4, 14, 17, 0.9);
+  --clinic-panel-2: rgba(8, 18, 23, 0.82);
+  --clinic-ink: #f2f7fa;
+  --clinic-muted: #8fa7ad;
+  --clinic-cyan: #24f4ee;
+  --clinic-cyan-soft: rgba(36, 244, 238, 0.22);
+  --clinic-purple: #a855ff;
+  --clinic-gold: #efc765;
+  --clinic-red: #ff4d6d;
+  --clinic-line: rgba(121, 232, 244, 0.22);
+  --clinic-glass: rgba(255, 255, 255, 0.045);
+  --clinic-shadow: 0 30px 120px rgba(0, 0, 0, 0.62), 0 0 42px rgba(36, 244, 238, 0.08);
+  --radius: 12px;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 10% 4%, rgba(168, 85, 255, 0.28), transparent 32%),
+    radial-gradient(circle at 92% 10%, rgba(36, 244, 238, 0.22), transparent 28%),
+    linear-gradient(180deg, rgba(8, 18, 23, 0.92), rgba(2, 4, 6, 0.98) 34%, #020406),
+    var(--clinic-bg);
+  color: var(--clinic-ink);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(rgba(36, 244, 238, 0.038) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(36, 244, 238, 0.028) 1px, transparent 1px);
+  background-size: 48px 48px, 48px 48px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.92), transparent 88%);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 4px),
+    linear-gradient(90deg, rgba(168, 85, 255, 0.09), transparent 18%, transparent 82%, rgba(36, 244, 238, 0.08));
+  opacity: 0.55;
+}
+
+.app-shell {
+  position: relative;
+  width: min(1500px, calc(100% - 34px));
+}
+
+.app-shell::before,
+.app-shell::after {
+  content: "DEGEN DNA CASE FILE";
+  position: fixed;
+  top: 50%;
+  z-index: -1;
+  color: rgba(168, 85, 255, 0.44);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.5em;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: translateY(-50%);
+  text-shadow: 0 0 18px rgba(168, 85, 255, 0.45);
+}
+
+.app-shell::before {
+  left: 14px;
+}
+
+.app-shell::after {
+  right: 14px;
+  color: rgba(36, 244, 238, 0.34);
+  text-shadow: 0 0 18px rgba(36, 244, 238, 0.38);
+}
+
+.topbar {
+  margin-top: 10px;
+  border: 1px solid var(--clinic-line);
+  border-radius: 18px;
+  padding: 12px 14px;
+  background:
+    linear-gradient(90deg, rgba(168, 85, 255, 0.16), rgba(2, 8, 10, 0.9) 26%, rgba(2, 8, 10, 0.86) 72%, rgba(36, 244, 238, 0.14)),
+    rgba(4, 10, 13, 0.88);
+  box-shadow: var(--clinic-shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.045);
+}
+
+.brand-mark,
+.medical-pulse-icon {
+  border-color: rgba(159, 179, 200, 0.86);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(143, 181, 200, 0.34), rgba(7, 12, 15, 0.92) 62%);
+  color: #a9cad8;
+  box-shadow: 0 0 0 4px rgba(36, 244, 238, 0.08), 0 0 28px rgba(36, 244, 238, 0.16);
+}
+
+.brand strong {
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.brand small,
+.eyebrow,
+.section-kicker,
+.rarity-grid span,
+.metric-strip span,
+.medical-card-head,
+.nft-claim-head span {
+  color: var(--clinic-cyan);
+  letter-spacing: 0.12em;
+}
+
+.ghost-button,
+.primary-button,
+.quick-row button,
+.view-switcher button,
+.mode-switcher button,
+.rank-prompts button,
+.lighthouse-button {
+  border-radius: 10px;
+  text-transform: none;
+}
+
+.ghost-button,
+.quick-row button,
+.view-switcher,
+.mode-switcher button {
+  border-color: rgba(121, 232, 244, 0.22);
+  background: rgba(8, 22, 27, 0.72);
+  color: #cfe6ea;
+}
+
+.ghost-button:hover,
+.quick-row button:hover,
+.view-switcher button.active,
+.mode-switcher button.active,
+.nav-actions [data-view].active {
+  border-color: rgba(36, 244, 238, 0.72);
+  color: var(--clinic-cyan);
+  background: rgba(36, 244, 238, 0.105);
+  box-shadow: 0 0 22px rgba(36, 244, 238, 0.12);
+}
+
+.primary-button,
+.lighthouse-button-join {
+  border-color: rgba(239, 199, 101, 0.9);
+  background:
+    linear-gradient(135deg, #ffdf83, #c88d34 42%, #a855ff);
+  color: #050607;
+  box-shadow: 0 0 28px rgba(239, 199, 101, 0.2), 0 16px 38px rgba(168, 85, 255, 0.18);
+}
+
+.follow-gate,
+.scanner,
+.diagnosis-panel,
+.report-section,
+.mini-panel,
+.pk-panel,
+.leaderboard,
+.about-panel,
+.share-card,
+.scan-form,
+.tweet-box,
+.nft-claim-panel,
+.lighthouse-card {
+  position: relative;
+  border: 1px solid var(--clinic-line);
+  background:
+    linear-gradient(135deg, rgba(36, 244, 238, 0.075), transparent 36%),
+    linear-gradient(315deg, rgba(168, 85, 255, 0.11), transparent 42%),
+    var(--clinic-panel);
+  box-shadow: var(--clinic-shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.scanner {
+  margin-top: 22px;
+  border-radius: 28px;
+  padding: 42px;
+  overflow: hidden;
+}
+
+.scanner::before,
+.diagnosis-panel::before,
+.share-card::before,
+.leaderboard::before,
+.pk-panel::before,
+.about-panel::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  pointer-events: none;
+  border: 1px solid rgba(121, 232, 244, 0.14);
+  clip-path: polygon(0 0, 38% 0, 41% 10px, 61% 10px, 64% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.scanner::after,
+.share-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(168, 85, 255, 0.18), transparent 24%, transparent 76%, rgba(36, 244, 238, 0.18));
+  opacity: 0.55;
+  mix-blend-mode: screen;
+}
+
+.scanner-copy {
+  position: relative;
+  z-index: 1;
+}
+
+h1 {
+  color: #f8fbff;
+  text-shadow: 0 0 26px rgba(36, 244, 238, 0.16);
+}
+
+.scanner-copy > p:not(.eyebrow) {
+  color: #b3c4c9;
+}
+
+.clinic-flow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  width: min(760px, 100%);
+  margin-top: 28px;
+}
+
+.clinic-flow div {
+  min-height: 104px;
+  border: 1px solid rgba(36, 244, 238, 0.24);
+  border-radius: 14px;
+  padding: 13px;
+  background:
+    linear-gradient(180deg, rgba(36, 244, 238, 0.08), rgba(255, 255, 255, 0.025)),
+    rgba(0, 0, 0, 0.24);
+}
+
+.clinic-flow span {
+  color: var(--clinic-gold);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.clinic-flow b,
+.clinic-flow small {
+  display: block;
+}
+
+.clinic-flow b {
+  margin-top: 10px;
+  color: #fff;
+  font-size: 18px;
+}
+
+.clinic-flow small {
+  margin-top: 6px;
+  color: var(--clinic-muted);
+  line-height: 1.35;
+}
+
+.scan-form {
+  z-index: 1;
+  align-self: stretch;
+  border-radius: 22px;
+  padding: 28px;
+}
+
+input {
+  border-color: rgba(121, 232, 244, 0.2);
+  background:
+    linear-gradient(180deg, rgba(36, 244, 238, 0.045), rgba(0, 0, 0, 0.34));
+  color: #f7fbff;
+}
+
+input:focus {
+  border-color: rgba(36, 244, 238, 0.72);
+  box-shadow: 0 0 0 3px rgba(36, 244, 238, 0.09), 0 0 28px rgba(36, 244, 238, 0.12);
+}
+
+.trust-list span,
+.label-list span,
+.card-tags span,
+.badge-chip {
+  border-color: rgba(36, 244, 238, 0.28);
+  background: rgba(36, 244, 238, 0.075);
+  color: #8ff7f0;
+}
+
+.diagnosis-panel {
+  border-radius: 22px;
+  padding: 28px;
+}
+
+.diagnosis-heading h2,
+.share-card h2 {
+  color: #f8fbff;
+  text-shadow: 0 0 20px rgba(36, 244, 238, 0.12);
+}
+
+.grade-stamp {
+  border-color: var(--clinic-gold);
+  color: var(--clinic-gold);
+  background: rgba(239, 199, 101, 0.08);
+  box-shadow: 0 0 28px rgba(239, 199, 101, 0.14);
+}
+
+.metric-strip article,
+.rarity-grid > div,
+.card-score-row,
+.card-loss,
+.medical-scan,
+.medical-note,
+.data-list div,
+.auth-teaser,
+.empty {
+  border-color: rgba(121, 232, 244, 0.18);
+  background:
+    linear-gradient(180deg, rgba(36, 244, 238, 0.055), rgba(255, 255, 255, 0.02)),
+    rgba(0, 0, 0, 0.2);
+}
+
+.metric-strip strong,
+.rarity-grid strong,
+.card-rarity strong {
+  color: var(--clinic-gold);
+}
+
+.meter,
+.wellbeing-footer {
+  background: rgba(255, 255, 255, 0.075);
+}
+
+.meter i,
+.meter.green i,
+.meter.yellow i {
+  background: linear-gradient(90deg, var(--clinic-purple), var(--clinic-cyan), var(--clinic-gold));
+}
+
+.danger {
+  border-color: rgba(255, 77, 109, 0.34);
+  background:
+    linear-gradient(135deg, rgba(255, 77, 109, 0.13), transparent 48%),
+    rgba(6, 10, 13, 0.9);
+}
+
+.share-rail {
+  top: 96px;
+}
+
+.share-card {
+  border-radius: 28px;
+  overflow: hidden;
+}
+
+.share-card-top,
+.share-card-foot {
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.brain-scan {
+  border-color: rgba(36, 244, 238, 0.42);
+  background:
+    radial-gradient(circle at 50% 44%, rgba(36, 244, 238, 0.2), transparent 28%),
+    linear-gradient(rgba(36, 244, 238, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(36, 244, 238, 0.08) 1px, transparent 1px),
+    rgba(1, 9, 10, 0.82);
+  background-size: auto, 18px 18px, 18px 18px, auto;
+}
+
+.nft-claim-panel {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.nft-claim-panel[hidden] {
+  display: none !important;
+}
+
+.nft-claim-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nft-claim-head b {
+  color: #fff;
+}
+
+.nft-claim-panel p {
+  margin: 0;
+  color: var(--clinic-muted);
+  line-height: 1.55;
+}
+
+.nft-claim-panel label {
+  color: var(--clinic-cyan);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.nft-claim-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.nft-claim-status[data-tone="success"],
+.nft-claim-status[data-tone="success"] a {
+  color: #7dff9f;
+}
+
+.nft-claim-status[data-tone="error"] {
+  color: #ff9aaa;
+}
+
+.nft-claim-status a {
+  color: var(--clinic-cyan);
+}
+
+.nft-claim-panel.is-disabled {
+  opacity: 0.72;
+}
+
+.board-row,
+.chain-row,
+.token-row {
+  border-color: rgba(121, 232, 244, 0.18);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--rarity-color, var(--clinic-cyan)) 13%, transparent), rgba(255, 255, 255, 0.02)),
+    rgba(3, 11, 14, 0.78);
+}
+
+.lighthouse-card {
+  border-radius: 18px;
+}
+
+.pk-result {
+  color: #dce8ea;
+}
+
+.wellbeing-footer {
+  border-color: rgba(121, 232, 244, 0.18);
+  border-radius: 22px;
+  margin-top: 30px;
+}
+
+@media (max-width: 1080px) {
+  .scanner {
+    padding: 28px;
+  }
+
+  .clinic-flow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .app-shell {
+    width: min(100% - 18px, 1500px);
+  }
+
+  .app-shell::before,
+  .app-shell::after {
+    display: none;
+  }
+
+  .scanner {
+    border-radius: 20px;
+    padding: 18px;
+    overflow: hidden;
+  }
+
+  .clinic-flow,
+  .nft-claim-row {
+    grid-template-columns: 1fr;
+  }
+
+  .creator-card {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .creator-card > div,
+  .scanner-copy,
+  .scan-form {
+    min-width: 0;
+  }
+
+  .creator-card h2,
+  .creator-card p,
+  .scanner-copy > p {
+    overflow-wrap: anywhere;
+  }
+
+  h1 {
+    max-width: 100%;
+    font-size: 35px;
+    line-height: 1.08;
+    word-break: break-all;
+  }
+
+  .gate-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .gate-actions .primary-button,
+  .gate-actions .ghost-button {
+    width: 100%;
   }
 }

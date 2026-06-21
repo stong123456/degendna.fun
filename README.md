@@ -65,6 +65,12 @@ Contract rules are intentionally strict:
 - One receiving wallet can receive only one NFT.
 - Rarity supply caps are hard-coded: `4500 / 2500 / 1500 / 800 / 400 / 249 / 50`.
 
+Current Sepolia deployment:
+
+```text
+DegenDnaMedicalRecord=0xC1170814C0e8826B947F263eFFCaD2668fAF969e
+```
+
 Before enabling claims:
 
 1. Run [supabase/nft_claims.sql](./supabase/nft_claims.sql) in Supabase SQL Editor.

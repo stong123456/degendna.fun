@@ -27,7 +27,7 @@ const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL || "https://ethereum-sepolia
 const SEPOLIA_MINTER_PRIVATE_KEY = process.env.SEPOLIA_MINTER_PRIVATE_KEY || "";
 const SEPOLIA_NFT_CONTRACT_ADDRESS = process.env.SEPOLIA_NFT_CONTRACT_ADDRESS || "";
 
-const REPORT_VERSION = "20260621-lighthouse-avatar-v7";
+const REPORT_VERSION = "20260621-cyber-clinic-v1";
 const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;
 const ANALYZE_CACHE_TTL_MS = 6 * HOUR_MS;
@@ -3724,9 +3724,61 @@ function nftRarityTier(report) {
   return NFT_RARITY_TIERS[report.rarity?.tier] ?? 0;
 }
 
+function buildNftClinicVerdict(report, profile) {
+  const lang = report.language || "zh";
+  const tier = report.rarity?.tier || "common";
+  const mystic = report.rarity?.mystic || [];
+  const omen = mystic.map((item) => item.value).filter(Boolean).slice(0, 2).join(" / ");
+  const address = report.address || "";
+  const pools = {
+    common: [
+      ["链上心率稳定，但偶发性追涨反射仍需复诊观察。", "Onchain pulse is stable, with occasional green-candle reflex requiring follow-up."],
+      ["钱包未见重大异常，建议继续保持睡眠，不要把横盘看成命运暗示。", "No major anomaly detected. Keep sleeping normally and stop reading destiny into chop."],
+      ["当前症状偏轻，主要表现为看盘时间长于有效决策时间。", "Symptoms are mild: chart-watching time exceeds useful decision time."]
+    ],
+    uncommon: [
+      ["病例显示轻度叙事敏感，遇到新热点时手指会先于大脑完成挂号。", "Mild narrative sensitivity detected; fingers check in before the brain when a new trend appears."],
+      ["链上脉搏略快，疑似在稳定和上头之间反复横跳。", "Onchain pulse runs slightly hot, oscillating between stability and impulse."],
+      ["该钱包有自救意识，但偶尔会把群聊截图当作临床证据。", "This wallet has self-preservation instincts, but sometimes treats group-chat screenshots as clinical evidence."]
+    ],
+    rare: [
+      ["病例进入链上异类区间，建议减少半夜复盘，增加白天呼吸。", "Case enters onchain anomaly range. Reduce midnight post-mortems and increase daytime breathing."],
+      ["该钱包对 Alpha 气味较敏感，但对退出按钮存在选择性失明。", "Sensitive to alpha scent, selectively blind to the exit button."],
+      ["链上影像显示多处叙事残留，暂未危及生命，但很适合截图。", "Imaging shows narrative residue. Not life-threatening, excellent screenshot material."]
+    ],
+    epic: [
+      ["链上精神科建议留观：该钱包对阳线、空投、土狗均存在复合型反应。", "Onchain psychiatry recommends observation: compound reaction to green candles, airdrops, and microcaps."],
+      ["本病例稀有度偏高，症状包括过度相信下一根阳线以及间歇性忘记止损。", "High rarity case: excessive belief in the next green candle and intermittent stop-loss amnesia."],
+      ["诊断结果显示，该钱包不是没救，是太会给冲动写病历摘要。", "Diagnosis: not hopeless, just unusually good at writing discharge notes for impulse."]
+    ],
+    legendary: [
+      ["该病例已进入币圈怪物层级，建议封存为 Season 0 高危教学样本。", "This case reaches crypto-monster tier and should be archived as a Season 0 high-risk teaching specimen."],
+      ["链上 CT 显示周期穿越痕迹明显，钱包活着，精神状态需要单独开会。", "Onchain CT shows clear cycle-survival traces. Wallet alive; mental state requires a separate meeting."],
+      ["主治医生意见：此钱包不适合被模仿，但非常适合被围观。", "Attending note: this wallet should not be copied, but absolutely deserves observation."]
+    ],
+    mythic: [
+      ["精神状态存疑。建议把交易按钮放远一点，把睡觉按钮放近一点。", "Mental state questionable. Move the trade button farther away and the sleep button closer."],
+      ["该钱包疑似把波动率当咖啡因使用，链上神经系统处于高亮状态。", "This wallet appears to use volatility as caffeine; onchain nervous system is overlit."],
+      ["病例罕见，已触发链上精神科二级会诊：先别加仓，先喝水。", "Rare case. Level-two onchain psych consult triggered: do not add first; drink water first."]
+    ],
+    unique: [
+      ["链上异常体已收录。此病例不建议解释，建议供奉在截图文件夹。", "Onchain anomaly archived. Do not explain this case; place it in the screenshot shrine."],
+      ["1/1 病例：钱包像从另一个周期逃出来的诊断残片。", "1/1 case: this wallet looks like a diagnostic fragment escaped from another cycle."],
+      ["系统无法给出常规建议，只能确认：这不是普通钱包，这是链上异象。", "No standard advice available. Confirmed: not a normal wallet, an onchain apparition."]
+    ]
+  };
+  const pool = pools[tier] || pools.common;
+  const [zh, en] = pool[stableIndex(address, `nft-verdict-${tier}-${profile?.username || ""}`, pool.length)];
+  const suffix = omen
+    ? pickLocalized(lang, ` 玄学读数：${omen}。`, ` Mystic reading: ${omen}.`)
+    : "";
+  return `${pickLocalized(lang, zh, en)}${suffix}`;
+}
+
 function claimRowFromReport({ claimId, reportHash, report, receiver, profile }) {
   const tier = nftRarityTier(report);
   const selected = report.modes?.abstract || report.report || {};
+  const nftVerdict = buildNftClinicVerdict(report, profile);
   return {
     id: claimId,
     report_hash: reportHash,
@@ -3746,7 +3798,7 @@ function claimRowFromReport({ claimId, reportHash, report, receiver, profile }) 
     airdrop: report.scores.airdrop,
     mystic_traits: report.rarity?.mystic || {},
     badges: report.badges?.slice(0, 5) || [],
-    verdict: selected.verdict || report.verdict || "",
+    verdict: nftVerdict || selected.verdict || report.verdict || "",
     loss_cause: selected.lossCause || report.lossCause || "",
     metadata_url: nftMetadataUrl(claimId),
     image_url: nftImageUrl(claimId),

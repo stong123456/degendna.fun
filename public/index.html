@@ -8,7 +8,7 @@
       name="description"
       content="输入钱包地址，生成能晒、能比、能自嘲的链上人格报告。"
     />
-    <link rel="stylesheet" href="/styles.css?v=20260620-rarity" />
+    <link rel="stylesheet" href="/styles.css?v=20260621-cyber-clinic" />
   </head>
   <body>
     <div class="app-shell">
@@ -67,8 +67,30 @@
         <section class="scanner">
           <div class="scanner-copy">
             <p class="eyebrow" data-i18n="hero.eyebrow">Degen DNA Report</p>
-            <h1 data-i18n="hero.title">输入钱包地址，看看你到底是哪种链上玩家。</h1>
+            <h1 data-i18n="hero.title">输入地址，照出链上病历。</h1>
             <p data-i18n="hero.copy">链上数据不会撒谎，但文案会补刀。</p>
+            <div class="clinic-flow" aria-label="链上精神科就诊流程" data-i18n-aria="clinic.aria">
+              <div>
+                <span>01</span>
+                <b data-i18n="clinic.step1Title">挂号</b>
+                <small data-i18n="clinic.step1Copy">输入公开地址</small>
+              </div>
+              <div>
+                <span>02</span>
+                <b data-i18n="clinic.step2Title">听诊</b>
+                <small data-i18n="clinic.step2Copy">读取链上心电图</small>
+              </div>
+              <div>
+                <span>03</span>
+                <b data-i18n="clinic.step3Title">诊断</b>
+                <small data-i18n="clinic.step3Copy">生成精神病历</small>
+              </div>
+              <div>
+                <span>04</span>
+                <b data-i18n="clinic.step4Title">出院</b>
+                <small data-i18n="clinic.step4Copy">晒图或领取 NFT</small>
+              </div>
+            </div>
           </div>
           <form id="scan-form" class="scan-form">
             <label for="wallet-address" data-i18n="form.label">EVM 钱包地址</label>
@@ -273,6 +295,19 @@
               <div class="share-actions">
                 <button id="share-card-button" class="primary-button" type="button" data-i18n="card.share">生成晒图并发到 X</button>
               </div>
+              <div id="nft-claim-panel" class="nft-claim-panel" hidden>
+                <div class="nft-claim-head">
+                  <span>Sepolia NFT</span>
+                  <b data-i18n="nft.title">领取测试网病历 NFT</b>
+                </div>
+                <p data-i18n="nft.copy">不用连接钱包，不签名，不授权。输入接收地址后，由链上主治医生把病例发送到 Sepolia。</p>
+                <label for="nft-receiver" data-i18n="nft.receiver">NFT 接收地址</label>
+                <div class="nft-claim-row">
+                  <input id="nft-receiver" autocomplete="off" spellcheck="false" placeholder="0x..." />
+                  <button id="nft-claim-button" class="ghost-button" type="button" data-i18n="nft.claim">领取病历</button>
+                </div>
+                <p id="nft-claim-status" class="nft-claim-status"></p>
+              </div>
               <div class="tweet-box">
                 <div class="tweet-box-head">
                   <span data-i18n="tweet.title">可复制推文</span>
@@ -373,6 +408,6 @@
       </footer>
     </div>
     <canvas id="card-canvas" width="1200" height="1600" hidden></canvas>
-    <script src="/app.js?v=20260621-lighthouse-avatar-v7" type="module"></script>
+    <script src="/app.js?v=20260621-cyber-clinic" type="module"></script>
   </body>
 </html>

@@ -24,8 +24,19 @@ const I18N = {
     },
     hero: {
       eyebrow: "Degen DNA Report",
-      title: "输入钱包地址，看看你到底是哪种链上玩家。",
+      title: "输入地址，照出链上病历。",
       copy: "链上数据不会撒谎，但文案会补刀。"
+    },
+    clinic: {
+      aria: "链上精神科就诊流程",
+      step1Title: "挂号",
+      step1Copy: "输入公开地址",
+      step2Title: "听诊",
+      step2Copy: "读取链上心电图",
+      step3Title: "诊断",
+      step3Copy: "生成精神病历",
+      step4Title: "出院",
+      step4Copy: "晒图或领取 NFT"
     },
     form: {
       label: "EVM 钱包地址",
@@ -125,6 +136,19 @@ const I18N = {
       copy: "复制推文",
       copied: "推文已复制，拿去公开处刑。",
       failed: "复制失败，可以手动选中文案。"
+    },
+    nft: {
+      title: "领取测试网病历 NFT",
+      copy: "不用连接钱包，不签名，不授权。输入接收地址后，由链上主治医生把病例发送到 Sepolia。",
+      receiver: "NFT 接收地址",
+      claim: "领取病历",
+      disabled: "样本钱包可以无限生成报告，但不能领取测试网 NFT。",
+      ready: "这份病例可以领取 Sepolia 测试网 NFT。一个钱包只能获得 1 张。",
+      claiming: "正在发送 Sepolia 病历 NFT，请不要重复点击。",
+      claimed: "病历 NFT 已发送。",
+      duplicate: "这个钱包或 X 用户名已经领取过病历 NFT。",
+      invalidReceiver: "请输入有效的 EVM 接收地址。",
+      failed: "NFT 领取失败。"
     },
     stats: { title: "样本数据", portfolio: "估算资产", tx: "交易次数", token: "Token 样本", meme: "Meme 暴露" },
     medical: {
@@ -233,8 +257,19 @@ ${report.verdict}
     },
     hero: {
       eyebrow: "Degen DNA Report",
-      title: "Paste a wallet address. Find out your Degen DNA.",
+      title: "Enter address. Get diagnosed.",
       copy: "Onchain data does not lie. The copy just adds the punchline."
+    },
+    clinic: {
+      aria: "Onchain psychiatry intake flow",
+      step1Title: "Check in",
+      step1Copy: "Enter public address",
+      step2Title: "Stethoscope",
+      step2Copy: "Read onchain pulse",
+      step3Title: "Diagnosis",
+      step3Copy: "Generate psych chart",
+      step4Title: "Discharge",
+      step4Copy: "Share or claim NFT"
     },
     form: {
       label: "EVM wallet address",
@@ -332,6 +367,19 @@ ${report.verdict}
       copy: "Copy tweet",
       copied: "Tweet copied. Public execution is now portable.",
       failed: "Copy failed. Select the text manually."
+    },
+    nft: {
+      title: "Claim Testnet Medical NFT",
+      copy: "No wallet connection, no signature, no approval. Enter a receiver address and the onchain attending sends the case file on Sepolia.",
+      receiver: "NFT receiver address",
+      claim: "Claim record",
+      disabled: "Sample wallets can generate unlimited reports, but cannot claim testnet NFTs.",
+      ready: "This case file can claim a Sepolia testnet NFT. One wallet can receive only one.",
+      claiming: "Sending Sepolia medical-record NFT. Do not click twice.",
+      claimed: "Medical-record NFT sent.",
+      duplicate: "This wallet or X handle has already claimed a medical-record NFT.",
+      invalidReceiver: "Enter a valid EVM receiver address.",
+      failed: "NFT claim failed."
     },
     stats: { title: "Sample Data", portfolio: "Est. Assets", tx: "Transactions", token: "Token Sample", meme: "Meme Exposure" },
     medical: {
@@ -907,6 +955,26 @@ function renderRarity(report = state.currentReport) {
   }
 }
 
+function renderNftClaimPanel(report = state.currentReport) {
+  const panel = $("#nft-claim-panel");
+  if (!panel) return;
+  panel.hidden = !report;
+  const status = $("#nft-claim-status");
+  const input = $("#nft-receiver");
+  const button = $("#nft-claim-button");
+  if (!report) return;
+  if (input && !input.value) input.value = report.address || "";
+  const eligible = report.nftEligible !== false;
+  panel.classList.toggle("is-disabled", !eligible);
+  if (button) button.disabled = !eligible;
+  if (status) {
+    status.textContent = eligible
+      ? t("nft.ready")
+      : report.nftIneligibleReason || t("nft.disabled");
+    status.dataset.tone = eligible ? "info" : "error";
+  }
+}
+
 function renderReport(report) {
   state.currentReport = report;
   if (report.defaultMode && !report.modes?.[state.reportMode]) {
@@ -975,6 +1043,7 @@ function renderReport(report) {
   text("#stat-meme", `${Math.round(report.metrics.memeRatio * 100)}%`);
 
   renderModeContent(report);
+  renderNftClaimPanel(report);
   saveToLeaderboard(report)
     .then(() => {
       if (report.xProfile) {
@@ -1629,6 +1698,67 @@ async function shareCard() {
   setTimeout(clearStatus, 5200);
 }
 
+async function claimNft() {
+  const report = state.currentReport;
+  if (!report) return;
+  const panel = $("#nft-claim-panel");
+  const input = $("#nft-receiver");
+  const button = $("#nft-claim-button");
+  const status = $("#nft-claim-status");
+  if (report.nftEligible === false) {
+    if (status) {
+      status.textContent = report.nftIneligibleReason || t("nft.disabled");
+      status.dataset.tone = "error";
+    }
+    return;
+  }
+  const receiver = input?.value.trim() || "";
+  if (!isAddress(receiver)) {
+    if (status) {
+      status.textContent = t("nft.invalidReceiver");
+      status.dataset.tone = "error";
+    }
+    input?.focus();
+    return;
+  }
+  if (button) button.disabled = true;
+  panel?.classList.add("is-minting");
+  if (status) {
+    status.textContent = t("nft.claiming");
+    status.dataset.tone = "info";
+  }
+  try {
+    const response = await fetch(`/api/nft/claim?lang=${state.lang}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        address: report.address,
+        receiver,
+        username: report.xProfile?.username || "",
+        lang: state.lang
+      })
+    });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || t("nft.failed"));
+    const claim = payload.claim || {};
+    const link = claim.explorerUrl
+      ? `<a href="${escapeHtml(claim.explorerUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t("nft.claimed"))} #${escapeHtml(claim.tokenId || "--")}</a>`
+      : escapeHtml(payload.duplicate ? t("nft.duplicate") : t("nft.claimed"));
+    if (status) {
+      status.innerHTML = link;
+      status.dataset.tone = payload.duplicate ? "info" : "success";
+    }
+  } catch (error) {
+    if (status) {
+      status.textContent = error.message || t("nft.failed");
+      status.dataset.tone = "error";
+    }
+  } finally {
+    panel?.classList.remove("is-minting");
+    if (button) button.disabled = report.nftEligible === false;
+  }
+}
+
 async function copyTweet() {
   if (!state.currentReport) return;
   const value = buildShareText(state.currentReport);
@@ -1701,6 +1831,7 @@ async function setLanguage(lang) {
 form.addEventListener("submit", handleScan);
 $("#pk-form").addEventListener("submit", handlePk);
 $("#share-card-button").addEventListener("click", shareCard);
+$("#nft-claim-button").addEventListener("click", claimNft);
 $("#copy-tweet").addEventListener("click", copyTweet);
 $("#language-toggle").addEventListener("click", () => setLanguage(state.lang === "zh" ? "en" : "zh"));
 $$("[data-view]").forEach((button) => {
