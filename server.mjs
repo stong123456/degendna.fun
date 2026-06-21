@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
 import { createHash, randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { readFile, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { extname, join, resolve } from "node:path";
@@ -3684,6 +3685,30 @@ const NFT_RARITY_TIERS = {
 };
 
 const NFT_RARITY_SUPPLY = [4500, 2500, 1500, 800, 400, 249, 50];
+const NFT_TEMPLATE_FILES = [
+  "common.png",
+  "uncommon.png",
+  "rare.png",
+  "epic.png",
+  "legendary.png",
+  "mythic.png",
+  "unique.png"
+];
+const nftTemplateCache = new Map();
+
+function nftTemplateDataUri(rarityTier = 0) {
+  const tier = Math.max(0, Math.min(NFT_TEMPLATE_FILES.length - 1, Number(rarityTier) || 0));
+  const filename = NFT_TEMPLATE_FILES[tier] || NFT_TEMPLATE_FILES[0];
+  if (nftTemplateCache.has(filename)) return nftTemplateCache.get(filename);
+  try {
+    const templatePath = resolve(publicDir, "nft-templates", filename);
+    const dataUri = `data:image/png;base64,${readFileSync(templatePath).toString("base64")}`;
+    nftTemplateCache.set(filename, dataUri);
+    return dataUri;
+  } catch {
+    return "";
+  }
+}
 
 function htmlEscape(value) {
   return String(value ?? "")
@@ -4000,7 +4025,7 @@ function nftMetadataFromRow(row) {
   };
 }
 
-function nftImageSvg(row) {
+function nftImageSvgLegacy(row) {
   const accents = ["#9fb3c8", "#49d19d", "#5fb6ff", "#9a5cff", "#e8bd58", "#ff6d4c", "#e6f7ff"];
   const accent = accents[Number(row.rarity_tier || 0)] || accents[0];
   const traits = row.mystic_traits && typeof row.mystic_traits === "object" ? Object.values(row.mystic_traits).slice(0, 4) : [];
@@ -4040,6 +4065,70 @@ function nftImageSvg(row) {
   <foreignObject x="190" y="1320" width="880" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="font:700 30px Arial,sans-serif;color:#f4f6f8;line-height:1.25">${verdict}</div></foreignObject>
   <text x="190" y="1455" fill="#9fb3c8" font-family="Arial, sans-serif" font-size="30">链上主治医生：石头</text>
   <text x="1040" y="1455" fill="${accent}" font-family="Arial, sans-serif" font-size="32" font-weight="900">degendna.fun</text>
+</svg>`;
+}
+
+function nftImageSvg(row) {
+  const accents = ["#9fb3c8", "#49d19d", "#5fb6ff", "#9a5cff", "#e8bd58", "#ff6d4c", "#e6f7ff"];
+  const tier = Math.max(0, Math.min(NFT_TEMPLATE_FILES.length - 1, Number(row.rarity_tier || 0)));
+  const accent = accents[tier] || accents[0];
+  const template = nftTemplateDataUri(tier);
+  if (!template) return nftImageSvgLegacy(row);
+
+  const traits = row.mystic_traits && typeof row.mystic_traits === "object" ? Object.values(row.mystic_traits).slice(0, 4) : [];
+  const badges = Array.isArray(row.badges) ? row.badges.slice(0, 3).map((badge) => badge.name || String(badge)) : [];
+  const symptoms = [...badges, ...traits].slice(0, 5).map((item) => htmlEscape(String(item).slice(0, 24)));
+  const title = htmlEscape(row.personality || "Onchain Adaptation Disorder");
+  const rarity = htmlEscape(row.rarity_label || "Common");
+  const verdict = htmlEscape(row.verdict || "Wallet status requires follow-up.");
+  const id = htmlEscape(String(row.id || "DDNA-CLINIC-S0").toUpperCase());
+  const date = htmlEscape(new Date(row.created_at || Date.now()).toISOString().slice(0, 10));
+  const degen = Math.round(Number(row.degen || 0));
+  const diamond = Math.round(Number(row.diamond || 0));
+  const airdrop = Math.round(Number(row.airdrop || 0));
+  const supplyCap = NFT_RARITY_SUPPLY[tier] || NFT_RARITY_SUPPLY[0];
+  const tierLabel = htmlEscape((NFT_TEMPLATE_FILES[tier] || "common.png").replace(".png", "").toUpperCase());
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1600" viewBox="0 0 1600 1600">
+  <defs>
+    <filter id="softGlow"><feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="${accent}" flood-opacity=".55"/></filter>
+    <style>
+      .tiny{font:700 25px Arial, sans-serif;letter-spacing:8px}
+      .label{font:800 28px Arial, sans-serif;letter-spacing:8px;color:${accent}}
+      .body{font:700 30px Arial, sans-serif;color:#d7e3e7;line-height:1.35}
+      .diagnosis{font:900 70px Arial, sans-serif;color:#f4f6f8;line-height:1.04;text-shadow:0 0 18px rgba(0,0,0,.9)}
+      .verdict{font:800 30px Arial, sans-serif;color:#eef8fb;line-height:1.25;text-shadow:0 0 16px rgba(0,0,0,.95)}
+      .pill{font:800 22px Arial, sans-serif;color:#dffff9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    </style>
+  </defs>
+  <rect width="1600" height="1600" fill="#020405"/>
+  <image href="${template}" x="0" y="0" width="1600" height="1600" preserveAspectRatio="xMidYMid slice"/>
+
+  <rect x="136" y="128" width="840" height="128" rx="26" fill="#020405" opacity=".42"/>
+  <text x="268" y="181" fill="#e2c36e" font-family="Arial, sans-serif" font-size="31" letter-spacing="12">Degen DNA Medical Record</text>
+  <foreignObject x="266" y="196" width="700" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="font:900 48px Arial,sans-serif;color:#f4f6f8;letter-spacing:2px">链上精神科测试网病历</div></foreignObject>
+  <text x="268" y="295" fill="${accent}" font-family="Arial, sans-serif" font-size="32" letter-spacing="4">Sepolia Testnet · Onchain Clinic</text>
+
+  <foreignObject x="252" y="382" width="600" height="70"><div xmlns="http://www.w3.org/1999/xhtml" class="label">PRIMARY DIAGNOSIS</div></foreignObject>
+  <foreignObject x="250" y="468" width="590" height="230"><div xmlns="http://www.w3.org/1999/xhtml" class="diagnosis">${title}</div></foreignObject>
+  <text x="250" y="738" fill="${accent}" font-family="Arial, sans-serif" font-size="30" letter-spacing="3">ICD-DN-${String(tier + 1).padStart(3, "0")}</text>
+  <foreignObject x="250" y="772" width="610" height="92"><div xmlns="http://www.w3.org/1999/xhtml" class="body">Degen ${degen}/100 · Diamond ${diamond}/100 · Airdrop ${airdrop}/100</div></foreignObject>
+
+  <foreignObject x="570" y="933" width="520" height="50"><div xmlns="http://www.w3.org/1999/xhtml" class="label" style="color:#e2c36e">RARITY CLASS · ${tierLabel}</div></foreignObject>
+  <foreignObject x="570" y="982" width="700" height="86"><div xmlns="http://www.w3.org/1999/xhtml" style="font:900 64px Georgia,serif;color:${accent};line-height:1;filter:drop-shadow(0 0 10px ${accent})">Rarity: ${rarity}</div></foreignObject>
+  <text x="570" y="1084" fill="#e2c36e" font-family="Arial, sans-serif" font-size="25" letter-spacing="2">Supply cap ${supplyCap} · Certified Onchain Record</text>
+
+  ${symptoms.map((tag, i) => `<foreignObject x="${260 + i * 244}" y="1196" width="210" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="pill" style="text-align:center">${tag}</div></foreignObject>`).join("")}
+
+  <foreignObject x="228" y="1340" width="430" height="78"><div xmlns="http://www.w3.org/1999/xhtml" class="tiny" style="color:${accent}">RECORD ID</div></foreignObject>
+  <foreignObject x="228" y="1384" width="430" height="55"><div xmlns="http://www.w3.org/1999/xhtml" style="font:800 30px Arial,sans-serif;color:#dce5e8;letter-spacing:2px">${id}</div></foreignObject>
+  <foreignObject x="682" y="1340" width="350" height="78"><div xmlns="http://www.w3.org/1999/xhtml" class="tiny" style="color:${accent}">ATTENDING DOCTOR</div></foreignObject>
+  <foreignObject x="682" y="1384" width="350" height="70"><div xmlns="http://www.w3.org/1999/xhtml" style="font:900 52px Arial,sans-serif;color:#f4f6f8">石头</div></foreignObject>
+  <foreignObject x="1080" y="1340" width="280" height="78"><div xmlns="http://www.w3.org/1999/xhtml" class="tiny" style="color:${accent}">DATE</div></foreignObject>
+  <text x="1080" y="1406" fill="#dce5e8" font-family="Arial, sans-serif" font-size="31" font-weight="800">${date}</text>
+  <foreignObject x="228" y="1450" width="1070" height="66"><div xmlns="http://www.w3.org/1999/xhtml" class="verdict">${verdict}</div></foreignObject>
+  <text x="420" y="1510" fill="${accent}" font-family="Arial, sans-serif" font-size="24" letter-spacing="5" filter="url(#softGlow)">degendna.fun · Ethereum Sepolia · Onchain Psychiatry</text>
 </svg>`;
 }
 

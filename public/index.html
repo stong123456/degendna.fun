@@ -29,6 +29,7 @@
           <button class="ghost-button" data-view="mirror" type="button" data-i18n="nav.mirror">照钱包</button>
           <button class="ghost-button" data-view="pk" type="button" data-i18n="nav.pk">钱包 PK</button>
           <button class="ghost-button" data-view="board" type="button" data-i18n="nav.board">X 排行榜</button>
+          <button class="ghost-button" data-view="mental" type="button" data-i18n="nav.mental">心理自测</button>
           <button class="ghost-button" data-view="about" type="button" data-i18n="nav.about">关于</button>
           <a class="ghost-button link-button" href="https://t.me/Stone141319" target="_blank" rel="noreferrer" data-i18n="nav.tg">TG 频道</a>
           <a class="ghost-button link-button" href="https://degendna.fun" target="_blank" rel="noreferrer">degendna.fun</a>
@@ -61,14 +62,24 @@
           <button class="active" type="button" data-view="mirror" data-i18n="views.mirror">钱包检测</button>
           <button type="button" data-view="pk" data-i18n="views.pk">钱包 PK</button>
           <button type="button" data-view="board" data-i18n="views.board">稀有度排行榜</button>
+          <button type="button" data-view="mental" data-i18n="views.mental">心理自测</button>
         </div>
 
         <section id="mirror-view" class="view-panel active" data-view-panel="mirror">
         <section class="scanner">
           <div class="scanner-copy">
             <p class="eyebrow" data-i18n="hero.eyebrow">Degen DNA Report</p>
+            <div class="portal-titleplate" aria-label="Degen DNA Portal">
+              <span>Degen DNA Portal</span>
+              <b>中文：链上精神健康门户</b>
+            </div>
             <h1 data-i18n="hero.title">输入地址，照出链上病历。</h1>
             <p data-i18n="hero.copy">链上数据不会撒谎，但文案会补刀。</p>
+            <p class="portal-subline">Onchain Clinic · 首个区块链心理状态分析与病例生成系统</p>
+            <div class="portal-actions" aria-label="Degen DNA portal actions">
+              <a class="portal-cta primary" href="#scan-form"><span>[ cite: 立即诊断 ]</span><b>START DIAGNOSIS</b></a>
+              <a class="portal-cta" href="#report-view"><span>[ cite: 提取病历 ]</span><b>RETRIEVE RECORD</b></a>
+            </div>
             <div class="clinic-flow" aria-label="链上精神科就诊流程" data-i18n-aria="clinic.aria">
               <div>
                 <span>01</span>
@@ -91,6 +102,23 @@
                 <small data-i18n="clinic.step4Copy">晒图或领取 NFT</small>
               </div>
             </div>
+            <div class="symptom-marquee" aria-hidden="true">
+              <div>
+                <span>Overthinking</span>
+                <span>Volatility Anxiety</span>
+                <span>FOMO</span>
+                <span>Degen Sleep</span>
+                <span>Hopium Dependence</span>
+                <span>Paper Hand Tremor</span>
+              </div>
+            </div>
+          </div>
+          <div class="portal-visual" aria-hidden="true">
+            <div class="portal-brain">
+              <span class="dna-strand"></span>
+              <span class="brain-core"></span>
+            </div>
+            <small>BRAIN-DNA MAPPING v2.1<br />[ cite: DEGEN PROTOCOL ]</small>
           </div>
           <form id="scan-form" class="scan-form">
             <label for="wallet-address" data-i18n="form.label">EVM 钱包地址</label>
@@ -398,6 +426,66 @@
             <p data-i18n="about.p4">所以我想做一个有点抽象、有点嘴毒，但最后还能提醒大家好好爱自己的链上人格实验。</p>
             <p data-i18n="about.p5">它可以吐槽你的钱包，但不会定义你的人生。</p>
           </div>
+        </section>
+
+        <section id="mental-panel" class="mental-center view-panel" data-view-panel="mental" hidden>
+          <div class="mental-hero">
+            <p class="section-kicker">Mental Health Self-Check</p>
+            <h2>心理健康自测中心</h2>
+            <p>不是诊断，只是帮你更早看见自己的状态。</p>
+            <div class="mental-privacy-grid">
+              <span>不登录</span>
+              <span>不上传答案</span>
+              <span>不公开结果</span>
+              <span>不绑定钱包</span>
+              <span>不进排行榜</span>
+              <span>不生成 NFT</span>
+            </div>
+          </div>
+
+          <div class="mental-safe-card">
+            <b>进入这里以后，我们先把玩笑收起来。</b>
+            <p>这些自测只能帮助你观察最近两周到一个月的情绪、焦虑、压力、睡眠和自我照顾状态，不能替代医生、心理咨询师或精神科医生的判断。</p>
+            <p>如果你现在有强烈自伤冲动、觉得自己可能会伤害自己，或已经处在危险中，请立刻联系当地紧急服务、身边可信任的人，或专业危机热线。</p>
+            <button id="mental-help-now" class="mental-danger-button" type="button">我现在感觉撑不住</button>
+          </div>
+
+          <div class="mental-tabs" role="tablist" aria-label="心理健康自测模块">
+            <button type="button" data-mental-test="quick" class="active">快速体检</button>
+            <button type="button" data-mental-test="who5">WHO-5 幸福感</button>
+            <button type="button" data-mental-test="phq9">情绪低落 PHQ-9</button>
+            <button type="button" data-mental-test="gad7">焦虑 GAD-7</button>
+            <button type="button" data-mental-test="sleep">睡眠自测</button>
+            <button type="button" data-mental-test="stress">压力与内耗</button>
+            <button type="button" data-mental-test="trading">交易心理自查</button>
+            <button type="button" data-mental-test="support">风险支持</button>
+          </div>
+
+          <section class="mental-test-card">
+            <div class="mental-test-head">
+              <div>
+                <span id="mental-test-range">过去两周</span>
+                <h3 id="mental-test-title">快速体检</h3>
+                <p id="mental-test-copy">用 3 分钟看见最近的整体状态。</p>
+              </div>
+              <small id="mental-test-time">预计用时：3 分钟</small>
+            </div>
+            <form id="mental-form" class="mental-form"></form>
+            <div class="mental-actions">
+              <button id="mental-submit" class="primary-button" type="button">查看结果</button>
+              <button id="mental-save" class="ghost-button" type="button" disabled>保存到本地</button>
+              <button id="mental-clear" class="ghost-button" type="button">清除本地记录</button>
+            </div>
+            <div id="mental-result" class="mental-result" hidden></div>
+          </section>
+
+          <section id="mental-support" class="mental-support">
+            <h3>安全支持</h3>
+            <p>你现在最重要的事情不是继续测分数，而是先保证自己安全。请尽量不要一个人待着，可以联系一个你信任的人，让 TA 现在陪你。</p>
+            <textarea id="mental-friend-message" readonly>我现在状态很不好，可能需要你陪我一下。你能不能现在联系我，或者过来陪我一会儿？</textarea>
+            <button id="mental-copy-help" class="ghost-button" type="button">复制给朋友</button>
+            <p class="mental-resource-note">如果你已经有具体计划、工具或强烈冲动，请立刻联系当地紧急服务，或去最近的急诊。美国可拨打或短信 988；其他地区请联系当地危机热线或紧急服务。</p>
+          </section>
         </section>
       </main>
 

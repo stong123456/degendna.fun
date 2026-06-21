@@ -94,6 +94,12 @@ NFT_CLAIM_ENABLED=true
 
 Keep `NFT_CLAIM_ENABLED=false` until the contract is deployed and the Supabase table exists.
 
+NFT artwork uses seven rarity-specific cyber clinic templates in `public/nft-templates/`. The server overlays dynamic report text onto those templates for metadata images, while the browser reuses the same templates for share-card screenshots.
+
+## Mental Health Self-Check
+
+The `/` app includes a separate "心理健康自测中心" view. It is intentionally not connected to wallet reports, rankings, NFT claims, or social sharing. Answers are scored in the browser; optional saved records stay in local browser storage only.
+
 ## Deploy Notes
 
 - This is a zero-dependency Node app, so it can run on a VPS, Render, Railway, Fly.io, or any Node-capable container host.

@@ -10,8 +10,8 @@ const I18N = {
       description: "输入钱包地址，生成能晒、能比、能自嘲的链上人格报告。"
     },
     brand: { aria: "链上照妖镜", mark: "照", name: "链上照妖镜", sub: "Degen DNA Report" },
-    nav: { aria: "工具入口", mirror: "照钱包", pk: "钱包 PK", board: "X 排行榜", about: "关于", tg: "TG 频道" },
-    views: { aria: "页面视图", mirror: "钱包检测", pk: "钱包 PK", board: "稀有度排行榜" },
+    nav: { aria: "工具入口", mirror: "照钱包", pk: "钱包 PK", board: "X 排行榜", mental: "心理自测", about: "关于", tg: "TG 频道" },
+    views: { aria: "页面视图", mirror: "钱包检测", pk: "钱包 PK", board: "稀有度排行榜", mental: "心理自测" },
     gate: {
       aria: "关注任务",
       avatarAlt: "Stone141319 头像",
@@ -243,8 +243,8 @@ ${report.verdict}
       description: "Paste a wallet address and generate a shareable onchain personality report."
     },
     brand: { aria: "Degen DNA", mark: "DNA", name: "Degen DNA", sub: "链上照妖镜" },
-    nav: { aria: "Tool navigation", mirror: "Scan", pk: "Wallet PK", board: "X Leaderboard", about: "About", tg: "TG Channel" },
-    views: { aria: "Page views", mirror: "Wallet Scan", pk: "Wallet PK", board: "Rarity Leaderboard" },
+    nav: { aria: "Tool navigation", mirror: "Scan", pk: "Wallet PK", board: "X Leaderboard", mental: "Self-check", about: "About", tg: "TG Channel" },
+    views: { aria: "Page views", mirror: "Wallet Scan", pk: "Wallet PK", board: "Rarity Leaderboard", mental: "Self-check" },
     gate: {
       aria: "Follow gate",
       avatarAlt: "Stone141319 avatar",
@@ -520,6 +520,179 @@ const RANDOM_SAMPLES = [
   "0x4e9ce36e442e55ecd9025b9a6e0d88485d628a67"
 ];
 
+const MENTAL_SCALE_LABELS = {
+  well: ["完全没有", "偶尔", "少于一半时间", "超过一半时间", "大部分时间", "一直如此"],
+  symptom: ["完全没有", "几天", "超过一半天数", "几乎每天"],
+  stress: ["从不", "偶尔", "经常", "几乎总是"]
+};
+
+const MENTAL_TESTS = {
+  quick: {
+    title: "快速心理体检",
+    copy: "3 分钟看见最近的整体状态。结果只用于自我了解，不会上传或公开。",
+    range: "过去两周到一个月",
+    time: "预计用时：3 分钟",
+    scale: "stress",
+    items: [
+      "我最近经常觉得情绪低落、提不起兴趣，或者对很多事没感觉。",
+      "我最近经常紧张、担心、坐立不安，脑子很难停下来。",
+      "我最近睡眠明显变差，入睡、夜醒、早醒或醒来疲惫。",
+      "我最近觉得压力过载，很难真正放松。",
+      "行情、亏损、错过机会或社交比较明显影响了我的心情。"
+    ],
+    result: (score) => {
+      if (score <= 3) return mentalResult("状态相对平稳", "你的回答提示近期压力和情绪困扰较低。继续保持休息、社交和基本生活节律。", "如果之后连续几天状态下滑，可以再回来复测。");
+      if (score <= 7) return mentalResult("轻度关注", "你最近可能已经有一些疲惫、紧张或睡眠被打扰的信号。", "建议先减少熬夜和高频看盘，给自己安排一点可恢复的时间。");
+      if (score <= 11) return mentalResult("建议认真关注", "你的近期状态提示压力或情绪困扰已经比较明显，可能影响休息、工作、学习或交易判断。", "建议做完整量表，并考虑和信任的人聊聊。如果持续两周以上，建议寻求专业帮助。");
+      return mentalResult("建议寻求更多支持", "你的回答提示近期状态可能已经处在高压区间。", "请优先保证睡眠和安全，减少独自硬扛。可以联系可信任的人，也可以考虑心理咨询、精神科或当地心理健康服务。");
+    }
+  },
+  who5: {
+    title: "WHO-5 幸福感量表",
+    copy: "观察最近两周的积极感受和心理幸福感。分数越高，幸福感越好。",
+    range: "过去两周",
+    time: "预计用时：1 分钟",
+    scale: "well",
+    items: [
+      "我感到快乐、心情愉快。",
+      "我感到平静、放松。",
+      "我感到精力充沛、充满活力。",
+      "我醒来时感到清新、休息充分。",
+      "我的日常生活中有让我感兴趣的事情。"
+    ],
+    result: (score) => {
+      if (score >= 18) return mentalResult("幸福感较好", "你的回答提示最近两周仍有较稳定的积极感受。", "继续保留让你恢复的事情，比如睡眠、运动、朋友、日常节律。");
+      if (score >= 13) return mentalResult("需要一点照顾", "你的幸福感处于中间区间，可能有些累，但还没有明显掉到底。", "可以观察一周，主动减少熬夜和刺激源，安排能让你恢复的小事。");
+      return mentalResult("建议认真关注", "你的 WHO-5 分数偏低，提示近期心理幸福感可能不足。", "如果低落、疲惫或兴趣下降持续影响生活，建议做 PHQ-9 或寻求专业支持。");
+    }
+  },
+  phq9: {
+    title: "情绪低落 PHQ-9",
+    copy: "观察最近两周抑郁相关困扰。结果不是诊断，只是提示是否需要更多关注。",
+    range: "过去两周",
+    time: "预计用时：2 分钟",
+    scale: "symptom",
+    safetyIndex: 8,
+    items: [
+      "做事时提不起兴趣或没有乐趣。",
+      "感到心情低落、沮丧或绝望。",
+      "入睡困难、睡不安稳，或睡得太多。",
+      "感到疲倦或没有精力。",
+      "食欲不振或吃得过多。",
+      "觉得自己很糟，或觉得自己让自己/家人失望。",
+      "难以集中注意力，例如看东西或做事时走神。",
+      "动作或说话慢到别人能注意到，或相反，烦躁到坐立不安。",
+      "出现过不如死了好，或以某种方式伤害自己的想法。"
+    ],
+    result: (score, answers) => {
+      if (answers[8] > 0) return mentalResult("先保证安全", "你在自伤相关问题上选择了非零答案。此时最重要的不是继续看分数，而是先确认你现在是安全的。", "请尽量不要一个人待着，联系可信任的人。如果你已经有具体计划、工具或强烈冲动，请立刻联系当地紧急服务或去最近的急诊。", true);
+      if (score <= 4) return mentalResult("低困扰区间", "你的回答提示近期抑郁相关困扰较低。", "保持观察即可。状态会波动，分数不是你这个人的评价。");
+      if (score <= 9) return mentalResult("轻度困扰", "你最近可能有一些低落、疲惫、兴趣下降或自我否定感。", "建议先照顾睡眠、减少熬夜，并观察是否持续两周以上。");
+      if (score <= 14) return mentalResult("中等困扰", "你的分数提示近期抑郁相关困扰较明显，可能已经影响睡眠、工作、学习、人际关系或交易判断。", "建议认真关注，并考虑联系心理咨询师、精神科医生或当地心理健康服务。");
+      return mentalResult("较高困扰", "你的回答提示近期情绪困扰偏高，可能不适合继续独自硬扛。", "建议尽快寻求专业帮助，并告诉一个可信任的人你最近的真实状态。");
+    }
+  },
+  gad7: {
+    title: "焦虑紧张 GAD-7",
+    copy: "观察最近两周紧张、担心、坐立不安和难以放松等状态。",
+    range: "过去两周",
+    time: "预计用时：2 分钟",
+    scale: "symptom",
+    items: [
+      "感到紧张、焦虑或急切。",
+      "不能停止或控制担心。",
+      "对各种事情担心得太多。",
+      "很难放松下来。",
+      "坐立不安，难以安静待着。",
+      "变得容易烦躁或易怒。",
+      "感到害怕，好像可怕的事情要发生。"
+    ],
+    result: (score) => {
+      if (score <= 4) return mentalResult("焦虑水平较低", "你的回答提示近期焦虑困扰较低。", "继续保持基本节律，尤其是睡眠和屏幕使用边界。");
+      if (score <= 9) return mentalResult("轻度焦虑信号", "你最近可能有一些担心、紧张或难以放松。", "可以先减少高刺激信息流，给大脑一点恢复时间。");
+      if (score <= 14) return mentalResult("中度焦虑信号", "你的分数提示近期焦虑相关困扰较明显。", "如果已经影响睡眠、工作、学习或交易判断，建议考虑进一步评估或专业帮助。");
+      return mentalResult("较高焦虑信号", "你最近可能处在比较高的紧张和担心状态。", "建议尽快寻求专业支持，尤其当焦虑伴随失眠、惊恐、明显回避或身体不适时。");
+    }
+  },
+  sleep: {
+    title: "睡眠自测",
+    copy: "观察睡眠质量、熬夜看盘和白天疲惫。不是标准诊断量表。",
+    range: "最近两周",
+    time: "预计用时：2 分钟",
+    scale: "symptom",
+    items: [
+      "入睡困难，躺下后很久睡不着。",
+      "夜里醒来，或醒后很难再次入睡。",
+      "早醒，醒来后觉得疲惫。",
+      "睡前或半夜会刷盘、看行情或查看钱包。",
+      "睡眠影响了白天精神、工作或学习。",
+      "因为行情提醒、群消息或交易软件打断睡眠。"
+    ],
+    result: (score) => {
+      if (score <= 5) return mentalResult("睡眠相对稳定", "你的睡眠困扰暂时不高。", "继续保持睡前边界，别让行情把夜晚占满。");
+      if (score <= 10) return mentalResult("睡眠需要关注", "你最近可能已经被入睡、夜醒或看盘习惯影响。", "建议睡前 30 分钟不看盘，把价格提醒改成关键价位提醒。");
+      return mentalResult("睡眠困扰明显", "你的回答提示睡眠已经明显受影响。", "如果连续两周严重失眠、白天功能受损，建议考虑专业帮助。");
+    }
+  },
+  stress: {
+    title: "压力与内耗",
+    copy: "观察最近一个月失控感、反刍、比较和压力过载。不是标准诊断量表。",
+    range: "最近一个月",
+    time: "预计用时：2 分钟",
+    scale: "stress",
+    items: [
+      "我觉得很多事情失控，自己很难掌握节奏。",
+      "我总在复盘、后悔、比较，脑子很难停下来。",
+      "我觉得自己很难真正放松。",
+      "亏损、回撤、错过机会会反复占据我的注意力。",
+      "我会因为别人的盈利截图或社交比较而焦虑。",
+      "我经常明明很累，却仍然逼自己继续盯盘或工作。"
+    ],
+    result: (score) => {
+      if (score <= 5) return mentalResult("压力可控", "你的回答提示压力暂时处在较可控区间。", "继续保留恢复性活动，不要只靠意志力硬撑。");
+      if (score <= 11) return mentalResult("中等内耗", "你最近可能有较多复盘、担心、比较或压力过载。", "建议减少高频信息源，给自己设置固定离屏时间。");
+      return mentalResult("高压状态", "你的回答提示压力和内耗已经较明显。", "如果已经影响睡眠、人际或日常功能，建议和可信任的人聊聊，并考虑专业支持。");
+    }
+  },
+  trading: {
+    title: "交易心理自查",
+    copy: "观察交易行为和情绪关系。它不是医学诊断，也不是投资建议。",
+    range: "最近一个月",
+    time: "预计用时：2 分钟",
+    scale: "stress",
+    items: [
+      "我容易因为 FOMO 冲动下单。",
+      "亏损后我会强烈自责，觉得自己很没用。",
+      "盈利后我会兴奋过度，风险控制变松。",
+      "我会用交易、刷盘或研究项目来逃避现实压力。",
+      "连续亏损后，我会想通过更大仓位快速扳回来。",
+      "我的钱包余额会明显影响自我评价。",
+      "我会因为错过机会反复内耗。",
+      "我知道自己该休息，但还是停不下来。"
+    ],
+    result: (score) => {
+      if (score <= 6) return mentalResult("相对稳定型", "你的交易情绪牵引暂时不高。", "保持风险边界，别让市场挤掉生活。");
+      if (score <= 13) return mentalResult("行情牵引型", "行情、盈亏或社交比较可能已经在影响你的情绪。", "建议把交易决策和情绪状态分开记录，疲惫时不做大决策。");
+      if (score <= 18) return mentalResult("中度交易内耗", "你的回答提示交易和情绪之间已经有较强绑定。", "建议设置暂停交易规则，例如睡眠不足、连续亏损、强烈 FOMO 时不下单。");
+      return mentalResult("高压交易状态", "你可能正在用交易承受或转移很大的压力。", "建议暂停高风险操作，先恢复睡眠和安全感。必要时寻求专业支持。");
+    }
+  },
+  support: {
+    title: "风险支持",
+    copy: "如果你现在感觉撑不住，这里只做一件事：先帮助你保证安全。",
+    range: "现在",
+    time: "先不要计时",
+    scale: "stress",
+    items: [
+      "我现在不想一个人待着。",
+      "我担心自己可能会伤害自己。",
+      "我需要立刻联系一个可信任的人。",
+      "我需要离开交易界面，先把自己稳住。"
+    ],
+    result: () => mentalResult("请先保证安全", "你现在最重要的事情不是继续测分数，而是先保证自己安全。", "请尽量不要一个人待着。联系一个可信任的人，让 TA 现在陪你。如果你已经有具体计划、工具或强烈冲动，请立刻联系当地紧急服务或去最近的急诊。", true)
+  }
+};
+
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 
@@ -628,7 +801,7 @@ function requireUnlocked() {
 }
 
 function setActiveView(view, { scroll = true } = {}) {
-  const next = ["mirror", "pk", "board", "about"].includes(view) ? view : "mirror";
+  const next = ["mirror", "pk", "board", "mental", "about"].includes(view) ? view : "mirror";
   state.activeView = next;
   $$("[data-view-panel]").forEach((panel) => {
     panel.hidden = panel.dataset.viewPanel !== next;
@@ -638,6 +811,7 @@ function setActiveView(view, { scroll = true } = {}) {
     button.classList.toggle("active", button.dataset.view === next);
   });
   if (next === "board") renderLeaderboard();
+  if (next === "mental") renderMentalCenter();
   if (scroll) {
     const target = $(`[data-view-panel="${next}"]`) || document.body;
     target.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1071,6 +1245,110 @@ function finishReportStatus(report) {
   clearStatus();
 }
 
+function mentalResult(title, body, next, urgent = false) {
+  return { title, body, next, urgent };
+}
+
+function activeMentalTestKey() {
+  return document.querySelector("[data-mental-test].active")?.dataset.mentalTest || "quick";
+}
+
+function renderMentalCenter(testKey = activeMentalTestKey()) {
+  const test = MENTAL_TESTS[testKey] || MENTAL_TESTS.quick;
+  const formNode = $("#mental-form");
+  if (!formNode) return;
+  $$("[data-mental-test]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.mentalTest === testKey);
+  });
+  text("#mental-test-title", test.title);
+  text("#mental-test-copy", test.copy);
+  text("#mental-test-range", test.range);
+  text("#mental-test-time", test.time);
+  const labels = MENTAL_SCALE_LABELS[test.scale] || MENTAL_SCALE_LABELS.symptom;
+  formNode.innerHTML = test.items.map((item, index) => `
+    <fieldset class="mental-question">
+      <legend>${escapeHtml(index + 1)}. ${escapeHtml(item)}</legend>
+      <div class="mental-options">
+        ${labels.map((label, value) => `
+          <label>
+            <input type="radio" name="q${index}" value="${value}" ${value === 0 ? "checked" : ""} />
+            <span>${escapeHtml(label)}</span>
+          </label>
+        `).join("")}
+      </div>
+    </fieldset>
+  `).join("");
+  const result = $("#mental-result");
+  if (result) {
+    result.hidden = true;
+    result.innerHTML = "";
+  }
+  const save = $("#mental-save");
+  if (save) save.disabled = true;
+}
+
+function readMentalAnswers(test) {
+  return test.items.map((_, index) => Number(document.querySelector(`input[name="q${index}"]:checked`)?.value || 0));
+}
+
+function calculateMentalResult(testKey = activeMentalTestKey()) {
+  const test = MENTAL_TESTS[testKey] || MENTAL_TESTS.quick;
+  const answers = readMentalAnswers(test);
+  const score = answers.reduce((sum, value) => sum + value, 0);
+  const result = test.result(score, answers);
+  return { testKey, test, answers, score, result, createdAt: new Date().toISOString() };
+}
+
+function renderMentalResult(payload = calculateMentalResult()) {
+  const resultNode = $("#mental-result");
+  if (!resultNode) return payload;
+  const maxScore = payload.test.scale === "well"
+    ? payload.test.items.length * 5
+    : payload.test.items.length * 3;
+  resultNode.hidden = false;
+  resultNode.dataset.urgent = payload.result.urgent ? "true" : "false";
+  resultNode.innerHTML = `
+    <span>${escapeHtml(payload.test.title)} · ${escapeHtml(payload.test.range)}</span>
+    <h3>${escapeHtml(payload.result.title)}</h3>
+    <p>${escapeHtml(payload.result.body)}</p>
+    <p>${escapeHtml(payload.result.next)}</p>
+    <div class="mental-score-line">
+      <b>${payload.score}</b>
+      <small>/ ${maxScore}</small>
+    </div>
+    <p class="mental-result-note">这个分数不是你这个人的评价。它只是在提醒你，最近可能真的有点累了。</p>
+  `;
+  const save = $("#mental-save");
+  if (save) save.disabled = false;
+  if (payload.result.urgent) {
+    $("#mental-support")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+  state.lastMentalResult = payload;
+  return payload;
+}
+
+function saveMentalResult() {
+  const payload = state.lastMentalResult || calculateMentalResult();
+  const existing = JSON.parse(localStorage.getItem("degenDnaMentalRecords") || "[]");
+  existing.unshift({
+    testKey: payload.testKey,
+    title: payload.test.title,
+    score: payload.score,
+    result: payload.result.title,
+    createdAt: payload.createdAt
+  });
+  localStorage.setItem("degenDnaMentalRecords", JSON.stringify(existing.slice(0, 20)));
+  setStatus("已保存到本地浏览器。不会上传，也不会和钱包报告绑定。");
+  setTimeout(clearStatus, 2400);
+}
+
+function clearMentalRecords() {
+  localStorage.removeItem("degenDnaMentalRecords");
+  state.lastMentalResult = null;
+  setStatus("本地自测记录已清除。");
+  setTimeout(clearStatus, 1800);
+}
+
 async function handleScan(event) {
   event.preventDefault();
   if (!requireUnlocked()) return;
@@ -1336,6 +1614,28 @@ async function imageSourceToDataUrl(src) {
   return blobToDataUrl(await response.blob());
 }
 
+const NFT_TEMPLATE_BY_RARITY = {
+  common: "common.png",
+  uncommon: "uncommon.png",
+  rare: "rare.png",
+  epic: "epic.png",
+  legendary: "legendary.png",
+  mythic: "mythic.png",
+  unique: "unique.png",
+  oneofone: "unique.png"
+};
+
+async function inlineShareTemplateBackground(clone, report = state.currentReport) {
+  const rarity = String(report?.rarity?.tier || clone?.dataset?.rarity || "common").toLowerCase();
+  const filename = NFT_TEMPLATE_BY_RARITY[rarity] || NFT_TEMPLATE_BY_RARITY.common;
+  try {
+    const dataUrl = await imageSourceToDataUrl(`/nft-templates/${filename}`);
+    clone.style.setProperty("--nft-template-image", `url("${dataUrl}")`);
+  } catch {
+    clone.style.setProperty("--nft-template-image", "none");
+  }
+}
+
 async function inlineCloneImages(clone) {
   const images = [...clone.querySelectorAll("img")];
   await Promise.all(images.map(async (image) => {
@@ -1352,7 +1652,7 @@ async function inlineCloneImages(clone) {
   }));
 }
 
-async function captureShareCardCanvas() {
+async function captureShareCardCanvas(report = state.currentReport) {
   const element = $("#share-card");
   const canvas = $("#card-canvas");
   if (!element || !canvas) throw new Error("share card missing");
@@ -1371,6 +1671,7 @@ async function captureShareCardCanvas() {
   clone.style.margin = `${bleed}px`;
   clone.style.transform = "none";
   await inlineCloneImages(clone);
+  await inlineShareTemplateBackground(clone, report);
 
   const css = collectDocumentCss();
   const serialized = new XMLSerializer().serializeToString(clone);
@@ -1414,7 +1715,7 @@ async function captureShareCardCanvas() {
 
 async function drawShareCanvas(report) {
   try {
-    return await captureShareCardCanvas();
+    return await captureShareCardCanvas(report);
   } catch (error) {
     console.warn("Falling back to synthetic share card", error);
     return drawSyntheticShareCanvas(report);
@@ -1833,9 +2134,31 @@ $("#pk-form").addEventListener("submit", handlePk);
 $("#share-card-button").addEventListener("click", shareCard);
 $("#nft-claim-button").addEventListener("click", claimNft);
 $("#copy-tweet").addEventListener("click", copyTweet);
+$("#mental-submit")?.addEventListener("click", () => renderMentalResult());
+$("#mental-save")?.addEventListener("click", saveMentalResult);
+$("#mental-clear")?.addEventListener("click", clearMentalRecords);
+$("#mental-help-now")?.addEventListener("click", () => {
+  setActiveView("mental");
+  $$("[data-mental-test]").forEach((button) => button.classList.toggle("active", button.dataset.mentalTest === "support"));
+  renderMentalCenter("support");
+  $("#mental-support")?.scrollIntoView({ behavior: "smooth", block: "center" });
+});
+$("#mental-copy-help")?.addEventListener("click", async () => {
+  const value = $("#mental-friend-message")?.value || "";
+  try {
+    await navigator.clipboard.writeText(value);
+    setStatus("已经复制。现在可以发给一个你信任的人。");
+  } catch {
+    setStatus("复制失败，可以手动选中这句话发给朋友。", "error");
+  }
+  setTimeout(clearStatus, 2400);
+});
 $("#language-toggle").addEventListener("click", () => setLanguage(state.lang === "zh" ? "en" : "zh"));
 $$("[data-view]").forEach((button) => {
   button.addEventListener("click", () => setActiveView(button.dataset.view));
+});
+$$("[data-mental-test]").forEach((button) => {
+  button.addEventListener("click", () => renderMentalCenter(button.dataset.mentalTest));
 });
 $$("[data-report-mode]").forEach((button) => {
   button.addEventListener("click", () => {
