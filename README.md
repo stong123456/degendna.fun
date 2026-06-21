@@ -46,6 +46,48 @@ SUPABASE_LEADERBOARD_TABLE=onchain_leaderboard
 
 Use the `service_role` key only in Railway server variables. Do not expose it in browser code.
 
+## Sepolia Medical Record NFT
+
+The NFT flow is platform-minted for user safety:
+
+- Users do not connect wallets.
+- Users do not sign messages.
+- Users do not approve tokens.
+- Users only enter a receiving EVM address.
+- The backend minter wallet pays Sepolia gas and calls the contract.
+
+Contract rules are intentionally strict:
+
+- Max supply is hard-coded at `9999`.
+- No public mint function exists.
+- Only `MINTER_ROLE` can mint.
+- One report hash can mint once.
+- One receiving wallet can receive only one NFT.
+- Rarity supply caps are hard-coded: `4500 / 2500 / 1500 / 800 / 400 / 249 / 50`.
+
+Before enabling claims:
+
+1. Run [supabase/nft_claims.sql](./supabase/nft_claims.sql) in Supabase SQL Editor.
+2. Send Sepolia ETH to the local deployer/minter address.
+3. Compile and deploy:
+
+```bash
+npm run compile:contracts
+npm run deploy:sepolia
+```
+
+4. Add the deployed contract address and minter private key to Railway variables:
+
+```text
+SUPABASE_NFT_CLAIMS_TABLE=nft_claims
+SEPOLIA_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com
+SEPOLIA_MINTER_PRIVATE_KEY=...
+SEPOLIA_NFT_CONTRACT_ADDRESS=...
+NFT_CLAIM_ENABLED=true
+```
+
+Keep `NFT_CLAIM_ENABLED=false` until the contract is deployed and the Supabase table exists.
+
 ## Deploy Notes
 
 - This is a zero-dependency Node app, so it can run on a VPS, Render, Railway, Fly.io, or any Node-capable container host.

@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="3660" viewBox="0 0 1800 3660">
+  <defs>
+    <linearGradient id="pageBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#020305"/>
+      <stop offset=".45" stop-color="#081011"/>
+      <stop offset="1" stop-color="#020204"/>
+    </linearGradient>
+    <pattern id="grid" width="46" height="46" patternUnits="userSpaceOnUse">
+      <path d="M46 0H0V46" fill="none" stroke="#102326" stroke-width="1"/>
+    </pattern>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feColorMatrix in="b" type="matrix" values="1 0 0 0 0 0 1 0 0 .9 0 0 1 0 1 0 0 0 .75 0"/>
+      <feBlend in="SourceGraphic"/>
+    </filter>
+    <filter id="goldGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feColorMatrix in="b" type="matrix" values="1 0 0 0 1 0 1 0 0 .68 0 0 1 0 .16 0 0 0 .75 0"/>
+      <feBlend in="SourceGraphic"/>
+    </filter>
+    <style>
+      .bg{fill:url(#pageBg)}
+      .cn{font-family:"Microsoft YaHei","Noto Sans SC",Arial,sans-serif}
+      .en{font-family:Inter,Arial,sans-serif}
+      .mono{font-family:"SFMono-Regular",Consolas,monospace}
+      .title{fill:#f7fbf5;font-weight:900}
+      .muted{fill:#a8b5b3}
+      .tiny{font-size:16px;letter-spacing:2px}
+      .small{font-size:18px}
+      .body{font-size:23px}
+      .h1{font-size:35px}
+      .h2{font-size:28px}
+      .chip{fill:rgba(5,16,16,.8);stroke:currentColor;stroke-width:1.5}
+      .panel{fill:rgba(2,8,9,.82);stroke:rgba(255,255,255,.16);stroke-width:1.4}
+      .scanline{stroke:currentColor;stroke-width:2;opacity:.6}
+      .brain{fill:none;stroke:currentColor;stroke-width:2.1;opacity:.9}
+      .common{color:#9ea8ac}
+      .uncommon{color:#40f59a}
+      .rare{color:#45a7ff}
+      .epic{color:#9b55ff}
+      .legendary{color:#ffd166}
+      .mythic{color:#ff5474}
+      .one{color:#7df9ff}
+    </style>
+    <g id="brainScan">
+      <rect x="0" y="0" width="210" height="168" rx="14" fill="rgba(0,30,28,.55)" stroke="currentColor" stroke-width="2"/>
+      <path class="brain" d="M54 88c-10-23 8-47 35-43 9-18 43-18 52 1 25-2 42 20 33 43 12 8 12 31-7 40-17 24-57 18-69 1-22 10-56-4-53-28-12-2-17-7-17-14 0-8 8-13 26-0z"/>
+      <path class="brain" d="M82 50c-4 17 7 29 22 31M124 45c8 16 0 33-17 38M67 90c24-11 58-6 90 10M87 128c24 6 51 4 74-8"/>
+      <path class="scanline" d="M22 28h22M22 48h14M22 68h18M22 128h22M166 28h22M174 48h14M170 68h18M166 128h22"/>
+      <path class="scanline" d="M56 150h12m8 0h20m9 0h52"/>
+      <circle cx="105" cy="88" r="70" fill="none" stroke="currentColor" stroke-width="1" opacity=".25"/>
+    </g>
+    <g id="medal">
+      <circle cx="0" cy="0" r="53" fill="#1a0f03" stroke="#ffd166" stroke-width="5"/>
+      <circle cx="0" cy="0" r="41" fill="rgba(255,209,102,.12)" stroke="#fff0bc" stroke-width="1.5"/>
+      <path d="M0-30L14-8 35 0 14 8 0 30-14 8-35 0-14-8Z" fill="currentColor" stroke="#fff0bc" stroke-width="2"/>
+      <path d="M-30-25c-20 17-20 51 0 68M30-25c20 17 20 51 0 68" fill="none" stroke="#ffd166" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g id="caseCard">
+      <path d="M30 0H594l40 40v520l-38 38H0V30Z" fill="rgba(255,255,255,.035)" stroke="currentColor" stroke-width="3"/>
+      <path d="M48 26h492l22 22h34v492l-22 22H28V72Z" fill="rgba(2,4,5,.88)" stroke="rgba(255,255,255,.2)" stroke-width="1.5"/>
+      <path d="M75 72h270l24 25h170l33-30h18v92H75Z" fill="rgba(255,255,255,.035)" stroke="rgba(255,255,255,.13)"/>
+      <text x="78" y="104" class="en tiny" fill="#e4c87b">Degen DNA Medical Record</text>
+      <text x="78" y="140" class="cn title" font-size="27">链上精神科测试网病历</text>
+      <text x="78" y="178" class="en body" fill="currentColor">Sepolia Testnet</text>
+      <text x="422" y="104" class="en" font-size="20" font-weight="800" fill="#68e6d7">Onchain Clinic</text>
+      <text x="422" y="132" class="en" font-size="18" fill="#a8b5b3">degendna.fun</text>
+      <circle cx="555" cy="120" r="35" fill="rgba(0,0,0,.6)" stroke="currentColor" stroke-width="2"/>
+      <path d="M537 120h12l7-18 13 36 10-18h14" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="60" y="214" width="335" height="215" rx="18" class="panel"/>
+      <text x="84" y="260" class="en tiny" fill="currentColor">PRIMARY DIAGNOSIS</text>
+      <text x="84" y="398" class="mono body" fill="currentColor">ICD-DN-001</text>
+      <g transform="translate(410 230)">
+        <use href="#brainScan"/>
+      </g>
+      <rect x="60" y="456" width="530" height="92" rx="16" fill="rgba(255,209,102,.05)" stroke="#ffd166" stroke-width="1.5"/>
+      <g transform="translate(115 502) scale(.78)" filter="url(#goldGlow)">
+        <use href="#medal"/>
+      </g>
+      <text x="185" y="493" class="en tiny" fill="#e4c87b">RARITY CLASS</text>
+      <text x="185" y="530" class="en title h2">Rarity:</text>
+      <rect x="60" y="570" width="530" height="82" rx="16" class="panel"/>
+      <text x="84" y="604" class="en tiny" fill="currentColor">SYMPTOM TAGS</text>
+      <rect x="84" y="621" width="115" height="24" rx="12" class="chip"/>
+      <rect x="210" y="621" width="115" height="24" rx="12" class="chip"/>
+      <rect x="336" y="621" width="115" height="24" rx="12" class="chip"/>
+      <text x="102" y="639" class="en small" fill="#c8fff4">FOMO</text>
+      <text x="228" y="639" class="en small" fill="#c8fff4">Degen Sleep</text>
+      <text x="354" y="639" class="en small" fill="#c8fff4">Overthinking</text>
+      <rect x="60" y="676" width="530" height="96" rx="16" class="panel"/>
+      <text x="84" y="715" class="en tiny" fill="currentColor">RECORD ID</text>
+      <text x="360" y="715" class="en tiny" fill="currentColor">ATTENDING</text>
+      <text x="360" y="748" class="en body muted">Stone @Stone141319</text>
+    </g>
+  </defs>
+  <rect class="bg" width="1800" height="3660"/>
+  <rect width="1800" height="3660" fill="url(#grid)" opacity=".75"/>
+  <text x="80" y="88" class="cn title" font-size="54">Degen DNA 测试网 NFT 病历 · 高端版稀有度预览</text>
+  <text x="80" y="132" class="cn muted body">已锁定参考风格：黑色硬质病例卡、紫青霓虹边、脑部扫描、金色稀有度勋章。NFT 不包含灯塔标识。</text>
+
+  <g transform="translate(80 210)" class="common">
+    <use href="#caseCard"/>
+    <text x="84" y="318" class="en title h1">Onchain Civil</text>
+    <text x="84" y="354" class="en title h1">Servant</text>
+    <text x="292" y="530" class="en title h2" fill="currentColor">Common</text>
+    <text x="84" y="748" class="mono body title">DDNA-CLINIC-S0-0001</text>
+  </g>
+  <g transform="translate(730 210)" class="uncommon" filter="url(#glow)">
+    <use href="#caseCard"/>
+    <text x="84" y="318" class="en title h1">Stablecoin</text>
+    <text x="84" y="354" class="en title h1">Meditator</text>
+    <text x="292" y="530" class="en title h2" fill="currentColor">Uncommon</text>
+    <text x="84" y="748" class="mono body title">DDNA-CLINIC-S0-0088</text>
+  </g>
+  <g transform="translate(80 1040)" class="rare" filter="url(#glow)">
+    <use href="#caseCard"/>
+    <text x="84" y="318" class="en title h1">Airdrop</text>
+    <text x="84" y="354" class="en title h1">Migratory Bird</text>
+    <text x="292" y="530" class="en title h2" fill="currentColor">Rare</text>
+    <text x="84" y="748" class="mono body title">DDNA-CLINIC-S0-0420</text>
+  </g>
+  <g transform="translate(730 1040)" class="epic" filter="url(#glow)">
+    <use href="#caseCard"/>
+    <text x="84" y="318" class="en title h1">Onchain</text>
+    <text x="84" y="354" class="en title h1">Adaptation</text>
+    <text x="292" y="530" class="en title h2" fill="currentColor">Epic</text>
+    <text x="84" y="748" class="mono body title">DDNA-CLINIC-S0-1314</text>
+  </g>
+  <g transform="translate(80 1870)" class="legendary" filter="url(#glow)">
+    <use href="#caseCard"/>
+    <text x="84" y="318" class="en title h1">Cycle</text>
+    <text x="84" y="354" class="en title h1">Survivor</text>
+    <text x="292" y="530" class="en title h2" fill="currentColor">Legendary</text>
+    <text x="84" y="748" class="mono body title">DDNA-CLINIC-S0-5200</text>
+  </g>
+  <g transform="translate(730 1870)" class="mythic" filter="url(#glow)">
+    <use href="#caseCard"/>
+    <text x="84" y="318" class="en title h1">Contract</text>
+    <text x="84" y="354" class="en title h1">Sleepwalker</text>
+    <text x="292" y="530" class="en title h2" fill="currentColor">Mythic</text>
+    <text x="84" y="748" class="mono body title">DDNA-CLINIC-S0-8888</text>
+  </g>
+  <g transform="translate(405 2700)" class="one" filter="url(#glow)">
+    <use href="#caseCard"/>
+    <text x="84" y="318" class="en title h1">Onchain</text>
+    <text x="84" y="354" class="en title h1">Anomaly</text>
+    <text x="292" y="530" class="en title h2" fill="currentColor">1/1</text>
+    <text x="84" y="748" class="mono body title">DDNA-CLINIC-S0-9999</text>
+  </g>
+  <text x="80" y="3585" class="cn muted body">预览说明：这版用于确认美术语言。最终上链图会按报告数据替换诊断、稀有度、症状标签、编号和接收地址。</text>
+</svg>

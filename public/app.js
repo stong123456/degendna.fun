@@ -90,7 +90,7 @@ const I18N = {
       rarity: "稀有度",
       share: "生成晒图并发到 X",
       defaultVerdict: "你的判断力偶尔在线，但下一根阳线总能让它下线。",
-      doctor: "链上主治医生：石头 @Stone141319",
+      doctor: "链上主治医生：石头",
       publicOnly: "不签名 · 只看公开数据",
       reminders: [
         "照完钱包，也记得照顾好自己。",
@@ -299,7 +299,7 @@ ${report.verdict}
       rarity: "Rarity",
       share: "Create card and share to X",
       defaultVerdict: "Your judgment occasionally comes online, but the next green candle always logs it out.",
-      doctor: "Onchain attending: Stone @Stone141319",
+      doctor: "Onchain attending: Stone",
       publicOnly: "No signature · public data only",
       reminders: [
         "Scan the wallet, then take care of yourself too.",
@@ -474,6 +474,21 @@ const RANDOM_SAMPLES = [
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+function ownedBoardKey(username, address) {
+  const user = String(username || "").replace(/^@/, "").toLowerCase();
+  const wallet = String(address || "").toLowerCase();
+  return user && wallet ? `degendna:own:${user}:${wallet}` : "";
+}
+
+function markOwnedBoardItem(username, address) {
+  const key = ownedBoardKey(username, address);
+  if (key) localStorage.setItem(key, "1");
+}
+
+function isOwnedBoardItem(item = {}) {
+  return localStorage.getItem(ownedBoardKey(item.username || item.handle, item.address)) === "1";
+}
 
 const form = $("#scan-form");
 const addressInput = $("#wallet-address");
@@ -655,6 +670,7 @@ async function saveToLeaderboard(report) {
   });
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error || t("board.submitFailed"));
+  markOwnedBoardItem(report.xProfile.username, report.address);
   await renderLeaderboard(payload.entries);
 }
 
@@ -733,7 +749,7 @@ function renderBoardRow(item, index, rankConfig, metricName) {
             </small>
           </div>
         </a>
-        <button class="ghost-button" type="button" data-board-address="${escapeHtml(item.address)}" data-board-x="${escapeHtml(item.handle || item.username || "")}">${escapeHtml(t("board.retest"))}</button>
+        ${isOwnedBoardItem(item) ? `<button class="ghost-button" type="button" data-board-address="${escapeHtml(item.address)}" data-board-x="${escapeHtml(item.handle || item.username || "")}">${escapeHtml(t("board.retest"))}</button>` : ""}
       </div>
     `;
 }
@@ -801,6 +817,27 @@ function cardRarityLabel(rarity = {}, lang = state.lang) {
   return `${rarity.tierName || "--"}${rateText}`;
 }
 
+function recordIdForReport(report = state.currentReport) {
+  const seed = hashString(`${report?.address || ""}:${report?.personalityId || ""}:${report?.rarity?.tier || ""}`);
+  const serial = String((seed % 9999) + 1).padStart(4, "0");
+  return `DDNA-CLINIC-S0-${serial}`;
+}
+
+function diagnosisLineForReport(report = state.currentReport) {
+  if (!report) return "Onchain Clinic Case";
+  if (report.language === "en") return report.personality || "Onchain Clinic Case";
+  const tier = report.rarity?.tier || "common";
+  return {
+    common: "Onchain Civil Servant",
+    uncommon: "Stablecoin Meditator",
+    rare: "Airdrop Migratory Bird",
+    epic: "Onchain Adaptation Disorder",
+    legendary: "Cycle Survivor",
+    mythic: "Contract Sleepwalker",
+    unique: "Onchain Anomaly"
+  }[tier] || "Onchain Clinic Case";
+}
+
 function hashString(value) {
   let hash = 2166136261;
   for (const char of String(value || "")) {
@@ -856,9 +893,18 @@ function renderRarity(report = state.currentReport) {
 
   const shareCard = $("#share-card");
   if (shareCard) shareCard.dataset.rarity = rarity.tier || "common";
+  text("#card-record-id", recordIdForReport(report));
+  text("#card-diagnosis-en", diagnosisLineForReport(report));
   text("#card-rarity", cardRarityLabel(rarity));
   text("#card-rarity-detail", comboRarityDetail(rarity));
   text("#card-care-note", careNoteForReport(report));
+  const mystic = $("#card-mystic");
+  if (mystic) {
+    mystic.innerHTML = (rarity.mystic || [])
+      .slice(0, 4)
+      .map((item) => `<span title="${escapeHtml(item.label || "")}: ${escapeHtml(item.value || "")}">${escapeHtml(item.value || "")}</span>`)
+      .join("");
+  }
 }
 
 function renderReport(report) {
@@ -1367,7 +1413,7 @@ async function drawSyntheticShareCanvas(report) {
   ctx.fillText(formatXName(identity), 176, 116, 520);
   ctx.fillStyle = "#a99f91";
   ctx.font = "700 22px Microsoft YaHei, Inter, sans-serif";
-  ctx.fillText(`${report.siteHost} · @Stone141319`, 176, 150, 520);
+  ctx.fillText(report.siteHost, 176, 150, 520);
 
   ctx.fillStyle = rarityColor;
   ctx.font = "800 34px Microsoft YaHei, Inter, sans-serif";
@@ -1499,7 +1545,7 @@ function charLength(value) {
 
 function truncateChars(value, max) {
   const chars = Array.from(String(value || ""));
-  return chars.length <= max ? chars.join("") : `${chars.slice(0, Math.max(0, max - 1)).join("")}…`;
+  return chars.length <= max ? chars.join("") : `${chars.slice(0, Math.max(0, max - 3)).join("")}...`;
 }
 
 function fitTweetText(value, max = 250) {

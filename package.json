@@ -5,9 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "node server.mjs",
-    "start": "NODE_ENV=production node server.mjs"
+    "start": "NODE_ENV=production node server.mjs",
+    "compile:contracts": "node scripts/compile-contract.cjs",
+    "deploy:sepolia": "node scripts/deploy-sepolia.cjs"
   },
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "ethers": "^6.13.4"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.6",
+    "@openzeppelin/contracts": "^5.0.2",
+    "hardhat": "^2.22.17",
+    "solc": "^0.8.24"
   }
 }

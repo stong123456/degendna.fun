@@ -1195,8 +1195,9 @@ input:focus {
   isolation: isolate;
   overflow: hidden;
   border: 1px solid var(--card-border);
-  border-radius: var(--radius);
+  border-radius: 18px;
   background:
+    radial-gradient(circle at 86% 12%, color-mix(in srgb, var(--card-accent) 28%, transparent), transparent 18%),
     linear-gradient(145deg, color-mix(in srgb, var(--card-accent) 22%, transparent), transparent 34%),
     linear-gradient(320deg, color-mix(in srgb, var(--card-secondary) 18%, transparent), transparent 36%),
     linear-gradient(180deg, var(--card-bg-a), var(--card-bg-b) 52%, var(--card-bg-c));
@@ -1328,10 +1329,10 @@ input:focus {
 .share-card::after {
   content: "";
   position: absolute;
-  inset: 11px;
+  inset: 12px;
   pointer-events: none;
   border: 1px solid var(--card-frame);
-  border-radius: 7px;
+  border-radius: 14px;
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.045),
     inset 0 0 44px color-mix(in srgb, var(--card-accent) 10%, transparent);
@@ -1360,13 +1361,36 @@ input:focus {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 16px;
+  padding: 16px 18px;
   color: var(--muted);
   font-size: 12px;
   font-weight: 800;
 }
 
-.share-card-top > span:last-child {
+.medical-pulse-icon {
+  flex: 0 0 auto;
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(160, 186, 196, 0.82);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(80, 118, 132, 0.42), rgba(7, 12, 15, 0.88) 62%);
+  box-shadow:
+    0 0 0 3px rgba(120, 156, 170, 0.08),
+    0 0 24px rgba(108, 177, 202, 0.22);
+}
+
+.medical-pulse-icon::before {
+  content: "";
+  position: absolute;
+  inset: 11px 7px;
+  background: currentColor;
+  color: #9bb6c2;
+  clip-path: polygon(0 55%, 24% 55%, 34% 26%, 50% 78%, 63% 45%, 100% 45%, 100% 56%, 69% 56%, 51% 100%, 34% 48%, 28% 66%, 0 66%);
+}
+
+.share-card-top > span:nth-child(2) {
   flex: 0 0 auto;
   display: grid;
   justify-items: end;
@@ -1385,7 +1409,100 @@ input:focus {
 
 .share-card-body {
   position: relative;
-  padding: 12px 20px 20px;
+  padding: 8px 20px 20px;
+}
+
+.medical-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: #e4c87b;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.medical-card-head b {
+  color: var(--card-accent);
+  white-space: nowrap;
+}
+
+.medical-scan {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 126px;
+  gap: 12px;
+  align-items: stretch;
+  margin-bottom: 12px;
+}
+
+.medical-scan > div:first-child,
+.brain-scan {
+  border: 1px solid color-mix(in srgb, var(--card-accent) 44%, transparent);
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, rgba(0, 0, 0, 0.35), var(--card-panel)),
+    rgba(0, 0, 0, 0.24);
+}
+
+.medical-scan > div:first-child {
+  padding: 12px;
+}
+
+.medical-scan span {
+  display: block;
+  color: var(--card-accent);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.16em;
+}
+
+.medical-scan strong {
+  display: block;
+  margin-top: 10px;
+  color: var(--paper);
+  font-size: 19px;
+  line-height: 1.06;
+}
+
+.brain-scan {
+  position: relative;
+  min-height: 92px;
+  overflow: hidden;
+}
+
+.brain-scan::before {
+  content: "";
+  position: absolute;
+  inset: 16px 18px 22px;
+  border: 2px solid var(--card-accent);
+  border-radius: 52% 46% 48% 46%;
+  box-shadow:
+    inset -18px 0 0 color-mix(in srgb, var(--card-accent) 14%, transparent),
+    0 0 18px color-mix(in srgb, var(--card-accent) 28%, transparent);
+  opacity: 0.85;
+}
+
+.brain-scan::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 11px, color-mix(in srgb, var(--card-accent) 20%, transparent) 11px 12px),
+    repeating-linear-gradient(90deg, transparent 0 16px, color-mix(in srgb, var(--card-accent) 16%, transparent) 16px 17px);
+  opacity: 0.35;
+}
+
+.brain-scan span {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 16px;
+  height: 13px;
+  background: currentColor;
+  color: var(--card-accent);
+  clip-path: polygon(0 62%, 16% 62%, 23% 20%, 32% 88%, 42% 55%, 54% 55%, 60% 32%, 70% 80%, 78% 62%, 100% 62%, 100% 72%, 80% 72%, 70% 98%, 60% 50%, 55% 70%, 40% 70%, 32% 100%, 22% 45%, 17% 75%, 0 75%);
 }
 
 .share-wallet {
@@ -1464,6 +1581,27 @@ input:focus {
 
 .card-tags {
   margin: 12px 0;
+}
+
+.card-mystic {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin: 10px 0 12px;
+}
+
+.card-mystic span {
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--card-accent) 34%, transparent);
+  border-radius: 999px;
+  padding: 6px 8px;
+  color: var(--muted);
+  background: rgba(0, 0, 0, 0.2);
+  font-size: 11px;
+  font-weight: 850;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .share-card blockquote {

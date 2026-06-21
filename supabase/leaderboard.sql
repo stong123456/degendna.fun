@@ -33,6 +33,12 @@ create index if not exists onchain_leaderboard_rank_idx
 create index if not exists onchain_leaderboard_address_idx
   on public.onchain_leaderboard (address);
 
+create unique index if not exists onchain_leaderboard_username_unique_idx
+  on public.onchain_leaderboard (lower(username));
+
+create unique index if not exists onchain_leaderboard_address_unique_idx
+  on public.onchain_leaderboard (lower(address));
+
 alter table public.onchain_leaderboard enable row level security;
 
 grant select on public.onchain_leaderboard to anon, authenticated;

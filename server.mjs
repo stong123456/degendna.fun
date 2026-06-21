@@ -1,4 +1,5 @@
 import { createServer } from "node:http";
+import { createHash, randomUUID } from "node:crypto";
 import { readFile, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { extname, join, resolve } from "node:path";
@@ -17,9 +18,14 @@ const LEADERBOARD_READ_LIMIT = 1000;
 const SUPABASE_URL = String(process.env.SUPABASE_URL || "").replace(/\/+$/, "");
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 const SUPABASE_LEADERBOARD_TABLE = process.env.SUPABASE_LEADERBOARD_TABLE || "onchain_leaderboard";
+const SUPABASE_NFT_CLAIMS_TABLE = process.env.SUPABASE_NFT_CLAIMS_TABLE || "nft_claims";
 const SUPABASE_TIMEOUT_MS = 3500;
 const X_BEARER_TOKEN = process.env.X_BEARER_TOKEN || process.env.X_API_BEARER_TOKEN || process.env.TWITTER_BEARER_TOKEN || "";
 const X_PROFILE_TIMEOUT_MS = 3500;
+const NFT_CLAIM_ENABLED = String(process.env.NFT_CLAIM_ENABLED || "false").toLowerCase() === "true";
+const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com";
+const SEPOLIA_MINTER_PRIVATE_KEY = process.env.SEPOLIA_MINTER_PRIVATE_KEY || "";
+const SEPOLIA_NFT_CONTRACT_ADDRESS = process.env.SEPOLIA_NFT_CONTRACT_ADDRESS || "";
 
 const REPORT_VERSION = "20260621-lighthouse-avatar-v7";
 const MINUTE_MS = 60 * 1000;
@@ -41,6 +47,11 @@ const SAMPLE_ADDRESSES = new Set([
   "0xf977814e90da44bfa03b6295a0616a897441acec",
   "0x4e9ce36e442e55ecd9025b9a6e0d88485d628a67"
 ]);
+
+const NFT_CONTRACT_ABI = [
+  "function mintMedicalRecord(address to,string tokenUri,bytes32 reportHash,uint8 rarityTier) external returns (uint256)",
+  "event MedicalRecordMinted(address indexed to,uint256 indexed tokenId,bytes32 indexed reportHash,uint8 rarityTier,string tokenUri)"
+];
 
 const reportCache = new Map();
 const chainCache = new Map();
@@ -1293,8 +1304,12 @@ function chainCacheKey(address) {
   return `chains:${REPORT_VERSION}:${chainConfigKey()}:${normalizedAddressKey(address)}`;
 }
 
+function isSampleWallet(address) {
+  return SAMPLE_ADDRESSES.has(normalizedAddressKey(address));
+}
+
 function cacheTtlForAddress(address) {
-  return SAMPLE_ADDRESSES.has(normalizedAddressKey(address)) ? SAMPLE_CACHE_TTL_MS : ANALYZE_CACHE_TTL_MS;
+  return isSampleWallet(address) ? SAMPLE_CACHE_TTL_MS : ANALYZE_CACHE_TTL_MS;
 }
 
 function clonePayload(payload) {
@@ -2904,7 +2919,7 @@ function buildModeStrategy(mode, context) {
 function compactTweetLine(text, limit) {
   const clean = trimSentenceEnd(String(text || "").replace(/\s+/g, " ").trim());
   if (clean.length <= limit) return clean;
-  return `${clean.slice(0, Math.max(0, limit - 1))}…`;
+  return `${clean.slice(0, Math.max(0, limit - 3))}...`;
 }
 
 function tweetOpener(mode, lang) {
@@ -2991,6 +3006,39 @@ function rateFromScore(score, floor = 0.05) {
   const normalized = Math.max(0, Math.min(99.95, score)) / 100;
   const rate = floor + 42 * Math.pow(1 - normalized, 2.15);
   return Number(Math.max(floor, Math.min(65, rate)).toFixed(rate < 1 ? 2 : 1));
+}
+
+function mysticTrait(address, salt, lang, zhValues, enValues) {
+  const labelsZh = {
+    moon: "链上月相",
+    pulse: "钱包脉象",
+    candle: "K线卦象",
+    room: "候诊室",
+    fate: "命运向量"
+  };
+  const labelsEn = {
+    moon: "Chain Moon Phase",
+    pulse: "Onchain Pulse",
+    candle: "Candle Omen",
+    room: "Clinic Room",
+    fate: "Fate Vector"
+  };
+  const index = stableIndex(address, `mystic-${salt}`, zhValues.length);
+  return {
+    id: salt,
+    label: pickLocalized(lang, labelsZh[salt] || salt, labelsEn[salt] || salt),
+    value: pickLocalized(lang, zhValues[index], enValues[index])
+  };
+}
+
+function buildMysticTraits(address, lang) {
+  return [
+    mysticTrait(address, "moon", lang, ["新月挂单", "半月观望", "满月上头", "血月回撤", "虚空月相"], ["New Moon Bid", "Half Moon Wait", "Full Moon FOMO", "Blood Moon Drawdown", "Void Moon"]),
+    mysticTrait(address, "pulse", lang, ["平稳脉", "过载脉", "间歇性发疯", "FOMO 尖峰", "钻石慢拍"], ["Calm", "Overclocked", "Irregular", "FOMO Spike", "Diamond Slowbeat"]),
+    mysticTrait(address, "candle", lang, ["阳线海市蜃楼", "阴线迷雾", "横盘经文", "突破发热", "插针预言"], ["Green Mirage", "Red Fog", "Sideways Sutra", "Breakout Fever", "Wick Prophecy"]),
+    mysticTrait(address, "room", lang, ["404 号诊室", "777 号诊室", "1314 号诊室", "8888 号急诊", "0x 号观察室"], ["Room 404", "Room 777", "Room 1314", "Room 8888", "Room 0x"]),
+    mysticTrait(address, "fate", lang, ["均值回归", "叙事漂移", "周期回声", "流动性阴影", "命运滑点"], ["Mean Reversion", "Narrative Drift", "Cycle Echo", "Liquidity Shadow", "Fate Slippage"])
+  ];
 }
 
 function rarityFromRate(rate, lang) {
@@ -3158,7 +3206,8 @@ function buildRarity(metrics, scores, personality, badges, address, lang, season
         `${combo.tierName} 组合 · 类似徽章组合出现率约 ${combo.appearanceRate}%。`,
         `${combo.tierName} combo · similar badge stack appears around ${combo.appearanceRate}%.`
       )
-    }
+    },
+    mystic: buildMysticTraits(address, lang)
   };
 }
 
@@ -3267,6 +3316,10 @@ function buildReport(address, chains, lang = "zh", seasonSampleSize = 0) {
     productName: pickLocalized(lang, "链上照妖镜", "Degen DNA"),
     productSubtitle: pickLocalized(lang, "Degen DNA Report", "Onchain Mirror"),
     reportVersion: REPORT_VERSION,
+    nftEligible: !isSampleWallet(address),
+    nftIneligibleReason: isSampleWallet(address)
+      ? pickLocalized(lang, "样本钱包可以无限生成报告，但不能领取测试网 NFT。", "Sample wallets can generate unlimited reports, but cannot claim testnet NFTs.")
+      : "",
     degraded: degradedChains.length > 0,
     degradedChains,
     personalityId,
@@ -3321,12 +3374,24 @@ async function readJsonBody(req, maxBytes = 32_768) {
   return JSON.parse(body);
 }
 
-function hasSupabaseLeaderboard() {
+function hasSupabase() {
   return Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
 }
 
+function hasSupabaseLeaderboard() {
+  return hasSupabase();
+}
+
+function supabaseTableUrl(tableName) {
+  return `${SUPABASE_URL}/rest/v1/${encodeURIComponent(tableName)}`;
+}
+
 function supabaseLeaderboardUrl() {
-  return `${SUPABASE_URL}/rest/v1/${encodeURIComponent(SUPABASE_LEADERBOARD_TABLE)}`;
+  return supabaseTableUrl(SUPABASE_LEADERBOARD_TABLE);
+}
+
+function supabaseNftClaimsUrl() {
+  return supabaseTableUrl(SUPABASE_NFT_CLAIMS_TABLE);
 }
 
 function supabaseHeaders(extra = {}) {
@@ -3434,6 +3499,25 @@ async function writeSupabaseLeaderboard(entries) {
   });
   if (!response.ok) {
     throw new Error(`Supabase leaderboard write failed: ${response.status} ${await response.text()}`);
+  }
+}
+
+async function deleteSupabaseLeaderboardDuplicates({ username, address }) {
+  if (!hasSupabaseLeaderboard()) return;
+  const normalizedUsername = String(username || "").replace(/^@/, "");
+  const normalizedAddress = normalizeAddress(address);
+  if (!normalizedUsername && !normalizedAddress) return;
+  const url = new URL(supabaseLeaderboardUrl());
+  const clauses = [];
+  if (normalizedUsername) clauses.push(`username.eq.${normalizedUsername}`);
+  if (normalizedAddress) clauses.push(`address.eq.${normalizedAddress}`);
+  url.searchParams.set("or", `(${clauses.join(",")})`);
+  const response = await fetchSupabase(url, {
+    method: "DELETE",
+    headers: supabaseHeaders({ prefer: "return=minimal" })
+  });
+  if (!response.ok) {
+    throw new Error(`Supabase leaderboard dedupe failed: ${response.status} ${await response.text()}`);
   }
 }
 
@@ -3560,10 +3644,23 @@ async function submitLeaderboardEntry({ address, lang, username }) {
   };
 
   const current = await readLeaderboard();
+  const entryUsername = String(entry.username || "").toLowerCase();
+  const entryAddress = normalizedAddressKey(entry.address);
   const next = publicLeaderboard([
     entry,
-    ...current.filter((item) => item.id !== entry.id)
+    ...current.filter((item) =>
+      item.id !== entry.id &&
+      String(item.username || "").toLowerCase() !== entryUsername &&
+      normalizedAddressKey(item.address) !== entryAddress
+    )
   ]);
+  if (hasSupabaseLeaderboard()) {
+    try {
+      await deleteSupabaseLeaderboardDuplicates(entry);
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
   await writeLeaderboard(next);
   return { entry, entries: next, profile };
 }
@@ -3574,6 +3671,324 @@ async function leaderboardSampleSize() {
   } catch {
     return 0;
   }
+}
+
+const NFT_RARITY_TIERS = {
+  common: 0,
+  uncommon: 1,
+  rare: 2,
+  epic: 3,
+  legendary: 4,
+  mythic: 5,
+  unique: 6
+};
+
+const NFT_RARITY_SUPPLY = [4500, 2500, 1500, 800, 400, 249, 50];
+
+function htmlEscape(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function reportHashForNft(report, username = "") {
+  const payload = JSON.stringify({
+    version: REPORT_VERSION,
+    address: normalizedAddressKey(report.address),
+    username: String(username || "").replace(/^@/, "").toLowerCase(),
+    language: report.language || "zh",
+    personalityId: report.personalityId,
+    rarity: report.rarity?.tier,
+    degen: report.scores?.degen,
+    diamond: report.scores?.diamond,
+    airdrop: report.scores?.airdrop
+  });
+  return `0x${createHash("sha256").update(payload).digest("hex")}`;
+}
+
+function nftClaimId(reportHash) {
+  return `ddna-${String(reportHash).replace(/^0x/, "").slice(0, 20)}`;
+}
+
+function nftMetadataUrl(claimId) {
+  return `${SITE_URL.replace(/\/+$/, "")}/api/nft/metadata/${encodeURIComponent(claimId)}`;
+}
+
+function nftImageUrl(claimId) {
+  return `${SITE_URL.replace(/\/+$/, "")}/api/nft/image/${encodeURIComponent(claimId)}.svg`;
+}
+
+function nftRarityTier(report) {
+  return NFT_RARITY_TIERS[report.rarity?.tier] ?? 0;
+}
+
+function claimRowFromReport({ claimId, reportHash, report, receiver, profile }) {
+  const tier = nftRarityTier(report);
+  const selected = report.modes?.abstract || report.report || {};
+  return {
+    id: claimId,
+    report_hash: reportHash,
+    report_id: report.rarity?.season?.id || "season-0",
+    address: normalizedAddressKey(report.address),
+    receiver: normalizedAddressKey(receiver),
+    username: profile?.username || null,
+    handle: profile?.handle || null,
+    language: report.language || "zh",
+    personality: report.personality,
+    personality_id: report.personalityId,
+    rarity_tier: tier,
+    rarity_label: report.rarity?.tierName || report.rarity?.tier || "Common",
+    rarity_supply_cap: NFT_RARITY_SUPPLY[tier],
+    degen: report.scores.degen,
+    diamond: report.scores.diamond,
+    airdrop: report.scores.airdrop,
+    mystic_traits: report.rarity?.mystic || {},
+    badges: report.badges?.slice(0, 5) || [],
+    verdict: selected.verdict || report.verdict || "",
+    loss_cause: selected.lossCause || report.lossCause || "",
+    metadata_url: nftMetadataUrl(claimId),
+    image_url: nftImageUrl(claimId),
+    status: "pending",
+    updated_at: new Date().toISOString()
+  };
+}
+
+async function fetchNftClaimByFilter(filter) {
+  if (!hasSupabase()) return null;
+  const url = new URL(supabaseNftClaimsUrl());
+  url.searchParams.set("select", "*");
+  url.searchParams.set("limit", "1");
+  Object.entries(filter).forEach(([key, value]) => url.searchParams.set(key, `eq.${value}`));
+  const response = await fetchSupabase(url, { headers: supabaseHeaders() });
+  if (!response.ok) throw new Error(`Supabase NFT claim read failed: ${response.status} ${await response.text()}`);
+  const rows = await response.json();
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
+async function fetchExistingNftClaim({ reportHash, address, receiver, username }) {
+  if (!hasSupabase()) return null;
+  const url = new URL(supabaseNftClaimsUrl());
+  url.searchParams.set("select", "*");
+  url.searchParams.set("limit", "1");
+  const clauses = [
+    `report_hash.eq.${reportHash}`,
+    `address.eq.${normalizedAddressKey(address)}`,
+    `receiver.eq.${normalizedAddressKey(receiver)}`
+  ];
+  const normalizedUsername = String(username || "").replace(/^@/, "").toLowerCase();
+  if (normalizedUsername) clauses.push(`username.eq.${normalizedUsername}`);
+  url.searchParams.set("or", `(${clauses.join(",")})`);
+  const response = await fetchSupabase(url, { headers: supabaseHeaders() });
+  if (!response.ok) throw new Error(`Supabase NFT claim lookup failed: ${response.status} ${await response.text()}`);
+  const rows = await response.json();
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
+async function insertNftClaim(row) {
+  const response = await fetchSupabase(supabaseNftClaimsUrl(), {
+    method: "POST",
+    headers: supabaseHeaders({
+      "content-type": "application/json",
+      prefer: "return=representation"
+    }),
+    body: JSON.stringify(row)
+  });
+  if (response.status === 409) return null;
+  if (!response.ok) throw new Error(`Supabase NFT claim insert failed: ${response.status} ${await response.text()}`);
+  const rows = await response.json();
+  return Array.isArray(rows) ? rows[0] || row : row;
+}
+
+async function updateNftClaim(id, patch) {
+  const url = new URL(supabaseNftClaimsUrl());
+  url.searchParams.set("id", `eq.${id}`);
+  const response = await fetchSupabase(url, {
+    method: "PATCH",
+    headers: supabaseHeaders({
+      "content-type": "application/json",
+      prefer: "return=representation"
+    }),
+    body: JSON.stringify({ ...patch, updated_at: new Date().toISOString() })
+  });
+  if (!response.ok) throw new Error(`Supabase NFT claim update failed: ${response.status} ${await response.text()}`);
+  const rows = await response.json();
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
+function nftClaimPublicPayload(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    address: row.address,
+    receiver: row.receiver,
+    username: row.username,
+    handle: row.handle,
+    personality: row.personality,
+    rarityTier: row.rarity_tier,
+    rarityLabel: row.rarity_label,
+    metadataUrl: row.metadata_url,
+    imageUrl: row.image_url,
+    tokenId: row.token_id,
+    txHash: row.tx_hash,
+    status: row.status,
+    mintedAt: row.minted_at,
+    explorerUrl: row.tx_hash ? `https://sepolia.etherscan.io/tx/${row.tx_hash}` : null
+  };
+}
+
+async function mintNftClaim(row) {
+  const { Contract, JsonRpcProvider, Wallet, isAddress: ethersIsAddress } = await import("ethers");
+  if (!ethersIsAddress(SEPOLIA_NFT_CONTRACT_ADDRESS)) throw new Error("SEPOLIA_NFT_CONTRACT_ADDRESS is not configured.");
+  if (!SEPOLIA_MINTER_PRIVATE_KEY) throw new Error("SEPOLIA_MINTER_PRIVATE_KEY is not configured.");
+  const provider = new JsonRpcProvider(SEPOLIA_RPC_URL);
+  const wallet = new Wallet(SEPOLIA_MINTER_PRIVATE_KEY, provider);
+  const contract = new Contract(SEPOLIA_NFT_CONTRACT_ADDRESS, NFT_CONTRACT_ABI, wallet);
+  const tx = await contract.mintMedicalRecord(row.receiver, row.metadata_url, row.report_hash, row.rarity_tier);
+  const receipt = await tx.wait();
+  let tokenId = null;
+  for (const log of receipt.logs || []) {
+    try {
+      const parsed = contract.interface.parseLog(log);
+      if (parsed?.name === "MedicalRecordMinted") {
+        tokenId = Number(parsed.args.tokenId);
+        break;
+      }
+    } catch {
+      // Ignore logs from other contracts.
+    }
+  }
+  return {
+    token_id: tokenId,
+    tx_hash: receipt.hash,
+    status: "minted",
+    minted_at: new Date().toISOString()
+  };
+}
+
+async function submitNftClaim({ address, receiver, username, lang }) {
+  const normalizedSource = normalizeAddress(address);
+  const normalizedReceiver = normalizeAddress(receiver);
+  if (!isAddress(normalizedSource) || !isAddress(normalizedReceiver)) {
+    throw new Error(pickLocalized(lang, "请输入有效的钱包地址和 NFT 接收地址。", "Enter a valid wallet address and NFT receiver address."));
+  }
+  if (isSampleWallet(normalizedSource)) {
+    throw new Error(pickLocalized(lang, "样本钱包可以无限生成报告，但不能领取测试网 NFT。", "Sample wallets can generate unlimited reports, but cannot claim testnet NFTs."));
+  }
+  if (!NFT_CLAIM_ENABLED) {
+    throw new Error(pickLocalized(lang, "测试网 NFT 领取还没开放，等合约部署完成后再来复诊。", "Testnet NFT claims are not open yet. Check back after contract deployment."));
+  }
+  if (!hasSupabase()) {
+    throw new Error(pickLocalized(lang, "NFT 领取需要先配置 Supabase。", "NFT claims require Supabase configuration first."));
+  }
+
+  const profile = username ? await resolveXProfile(username) : null;
+  const report = await analyzeWallet(normalizedSource, lang);
+  const reportHash = reportHashForNft(report, profile?.username || username || "");
+  const existing = await fetchExistingNftClaim({
+    reportHash,
+    address: normalizedSource,
+    receiver: normalizedReceiver,
+    username: profile?.username || username || ""
+  });
+  if (existing) {
+    return { claim: nftClaimPublicPayload(existing), duplicate: true };
+  }
+
+  const claimId = nftClaimId(reportHash);
+  const inserted = await insertNftClaim(claimRowFromReport({
+    claimId,
+    reportHash,
+    report,
+    receiver: normalizedReceiver,
+    profile
+  }));
+  let row = inserted || await fetchExistingNftClaim({
+    reportHash,
+    address: normalizedSource,
+    receiver: normalizedReceiver,
+    username: profile?.username || username || ""
+  });
+  if (!row) throw new Error(pickLocalized(lang, "NFT 领取排队失败，请稍后重试。", "NFT claim queue failed. Try again later."));
+  if (row.status === "minted") return { claim: nftClaimPublicPayload(row), duplicate: true };
+
+  try {
+    row = await updateNftClaim(row.id, { status: "minting", error: null });
+    const minted = await mintNftClaim(row);
+    row = await updateNftClaim(row.id, minted);
+    return { claim: nftClaimPublicPayload(row), duplicate: false };
+  } catch (error) {
+    await updateNftClaim(row.id, { status: "failed", error: error.message || String(error) }).catch(() => {});
+    throw error;
+  }
+}
+
+function nftMetadataFromRow(row) {
+  const traits = row.mystic_traits && typeof row.mystic_traits === "object" ? row.mystic_traits : {};
+  const badges = Array.isArray(row.badges) ? row.badges : [];
+  return {
+    name: `Degen DNA Medical Record ${String(row.id || "").toUpperCase()}`,
+    description: "A Sepolia testnet commemorative medical-record NFT generated from a degendna.fun onchain personality report. Entertainment only. Not medical, psychological, investment, or financial advice.",
+    image: row.image_url || nftImageUrl(row.id),
+    external_url: SITE_URL,
+    attributes: [
+      { trait_type: "Diagnosis", value: row.personality },
+      { trait_type: "Rarity", value: row.rarity_label },
+      { trait_type: "Rarity Tier", value: row.rarity_tier },
+      { trait_type: "Degen Index", value: row.degen, max_value: 100 },
+      { trait_type: "Diamond Hand Index", value: row.diamond, max_value: 100 },
+      { trait_type: "Airdrop Radar", value: row.airdrop, max_value: 100 },
+      ...badges.slice(0, 3).map((badge, index) => ({ trait_type: `Badge ${index + 1}`, value: badge.name || String(badge) })),
+      ...Object.entries(traits).map(([key, value]) => ({ trait_type: key, value })),
+      { trait_type: "Season", value: "Season 0: Genesis Clinic" },
+      { trait_type: "Network", value: "Ethereum Sepolia" },
+      { trait_type: "Attending", value: "Stone" }
+    ]
+  };
+}
+
+function nftImageSvg(row) {
+  const accents = ["#9fb3c8", "#49d19d", "#5fb6ff", "#9a5cff", "#e8bd58", "#ff6d4c", "#e6f7ff"];
+  const accent = accents[Number(row.rarity_tier || 0)] || accents[0];
+  const traits = row.mystic_traits && typeof row.mystic_traits === "object" ? Object.values(row.mystic_traits).slice(0, 4) : [];
+  const badges = Array.isArray(row.badges) ? row.badges.slice(0, 3).map((badge) => badge.name || String(badge)) : [];
+  const title = htmlEscape(row.personality || "Onchain Adaptation Disorder");
+  const rarity = htmlEscape(row.rarity_label || "Common");
+  const verdict = htmlEscape(row.verdict || "Wallet status requires follow-up.");
+  const symptoms = [...badges, ...traits].slice(0, 5);
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1600" viewBox="0 0 1600 1600">
+  <defs>
+    <radialGradient id="g" cx="72%" cy="18%" r="82%"><stop offset="0" stop-color="${accent}" stop-opacity=".34"/><stop offset=".52" stop-color="#061316"/><stop offset="1" stop-color="#020405"/></radialGradient>
+    <linearGradient id="b" x1="0" x2="1"><stop stop-color="${accent}"/><stop offset=".54" stop-color="#f0d08a"/><stop offset="1" stop-color="#6de6ff"/></linearGradient>
+  </defs>
+  <rect width="1600" height="1600" fill="#020405"/>
+  <rect x="70" y="70" width="1460" height="1460" rx="86" fill="url(#g)" stroke="url(#b)" stroke-width="8"/>
+  <rect x="124" y="124" width="1352" height="1352" rx="48" fill="#071013" opacity=".92" stroke="#39515a" stroke-width="2"/>
+  <text x="190" y="198" fill="#e2c36e" font-family="Arial, sans-serif" font-size="34" letter-spacing="12">Degen DNA Medical Record</text>
+  <text x="190" y="276" fill="#f4f6f8" font-family="Arial, sans-serif" font-size="62" font-weight="900">链上精神科测试网病历</text>
+  <text x="190" y="334" fill="${accent}" font-family="Arial, sans-serif" font-size="36">Sepolia Testnet · Onchain Clinic</text>
+  <circle cx="1322" cy="238" r="58" fill="#0b171b" stroke="#9fb3c8" stroke-width="4"/>
+  <path d="M1274 238h32l16-38 24 78 22-48h50" fill="none" stroke="#9fb3c8" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="190" y="430" width="760" height="420" rx="30" fill="#0a1719" stroke="${accent}" stroke-opacity=".72" stroke-width="3"/>
+  <text x="238" y="506" fill="${accent}" font-family="Arial, sans-serif" font-size="27" letter-spacing="8">PRIMARY DIAGNOSIS</text>
+  <foreignObject x="236" y="554" width="650" height="190"><div xmlns="http://www.w3.org/1999/xhtml" style="font:900 58px Arial,sans-serif;color:#f4f6f8;line-height:1.12">${title}</div></foreignObject>
+  <text x="238" y="775" fill="#9fb3c8" font-family="Arial, sans-serif" font-size="34">Degen ${Number(row.degen || 0)}/100 · Diamond ${Number(row.diamond || 0)}/100</text>
+  <rect x="1010" y="430" width="350" height="420" rx="30" fill="#061214" stroke="#23454c" stroke-width="3"/>
+  <circle cx="1185" cy="620" r="118" fill="none" stroke="${accent}" stroke-opacity=".52" stroke-width="3"/>
+  <path d="M1085 624c32-98 170-113 202-9 23 75-44 146-120 123-48-14-80-58-82-114z" fill="none" stroke="${accent}" stroke-width="8" opacity=".86"/>
+  <path d="M1074 620h218M1184 502v236M1108 548c56 48 110 48 160 0M1104 696c55-38 108-38 164 0" stroke="${accent}" stroke-width="3" opacity=".45"/>
+  <rect x="190" y="910" width="1170" height="178" rx="24" fill="#14110a" stroke="#e2bd64" stroke-width="4"/>
+  <text x="258" y="998" fill="#e2c36e" font-family="Arial, sans-serif" font-size="28" letter-spacing="8">RARITY CLASS</text>
+  <text x="258" y="1060" fill="${accent}" font-family="Arial, sans-serif" font-size="62" font-weight="900">Rarity: ${rarity}</text>
+  <rect x="190" y="1140" width="1170" height="150" rx="24" fill="#081517" stroke="#38585c" stroke-width="2"/>
+  <text x="238" y="1205" fill="${accent}" font-family="Arial, sans-serif" font-size="24" letter-spacing="7">SYMPTOM TAGS</text>
+  ${symptoms.map((tag, i) => `<rect x="${238 + (i % 3) * 330}" y="${1230 + Math.floor(i / 3) * 48}" width="288" height="34" rx="17" fill="#0d2526" stroke="${accent}" stroke-opacity=".7"/><text x="${258 + (i % 3) * 330}" y="${1254 + Math.floor(i / 3) * 48}" fill="#d8fff7" font-family="Arial, sans-serif" font-size="22">${htmlEscape(tag)}</text>`).join("")}
+  <foreignObject x="190" y="1320" width="880" height="90"><div xmlns="http://www.w3.org/1999/xhtml" style="font:700 30px Arial,sans-serif;color:#f4f6f8;line-height:1.25">${verdict}</div></foreignObject>
+  <text x="190" y="1455" fill="#9fb3c8" font-family="Arial, sans-serif" font-size="30">链上主治医生：石头</text>
+  <text x="1040" y="1455" fill="${accent}" font-family="Arial, sans-serif" font-size="32" font-weight="900">degendna.fun</text>
+</svg>`;
 }
 
 async function safeChainResult(chain, task) {
@@ -3693,10 +4108,61 @@ async function handleApi(req, res, pathname, searchParams) {
       },
       integrations: {
         xApi: Boolean(X_BEARER_TOKEN),
-        supabase: hasSupabaseLeaderboard()
+        supabase: hasSupabaseLeaderboard(),
+        nftClaims: NFT_CLAIM_ENABLED && hasSupabase() && Boolean(SEPOLIA_NFT_CONTRACT_ADDRESS)
       },
       chains: [...BLOCKSCOUT_CHAINS.map((chain) => chain.name), BNB_CHAIN.name]
     });
+  }
+
+  if (pathname.startsWith("/api/nft/metadata/")) {
+    const id = decodeURIComponent(pathname.replace("/api/nft/metadata/", ""));
+    try {
+      const row = await fetchNftClaimByFilter({ id });
+      if (!row) return json(res, 404, { error: "NFT metadata not found" });
+      return json(res, 200, nftMetadataFromRow(row));
+    } catch (error) {
+      return json(res, 502, { error: error.message || "NFT metadata failed" });
+    }
+  }
+
+  if (pathname.startsWith("/api/nft/image/")) {
+    const id = decodeURIComponent(pathname.replace("/api/nft/image/", "").replace(/\.svg$/i, ""));
+    try {
+      const row = await fetchNftClaimByFilter({ id });
+      if (!row) return json(res, 404, { error: "NFT image not found" });
+      res.writeHead(200, {
+        "content-type": "image/svg+xml; charset=utf-8",
+        "cache-control": "public, max-age=3600"
+      });
+      res.end(nftImageSvg(row));
+      return;
+    } catch (error) {
+      return json(res, 502, { error: error.message || "NFT image failed" });
+    }
+  }
+
+  if (pathname === "/api/nft/claim") {
+    const lang = normalizeLang(searchParams.get("lang"));
+    if (req.method !== "POST") {
+      return json(res, 405, { error: "Method not allowed" });
+    }
+    const limited = rateLimit(req, "nft-claim", { limit: 5, windowMs: HOUR_MS });
+    if (!limited.ok) {
+      res.setHeader("retry-after", String(limited.retryAfter));
+      return json(res, 429, { error: pickLocalized(lang, RATE_LIMIT_MESSAGE_ZH, RATE_LIMIT_MESSAGE_EN), retryAfter: limited.retryAfter });
+    }
+    try {
+      const body = await readJsonBody(req);
+      return json(res, 200, await submitNftClaim({
+        address: body.address,
+        receiver: body.receiver,
+        username: body.username,
+        lang: normalizeLang(body.lang || lang)
+      }));
+    } catch (error) {
+      return json(res, 400, { error: error.message || pickLocalized(lang, "NFT 领取失败。", "NFT claim failed.") });
+    }
   }
 
   if (pathname === "/api/x-profile") {
