@@ -81,7 +81,7 @@ const I18N = {
       kol: "KOL 版"
     },
     card: {
-      reportTitle: "链上精神病历",
+      reportTitle: "链上听诊器诊断报告",
       personalityPrefix: "钱包人格：",
       degen: "Degen 指数",
       diamond: "钻石手指数",
@@ -128,8 +128,8 @@ const I18N = {
     },
     stats: { title: "样本数据", portfolio: "估算资产", tx: "交易次数", token: "Token 样本", meme: "Meme 暴露" },
     medical: {
-      title: "链上精神病历（娱乐版）",
-      copy: "这是一份只看钱包行为的娱乐诊断，不是医学诊断。照妖镜可以补刀，但真实的人要被好好照顾。"
+      title: "链上听诊器 · 精神病历（娱乐版）",
+      copy: "这是一份只听钱包心跳的娱乐诊断，不是医学诊断。链上主治医生可以补刀，但真实的人要被好好照顾。"
     },
     pk: {
       title: "钱包 PK",
@@ -174,7 +174,7 @@ const I18N = {
       metricRarity: "人格稀有度",
       metricMedical: "链上精神病历分",
       lighthouseTitle: "灯塔蓝 V 入口",
-      lighthouseCopy: "1000 粉以上蓝 V / KOL 如果已经被照妖镜照出来，可以顺手加入灯塔，把链上人格样本带进更大的社交实验。",
+      lighthouseCopy: "1000 粉以上蓝 V / KOL 如果已经被链上听诊器诊断出来，可以顺手加入灯塔，把链上人格样本带进更大的社交实验。",
       lighthouseFollow: "关注灯塔 @Lighthouse_2026",
       lighthouseJoin: "加入灯塔"
     },
@@ -204,7 +204,8 @@ const I18N = {
       preparing: "正在生成晒图...",
       imageCopied: "已打开 X 发帖页，晒图已复制到剪贴板，直接粘贴即可。",
       imageDownloaded: "已打开 X 发帖页，浏览器不支持复制图片，PNG 已自动下载。",
-      text: (report) => `我的链上 Degen 基因检测结果出来了：${report.personality}
+      text: (report) => `我刚被链上主治医生做了链上诊断。
+钱包人格：${report.personality}
 稀有度：${report.rarity?.tierName || "链上异类"} · 组合出现率 ${report.rarity?.combo?.appearanceRate || "--"}%
 Degen 指数 ${report.scores.degen}/100，钻石手 ${report.scores.diamond}/100。
 ${report.verdict}
@@ -289,7 +290,7 @@ ${report.verdict}
       kol: "KOL"
     },
     card: {
-      reportTitle: "Onchain Psych Chart",
+      reportTitle: "Onchain Stethoscope Report",
       personalityPrefix: "DNA Type: ",
       degen: "Degen Index",
       diamond: "Diamond Hands",
@@ -334,8 +335,8 @@ ${report.verdict}
     },
     stats: { title: "Sample Data", portfolio: "Est. Assets", tx: "Transactions", token: "Token Sample", meme: "Meme Exposure" },
     medical: {
-      title: "Onchain Psych Chart (for fun)",
-      copy: "This is an entertainment diagnosis of wallet behavior only, not a medical diagnosis. The mirror can roast the wallet; the person still deserves care."
+      title: "Onchain Stethoscope · Psych Chart (for fun)",
+      copy: "This is an entertainment diagnosis of wallet behavior only, not a medical diagnosis. The onchain attending can roast the wallet; the person still deserves care."
     },
     pk: {
       title: "Wallet PK",
@@ -380,7 +381,7 @@ ${report.verdict}
       metricRarity: "Personality Rarity",
       metricMedical: "Onchain Psych Score",
       lighthouseTitle: "Lighthouse Blue-V Entry",
-      lighthouseCopy: "If you are a 1,000+ follower Blue-V / KOL and your wallet has been mirrored, join Lighthouse and bring this onchain personality experiment into a wider social graph.",
+      lighthouseCopy: "If you are a 1,000+ follower Blue-V / KOL and your wallet has been diagnosed by the Onchain Stethoscope, join Lighthouse and bring this wallet-personality experiment into a wider social graph.",
       lighthouseFollow: "Follow Lighthouse @Lighthouse_2026",
       lighthouseJoin: "Join Lighthouse"
     },
@@ -410,7 +411,8 @@ ${report.verdict}
       preparing: "Creating share card...",
       imageCopied: "X composer opened. The card image is copied, paste it into the post.",
       imageDownloaded: "X composer opened. This browser cannot copy images, so the PNG was downloaded.",
-      text: (report) => `My Degen DNA: ${report.scores.degen}/100
+      text: (report) => `My wallet just got diagnosed by the onchain attending.
+Degen DNA: ${report.scores.degen}/100
 Type: ${report.personality}
 Rarity: ${report.rarity?.tierName || "Rare"} · combo occurrence ${report.rarity?.combo?.appearanceRate || "--"}%
 Diamond Hands: ${report.scores.diamond}/100

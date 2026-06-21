@@ -222,7 +222,7 @@
                     <b id="card-owner-name">@Stone141319</b>
                   </span>
                   <span>
-                    <i data-i18n="card.reportTitle">链上精神状态评估</i>
+                    <i data-i18n="card.reportTitle">链上听诊器诊断报告</i>
                     <b>Degen DNA</b>
                   </span>
                 </div>
@@ -305,13 +305,22 @@
             <span data-i18n="board.teaser">上榜后会显示：X 头像 / @handle / 钱包人格 / Degen 指数 / 钻石手指数 / 综合处刑分</span>
           </div>
           <div class="lighthouse-card">
-            <div>
-              <b data-i18n="board.lighthouseTitle">灯塔蓝 V 入口</b>
-              <p data-i18n="board.lighthouseCopy">1000 粉以上蓝 V / KOL 如果已经被照妖镜照出来，可以顺手加入灯塔，把链上人格样本带进更大的社交实验。</p>
+            <div class="lighthouse-identity">
+              <img class="lighthouse-logo" src="/assets/lighthouse-logo.svg" alt="Lighthouse" />
+              <div>
+                <b data-i18n="board.lighthouseTitle">灯塔蓝 V 入口</b>
+                <p data-i18n="board.lighthouseCopy">1000 粉以上蓝 V / KOL 如果已经被链上听诊器诊断出来，可以顺手加入灯塔，把链上人格样本带进更大的社交实验。</p>
+              </div>
             </div>
             <div class="lighthouse-actions">
-              <a class="ghost-button" href="https://x.com/Lighthouse_2026" target="_blank" rel="noopener noreferrer" data-i18n="board.lighthouseFollow">关注灯塔 @Lighthouse_2026</a>
-              <a class="primary-button" href="https://app.lhdao.top/?ref=cmkamdijn000cc94wijye0uz7" target="_blank" rel="noopener noreferrer" data-i18n="board.lighthouseJoin">加入灯塔</a>
+              <a class="lighthouse-button lighthouse-button-x" href="https://x.com/Lighthouse_2026" target="_blank" rel="noopener noreferrer">
+                <span>X</span>
+                <b data-i18n="board.lighthouseFollow">关注灯塔 @Lighthouse_2026</b>
+              </a>
+              <a class="lighthouse-button lighthouse-button-join" href="https://app.lhdao.top/?ref=cmkamdijn000cc94wijye0uz7" target="_blank" rel="noopener noreferrer">
+                <span>LH</span>
+                <b data-i18n="board.lighthouseJoin">加入灯塔</b>
+              </a>
             </div>
           </div>
           <div class="rank-prompts" aria-label="排行榜分类" data-i18n-aria="board.rankAria">
@@ -349,6 +358,6 @@
       </footer>
     </div>
     <canvas id="card-canvas" width="1200" height="1600" hidden></canvas>
-    <script src="/app.js?v=20260621-board-lighthouse-v5" type="module"></script>
+    <script src="/app.js?v=20260621-stethoscope-lighthouse-v6" type="module"></script>
   </body>
 </html>

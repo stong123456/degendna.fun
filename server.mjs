@@ -21,7 +21,7 @@ const SUPABASE_TIMEOUT_MS = 3500;
 const X_BEARER_TOKEN = process.env.X_BEARER_TOKEN || process.env.X_API_BEARER_TOKEN || process.env.TWITTER_BEARER_TOKEN || "";
 const X_PROFILE_TIMEOUT_MS = 3500;
 
-const REPORT_VERSION = "20260621-board-lighthouse-v5";
+const REPORT_VERSION = "20260621-stethoscope-lighthouse-v6";
 const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;
 const ANALYZE_CACHE_TTL_MS = 6 * HOUR_MS;
@@ -2909,10 +2909,10 @@ function compactTweetLine(text, limit) {
 
 function tweetOpener(mode, lang) {
   const openers = {
-    normal: ["我的 Degen DNA 报告出来了。", "My Degen DNA scan is out."],
-    roast: ["我的钱包刚被链上照妖镜公开补刀。", "My wallet just got roasted by Degen DNA."],
-    abstract: ["链上照妖镜把我的钱包照出来了。", "Degen DNA just exposed my wallet."],
-    kol: ["如果这个钱包有账号简介，大概是这样。", "If this wallet had a bio, it would be this."]
+    normal: ["我刚被链上主治医生做了链上诊断。", "My wallet just got diagnosed by the onchain attending."],
+    roast: ["我刚被链上主治医生公开做了链上诊断。", "My wallet just got a public diagnosis from the onchain attending."],
+    abstract: ["我刚被链上主治医生用链上听诊器诊断了。", "My wallet just got diagnosed with the Onchain Stethoscope."],
+    kol: ["链上主治医生刚给这个钱包做了链上诊断。", "The onchain attending just diagnosed this wallet's public persona."]
   };
   const [zh, en] = openers[mode] || openers.abstract;
   return pickLocalized(lang, zh, en);

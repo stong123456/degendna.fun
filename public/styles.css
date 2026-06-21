@@ -827,15 +827,50 @@ input:focus {
 .lighthouse-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 14px;
+  gap: 18px;
   align-items: center;
   margin-top: 14px;
-  border: 1px solid rgba(100, 181, 255, 0.24);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(125, 249, 255, 0.26);
   border-radius: var(--radius);
-  padding: 13px;
+  padding: 15px;
   background:
-    linear-gradient(135deg, rgba(100, 181, 255, 0.1), rgba(194, 123, 255, 0.08)),
+    linear-gradient(135deg, rgba(100, 181, 255, 0.13), rgba(255, 209, 102, 0.08) 48%, rgba(194, 123, 255, 0.1)),
     rgba(255, 255, 255, 0.035);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 18px 38px rgba(0, 0, 0, 0.22);
+}
+
+.lighthouse-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(125, 249, 255, 0.12), transparent);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.lighthouse-identity {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 12px;
+}
+
+.lighthouse-logo {
+  flex: 0 0 auto;
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(125, 249, 255, 0.36);
+  border-radius: 14px;
+  background: #080b12;
+  box-shadow:
+    0 0 0 4px rgba(125, 249, 255, 0.08),
+    0 0 28px rgba(125, 249, 255, 0.14);
 }
 
 .lighthouse-card b {
@@ -849,6 +884,8 @@ input:focus {
 }
 
 .lighthouse-actions {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -857,6 +894,60 @@ input:focus {
 
 .lighthouse-actions a {
   text-decoration: none;
+}
+
+.lighthouse-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  border-radius: 8px;
+  padding: 0 13px;
+  font-weight: 950;
+  white-space: nowrap;
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.lighthouse-button:hover {
+  transform: translateY(-1px);
+}
+
+.lighthouse-button span {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.lighthouse-button b {
+  color: inherit;
+}
+
+.lighthouse-button-x {
+  border: 1px solid rgba(125, 249, 255, 0.34);
+  color: #d9fbff;
+  background: rgba(125, 249, 255, 0.08);
+}
+
+.lighthouse-button-x span {
+  color: #080b12;
+  background: #d9fbff;
+}
+
+.lighthouse-button-join {
+  border: 1px solid rgba(255, 209, 102, 0.5);
+  color: #110d07;
+  background: linear-gradient(135deg, #ffd166, #ff5b35);
+  box-shadow: 0 10px 30px rgba(255, 91, 53, 0.2);
+}
+
+.lighthouse-button-join span {
+  color: #ffd166;
+  background: rgba(17, 13, 7, 0.86);
 }
 
 .chain-row,
@@ -1665,6 +1756,10 @@ dd {
     grid-template-columns: 1fr;
   }
 
+  .lighthouse-identity {
+    align-items: flex-start;
+  }
+
   .lighthouse-card b,
   .lighthouse-card p {
     overflow-wrap: anywhere;
@@ -1675,7 +1770,7 @@ dd {
   }
 
   .lighthouse-actions a {
-    min-width: min(100%, 190px);
+    min-width: min(100%, 210px);
     justify-content: center;
   }
 }
