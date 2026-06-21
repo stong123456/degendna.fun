@@ -21,7 +21,7 @@ const SUPABASE_TIMEOUT_MS = 3500;
 const X_BEARER_TOKEN = process.env.X_BEARER_TOKEN || process.env.X_API_BEARER_TOKEN || process.env.TWITTER_BEARER_TOKEN || "";
 const X_PROFILE_TIMEOUT_MS = 3500;
 
-const REPORT_VERSION = "20260621-stethoscope-lighthouse-v6";
+const REPORT_VERSION = "20260621-lighthouse-avatar-v7";
 const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;
 const ANALYZE_CACHE_TTL_MS = 6 * HOUR_MS;

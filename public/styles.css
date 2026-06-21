@@ -866,8 +866,9 @@ input:focus {
   width: 54px;
   height: 54px;
   border: 1px solid rgba(125, 249, 255, 0.36);
-  border-radius: 14px;
+  border-radius: 50%;
   background: #080b12;
+  object-fit: cover;
   box-shadow:
     0 0 0 4px rgba(125, 249, 255, 0.08),
     0 0 28px rgba(125, 249, 255, 0.14);
