@@ -13,6 +13,7 @@ const routeLinks = [...document.querySelectorAll("[data-route]")];
 
 const EVM_ADDRESS = /^0x[a-fA-F0-9]{40}$/;
 const LANG_KEY = "degendna-home-language";
+const LOCAL_LEADERBOARD_KEY = "degendna:wallet-leaderboard:v1";
 const PAGE_NAMES = ["home", "report", "wallet", "rarity", "psyche", "psyche-test", "about"];
 
 const I18N = {
@@ -713,8 +714,10 @@ const REPORT_RARITY_TIERS = [
 ];
 
 let activeReportScores = { degen: 86, diamond: 31 };
-let activeReportIdentity = { handle: "@handle", wallet: "00000039..." };
+let activeReportIdentity = { handle: "@handle", wallet: "00000039...", rawWallet: "" };
 let activeReportDimensions = [86, 31, 69, 78, 92, 44];
+let activeReportNarrative = null;
+let activeLeaderboardEntries = [];
 const REPORT_BADGE_CATALOG = [
   { key: "paper-king", icon: "♕", code: "PAPER", dimension: 2, min: 48, color: "#ffe58f", zh: "纸手之王", en: "Paperhand King" },
   { key: "diamond-fever", icon: "◆", code: "DIAMOND", dimension: 1, min: 70, color: "#7ff7ff", zh: "钻石执念", en: "Diamond Fever" },
@@ -733,6 +736,161 @@ const REPORT_BADGE_CATALOG = [
 ];
 const REPORT_DIMENSION_LABELS = ["Degen 指数", "钻石手指数", "纸手指数", "深夜内耗", "抽象浓度", "自愈速率"];
 
+const WALLET_REPORT_COPY_BANK = {
+  zh: {
+    personalities: [
+      "高位接盘艺术家", "流动性夜行者", "空投病历收集员", "土狗急诊实习生", "钻石手考古学家", "K线幻觉观察员",
+      "Gas峰值冲锋队", "稳定币防空洞管理员", "桥接游牧民", "叙事过敏体质", "合约按钮压力怪", "回撤复盘诗人",
+      "止损失联患者", "阳线祈雨师", "链上冷启动人格", "仓位漂移驾驶员", "群聊截图受害者", "资产轮动强迫症",
+      "低流动性潜水员", "本金保卫战临时队长", "反向指标预言家", "协议门诊常客", "夜盘神经兴奋型", "冷钱包冥想者"
+    ],
+    causes: [
+      "看到别人赚钱后手速过快", "把群聊截图当成了临床证据", "对下一根阳线存在过度信任", "在深夜把小仓位买成了病例编号",
+      "退出按钮长期处于选择性失明", "每次热点升温都会自动挂号", "喜欢在流动性最薄的地方证明勇气", "把稳定币防守误会成错过人生",
+      "桥接次数像迁徙，复盘次数像忏悔", "明明想做趋势，却总被短线噪音点名", "止损写在计划里，执行留在平行宇宙",
+      "手续费和情绪一起偷偷扣血", "买入前像研究员，买入后像许愿池", "只会进场，不太会体面离场",
+      "把空投任务做成了链上通勤", "仓位管理靠感觉，感觉经常请假", "越亏越想用下一笔交易写论文",
+      "对低市值叙事的免疫系统偏弱", "一看到新概念就开始给钱包改简历", "复盘很真诚，下次仍然按原路径发病"
+    ],
+    sentences: [
+      "你的钱包最大问题，是太容易把热闹误读成命运。",
+      "这不是单纯风险偏好高，这是钱包在替情绪抢方向盘。",
+      "你并不缺判断力，只是市场一吵，判断力就会静音。",
+      "这个地址像一台叙事雷达，能发现机会，也会把噪音当信号。",
+      "你的链上病灶不在亏损本身，而在每次亏损后都想立刻证明自己。",
+      "钱包会回撤，人也会疲惫，先把仓位和睡眠都降一点杠杆。",
+      "你适合把买入按钮旁边贴一张纸：再等十分钟也不会错过人生。",
+      "这份病例最危险的地方，是你总觉得下一次会完全不同。",
+      "你的 Alpha 嗅觉不差，但退出系统需要重新挂号。",
+      "钱包没有坏，只是经常在情绪高温时把风控忘在门口。",
+      "你像在链上写日记：每一笔交易都很诚实，也很嘴硬。",
+      "这个钱包不是没救，是需要把冲动从主治医生降级为实习生。",
+      "越想翻本，越要先停止让钱包替自尊做决定。",
+      "你和行情的关系，像恋爱脑和已读不回：总想再解释一次。",
+      "当你开始相信截图能治疗焦虑，钱包就会自动进入高危观察。",
+      "最适合你的处方不是神单，而是分批、复盘和准时睡觉。"
+    ],
+    wordCloud: [
+      "热点牵引强，适合先分层，再出手。",
+      "资产分布像情绪热力图，亮点很多，冷静更少。",
+      "主线嗅觉在线，但仓位切换容易过快。",
+      "链上足迹偏实验型，适合小样本、多验证。",
+      "防守意识存在，只是经常被新叙事打断。",
+      "组合气质偏进攻，建议给稳定仓留固定席位。",
+      "钱包很会找故事，也很会把故事买成仓位。",
+      "行为像多线程复盘：一边自救，一边继续探索。"
+    ],
+    primary: ["冲锋型", "观察型", "游牧型", "考古型", "复盘型", "防守型", "抽象型", "波段型"],
+    holding: ["波动敏感", "叙事驱动", "半自动切换", "长短混合", "防守偏弱", "耐心间歇性上线", "风险嗅觉灵敏", "退出纪律待修复"],
+    lossLines: [
+      ["追涨触发", "回撤复盘", "深夜下单"],
+      ["截图上头", "止损失联", "手续费扣血"],
+      ["叙事漂移", "仓位走散", "反弹犹豫"],
+      ["桥接过量", "空投疲劳", "低流动性探险"],
+      ["群聊污染", "K线催眠", "卖飞后补票"],
+      ["小仓试水", "越亏越勇", "复盘延迟"]
+    ],
+    fateStrip: [
+      ["短期回撤", "中段修复", "尾段反弹"],
+      ["先冷静", "再验证", "后加仓"],
+      ["错过热点", "重建节奏", "抓到回声"],
+      ["任务堆积", "筛掉噪音", "等待结算"],
+      ["小亏止血", "仓位归位", "信号回暖"],
+      ["情绪降温", "资金回流", "耐心复活"]
+    ],
+    radar: [
+      ["解锁", "持仓", "冲动"],
+      ["空投", "桥接", "复盘"],
+      ["叙事", "流动性", "退出"],
+      ["睡眠", "仓位", "纪律"],
+      ["Alpha", "噪音", "冷却"],
+      ["本金", "风控", "耐心"]
+    ],
+    shareDigest: [
+      "这份病历适合截图，但更适合睡醒后再复盘。",
+      "结果只做娱乐化人格摘要，不定义真实人生。",
+      "钱包可以被吐槽，风险需要被认真管理。",
+      "先照见模式，再决定下一次怎么点按钮。"
+    ],
+    tweet: [
+      "我的钱包做了链上体检：医生说不是穷，是流动性叛逆期。来照照你的：degendna.fun",
+      "刚给钱包挂了个链上精神科，诊断结果比K线还诚实。来照照你的：degendna.fun",
+      "钱包病历已生成：症状包括嘴硬、追热点、以及偶尔相信下一根阳线。degendna.fun",
+      "我让钱包照了照妖镜，结果它比我更需要风控。你也来试试：degendna.fun",
+      "链上体检完成：钱包没坏，只是情绪管理还在测试网。degendna.fun"
+    ]
+  },
+  en: {
+    personalities: [
+      "High-Entry Performance Artist", "Liquidity Night Walker", "Airdrop Case Collector", "Meme ER Intern", "Diamond-Hand Archaeologist", "Candle Hallucination Observer",
+      "Gas-Peak Vanguard", "Stablecoin Bunker Warden", "Bridge Nomad", "Narrative Allergy Patient", "Contract Button Stress Tester", "Drawdown Postmortem Poet",
+      "Missing Stop-Loss Case", "Green-Candle Rainmaker", "Onchain Cold-Start Persona", "Position Drift Driver", "Group-Chat Screenshot Victim", "Rotation Compulsion Wallet"
+    ],
+    causes: [
+      "your hands accelerate when other people post gains", "group-chat screenshots are treated as clinical evidence", "the next green candle receives too much faith",
+      "small late-night entries become full case numbers", "the exit button has selective invisibility", "every warm narrative files an appointment for you",
+      "you prove courage where liquidity is thinnest", "stablecoin defense gets mistaken for missing your life", "fees and feelings drain the account together",
+      "you buy like an analyst and hold like a wishing well", "entries are easy while graceful exits remain theoretical", "airdrop tasks became an onchain commute",
+      "position sizing depends on mood, and mood often calls in sick", "low-cap narratives slip past the immune system", "every new concept makes the wallet rewrite its resume"
+    ],
+    sentences: [
+      "Your wallet's biggest issue is mistaking market noise for destiny.",
+      "This is not simple risk appetite; the wallet keeps grabbing the emotional steering wheel.",
+      "Your judgment exists, but it goes silent when the room gets loud.",
+      "This address is a narrative radar: good at finding signals, also good at adopting noise.",
+      "The leak is not one loss; it is the urge to prove yourself immediately after it.",
+      "Wallets draw down, people get tired; lower leverage on both positions and sleep.",
+      "Put a note next to the buy button: waiting ten minutes will not ruin your life.",
+      "The risky part is believing the next attempt will be completely different.",
+      "Your alpha nose works. Your exit system needs another appointment.",
+      "The wallet is not broken; it simply forgets risk controls at high emotional temperature."
+    ],
+    wordCloud: [
+      "Hype pulls hard; scale first, act second.",
+      "Asset distribution reads like an emotion heatmap: many bright spots, less calm.",
+      "Theme detection is live, but position switching runs too fast.",
+      "Onchain traces feel experimental: small samples, many validations.",
+      "Defense exists, but new narratives interrupt it often.",
+      "The portfolio leans offensive; reserve a fixed seat for stables."
+    ],
+    primary: ["Charger", "Observer", "Nomad", "Archaeologist", "Postmortem", "Defender", "Abstract", "Swing"],
+    holding: ["Volatility-sensitive", "Narrative-led", "Semi-automatic", "Mixed horizon", "Defense-light", "Intermittent patience", "Risk-aware", "Exit discipline pending"],
+    lossLines: [
+      ["Chase trigger", "Drawdown review", "Late-night order"],
+      ["Screenshot tilt", "Stop-loss offline", "Fee bleed"],
+      ["Narrative drift", "Position scatter", "Rebound hesitation"],
+      ["Bridge overload", "Airdrop fatigue", "Thin-liquidity dive"],
+      ["Chat pollution", "Candle hypnosis", "Buyback after selling"]
+    ],
+    fateStrip: [
+      ["Dip", "Repair", "Rebound"],
+      ["Cool down", "Validate", "Scale in"],
+      ["Miss hype", "Reset rhythm", "Catch echo"],
+      ["Task pile", "Filter noise", "Wait settlement"],
+      ["Stop bleed", "Re-seat bags", "Signal warms"]
+    ],
+    radar: [
+      ["Unlock", "Hold", "Impulse"],
+      ["Airdrop", "Bridge", "Review"],
+      ["Narrative", "Liquidity", "Exit"],
+      ["Sleep", "Sizing", "Discipline"],
+      ["Alpha", "Noise", "Cooldown"]
+    ],
+    shareDigest: [
+      "This case is screenshot-friendly, but better reviewed after sleep.",
+      "Entertainment persona summary only; it does not define real life.",
+      "The wallet can be roasted. Risk still deserves respect.",
+      "See the pattern first, then decide how to click next time."
+    ],
+    tweet: [
+      "My wallet got an onchain checkup: not poor, just in its liquidity rebellion era. Try yours: degendna.fun",
+      "I sent my wallet to onchain psychiatry. The diagnosis was more honest than the chart. degendna.fun",
+      "Wallet case generated: symptoms include denial, narrative chasing, and faith in the next green candle. degendna.fun",
+      "My wallet looked into the onchain mirror. Turns out it needs risk management more than I do. degendna.fun"
+    ]
+  }
+};
+
 function clampReportScore(value) {
   return Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
 }
@@ -740,6 +898,127 @@ function clampReportScore(value) {
 function reportRarityFromScore(score) {
   const normalized = clampReportScore(score);
   return [...REPORT_RARITY_TIERS].reverse().find((tier) => normalized >= tier.min) || REPORT_RARITY_TIERS[0];
+}
+
+function stableHash(value, salt = "") {
+  let hash = 2166136261;
+  const input = `${salt}:${String(value || "")}`;
+  for (const char of input) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function pickVariant(list, seed, offset = 0) {
+  if (!Array.isArray(list) || !list.length) return "";
+  return list[(seed + offset * 9973) % list.length];
+}
+
+function normalizeReportApiData(apiReport) {
+  if (!apiReport || typeof apiReport !== "object") return null;
+  const mode = apiReport.report || apiReport.modes?.[apiReport.defaultMode] || apiReport.modes?.abstract || null;
+  const scores = apiReport.scores || {};
+  return {
+    personality: apiReport.personality,
+    lossCause: apiReport.lossCause || mode?.lossCause,
+    verdict: apiReport.verdict || mode?.verdict,
+    assetPersonality: mode?.assetPersonality,
+    holdingBehavior: mode?.holdingBehavior,
+    lossBlackBox: mode?.lossBlackBox,
+    alphaRadar: Array.isArray(mode?.alphaRadar) ? mode.alphaRadar : [],
+    fate90Days: Array.isArray(mode?.fate90Days) ? mode.fate90Days : [],
+    strategyFit: mode?.strategyFit,
+    labels: Array.isArray(apiReport.labels) ? apiReport.labels : [],
+    scores: {
+      degen: scores.degen,
+      diamond: scores.diamond,
+      airdrop: scores.airdrop
+    },
+    rankScore: apiReport.rankScore,
+    rarity: apiReport.rarity,
+    shortAddress: apiReport.shortAddress
+  };
+}
+
+function buildWalletNarrative(options = {}) {
+  const bank = WALLET_REPORT_COPY_BANK[currentLang] || WALLET_REPORT_COPY_BANK.zh;
+  const api = normalizeReportApiData(options.apiReport);
+  const seedSource = options.rawWallet || activeReportIdentity.rawWallet || activeReportIdentity.wallet || "degendna";
+  const seed = stableHash(seedSource, `${currentLang}:${options.degen}:${options.diamond}`);
+  const degen = clampReportScore(api?.scores.degen ?? options.degen ?? activeReportScores.degen);
+  const diamond = clampReportScore(api?.scores.diamond ?? options.diamond ?? activeReportScores.diamond);
+  const tier = options.tier || reportRarityFromScore(degen);
+  const personality = api?.personality || pickVariant(bank.personalities, seed, 1);
+  const cause = api?.lossCause || pickVariant(bank.causes, seed, 2);
+  const sentence = api?.verdict || pickVariant(bank.sentences, seed, 3);
+  const wordCloud = api?.assetPersonality || pickVariant(bank.wordCloud, seed, 4);
+  const primary = pickVariant(bank.primary, seed + degen, 5);
+  const holding = api?.holdingBehavior || pickVariant(bank.holding, seed + diamond, 6);
+  const lossLines = api?.lossBlackBox
+    ? [pickVariant(pickVariant(bank.lossLines, seed, 7), seed, 1), api.lossBlackBox, pickVariant(pickVariant(bank.lossLines, seed, 8), seed, 2)]
+    : pickVariant(bank.lossLines, seed, 7);
+  const fateStrip = api?.fate90Days?.length ? api.fate90Days.slice(0, 3) : pickVariant(bank.fateStrip, seed, 8);
+  const radar = api?.alphaRadar?.length ? api.alphaRadar.slice(0, 3) : pickVariant(bank.radar, seed, 9);
+  const shareDigest = [
+    api?.strategyFit ? (currentLang === "en" ? `Best fit: ${api.strategyFit}.` : `适合你的风格：${api.strategyFit}。`) : pickVariant(bank.shareDigest, seed, 10),
+    pickVariant(bank.shareDigest, seed, 11)
+  ];
+  const tags = (api?.labels?.length ? api.labels : [
+    personality,
+    degen >= 76 ? (currentLang === "en" ? "High Risk" : "高风险冲锋") : (currentLang === "en" ? "Risk Sample" : "风险样本"),
+    diamond >= 70 ? (currentLang === "en" ? "Diamond Hands" : "钻石手") : (currentLang === "en" ? "Cooldown Needed" : "需要冷却")
+  ]).slice(0, 3);
+  const tweet = pickVariant(bank.tweet, seed, 12);
+
+  return {
+    personality,
+    cause,
+    sentence,
+    wordCloud,
+    assetFacts: [
+      [currentLang === "en" ? "Primary" : "主导人格", primary],
+      [currentLang === "en" ? "Holding" : "持仓气质", holding]
+    ],
+    lossLines: lossLines.slice(0, 3),
+    fateStrip: fateStrip.slice(0, 3),
+    radar: radar.slice(0, 3),
+    shareDigest,
+    tags,
+    tweet,
+    tier,
+    api
+  };
+}
+
+function applyReportNarrative(report, narrative = activeReportNarrative) {
+  if (!report || !narrative) return;
+  const dossierBlocks = report.querySelectorAll(".report-dossier > div");
+  setText(dossierBlocks[0]?.querySelector("b"), narrative.personality);
+  const dossierRows = report.querySelectorAll(".report-dossier p");
+  setText(dossierRows[3]?.querySelector("strong"), narrative.cause);
+  setText(dossierRows[4]?.querySelector("strong"), narrative.sentence);
+  setText(report.querySelector(".share-card-preview p"), narrative.personality);
+  report.querySelectorAll(".share-card-tags small").forEach((tag, index) => {
+    setText(tag, narrative.tags[index] || narrative.tags[0] || "");
+  });
+  report.querySelectorAll(".share-card-digest p").forEach((line, index) => {
+    setText(line, narrative.shareDigest[index] || "");
+  });
+  setText(report.querySelector(".word-cloud"), narrative.wordCloud);
+  report.querySelectorAll(".asset-widget .widget-facts div").forEach((row, index) => {
+    setText(row.querySelector("dt"), narrative.assetFacts?.[index]?.[0]);
+    setText(row.querySelector("dd"), narrative.assetFacts?.[index]?.[1]);
+  });
+  report.querySelectorAll(".black-widget .widget-lines li").forEach((item, index) => setText(item, narrative.lossLines?.[index]));
+  report.querySelectorAll(".luck-widget .fate-strip span").forEach((item, index) => setText(item, narrative.fateStrip?.[index]));
+  report.querySelectorAll(".radar-widget li").forEach((item, index) => {
+    const bar = item.querySelector("span");
+    item.textContent = narrative.radar?.[index] || "";
+    if (bar) item.prepend(bar);
+  });
+  const input = report.querySelector(".share-widget input");
+  if (input) input.value = narrative.tweet;
 }
 
 function selectReportBadges(dimensions = activeReportDimensions, tier = reportRarityFromScore(activeReportScores.degen)) {
@@ -777,12 +1056,13 @@ function renderReportBadges(report, dimensions = activeReportDimensions, tier = 
   });
 }
 
-function updateReportScores(degenScore, diamondScore) {
+function updateReportScores(degenScore, diamondScore, options = {}) {
   const report = document.querySelector(".ref-report-page");
   if (!report) return;
 
-  const degen = clampReportScore(degenScore);
-  const diamond = clampReportScore(diamondScore);
+  const api = normalizeReportApiData(options.apiReport);
+  const degen = clampReportScore(api?.scores.degen ?? degenScore);
+  const diamond = clampReportScore(api?.scores.diamond ?? diamondScore);
   const paper = clampReportScore(100 - Math.round((degen + diamond) / 2));
   const night = clampReportScore(38 + (degen % 55));
   const abstract = clampReportScore(44 + ((degen * 7 + diamond) % 53));
@@ -820,6 +1100,15 @@ function updateReportScores(degenScore, diamondScore) {
   report.querySelectorAll(".rarity-ladder span").forEach((item) => {
     item.classList.toggle("active", item.textContent.trim() === tier.label);
   });
+  activeReportNarrative = buildWalletNarrative({
+    rawWallet: options.rawWallet || activeReportIdentity.rawWallet || activeReportIdentity.wallet,
+    degen,
+    diamond,
+    dimensions: activeReportDimensions,
+    tier,
+    apiReport: options.apiReport
+  });
+  applyReportNarrative(report, activeReportNarrative);
   renderReportDimensionCurves(report, activeReportDimensions);
   renderReportBadges(report, activeReportDimensions, tier);
 }
@@ -895,9 +1184,9 @@ function shortWallet(value) {
   return `${clean.slice(0, 6)}...${clean.slice(-4)}`;
 }
 
-function normalizeHandle(value) {
+function normalizeHandle(value, fallback = activeReportIdentity.handle) {
   const clean = String(value || "").trim();
-  if (!clean) return activeReportIdentity.handle;
+  if (!clean) return fallback;
   return clean.startsWith("@") ? clean : `@${clean}`;
 }
 
@@ -934,9 +1223,11 @@ function updateReportIdentity(options = {}) {
   const report = document.querySelector(".ref-report-page");
   if (!report) return;
 
-  const handle = normalizeHandle(options.handle);
+  const hasHandle = Object.prototype.hasOwnProperty.call(options, "handle");
+  const handle = normalizeHandle(options.handle, hasHandle ? "@handle" : activeReportIdentity.handle);
   const wallet = shortWallet(options.wallet);
-  activeReportIdentity = { handle, wallet };
+  const rawWallet = options.wallet || activeReportIdentity.rawWallet || wallet;
+  activeReportIdentity = { handle, wallet, rawWallet };
 
   setText(report.querySelector(".patient-strip strong"), handle);
   setText(report.querySelector(".patient-strip small"), `short wallet: ${wallet}`);
@@ -944,7 +1235,254 @@ function updateReportIdentity(options = {}) {
   applyReportAvatar(report, handle);
 
   const input = report.querySelector(".share-widget input");
-  if (input) input.value = finalText("report", "tweet");
+  if (input) input.value = activeReportNarrative?.tweet || finalText("report", "tweet");
+}
+
+function readLocalLeaderboard() {
+  try {
+    const parsed = JSON.parse(window.localStorage?.getItem(LOCAL_LEADERBOARD_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeLocalLeaderboard(entries) {
+  try {
+    window.localStorage?.setItem(LOCAL_LEADERBOARD_KEY, JSON.stringify(entries.slice(0, 30)));
+  } catch {
+    // Local ranking is a progressive enhancement; the report still works without storage.
+  }
+}
+
+function leaderboardEntryKey(entry) {
+  return String(entry?.address || entry?.id || entry?.handle || "").toLowerCase();
+}
+
+function leaderboardRarityScore(entry) {
+  return Number(entry?.rarity?.score ?? entry?.rankScore ?? entry?.degen ?? 0) || 0;
+}
+
+function leaderboardCategory(entry) {
+  if (entry?.category) return entry.category;
+  const degen = Number(entry?.degen || 0);
+  const diamond = Number(entry?.diamond || 0);
+  const airdrop = Number(entry?.airdrop || 0);
+  if (airdrop >= Math.max(degen, diamond, 58)) return "airdrop";
+  if (diamond >= Math.max(degen, 62)) return "diamond";
+  if (degen >= 68) return "degen";
+  return "psyche";
+}
+
+function tierClassForEntry(entry) {
+  const tier = String(entry?.rarity?.tier || entry?.rarity?.key || "").toLowerCase();
+  const label = String(entry?.rarity?.tierName || entry?.rarity?.label || entry?.rarity || "").toLowerCase();
+  if (tier === "unique" || tier === "one" || label.includes("1/1")) return "tier-glitch";
+  if (tier === "mythic" || label.includes("mythic")) return "tier-red";
+  if (tier === "legendary" || label.includes("legendary")) return "tier-gold";
+  if (tier === "epic" || label.includes("epic")) return "tier-purple";
+  if (tier === "rare" || label.includes("rare")) return "tier-blue";
+  if (tier === "uncommon" || label.includes("uncommon")) return "tier-green";
+  const degen = Number(entry?.degen || entry?.rankScore || 0);
+  return degen >= 92 ? "tier-red" : degen >= 80 ? "tier-gold" : degen >= 65 ? "tier-purple" : degen >= 50 ? "tier-blue" : "tier-green";
+}
+
+function leaderboardRarityLabel(entry) {
+  if (entry?.rarity?.tierName) return entry.rarity.tierName;
+  if (entry?.rarity?.label) return entry.rarity.label;
+  if (typeof entry?.rarity === "string") return entry.rarity;
+  return reportRarityFromScore(entry?.degen || entry?.rankScore || 0).label;
+}
+
+function mergeLeaderboardEntries(...lists) {
+  const byKey = new Map();
+  lists.flat().filter(Boolean).forEach((entry) => {
+    const key = leaderboardEntryKey(entry);
+    if (!key) return;
+    const existing = byKey.get(key);
+    if (!existing || String(entry.generatedAt || "").localeCompare(String(existing.generatedAt || "")) >= 0) {
+      byKey.set(key, entry);
+    }
+  });
+  return [...byKey.values()]
+    .sort((a, b) =>
+      leaderboardRarityScore(b) - leaderboardRarityScore(a) ||
+      Number(b.rankScore || 0) - Number(a.rankScore || 0) ||
+      String(b.generatedAt || "").localeCompare(String(a.generatedAt || ""))
+    )
+    .slice(0, 30);
+}
+
+function rankAvatarMarkup(entry) {
+  const handle = String(entry?.handle || "");
+  const username = String(entry?.username || "").replace(/^@/, "");
+  const usableHandle = handle.startsWith("@") ? handle : username && !username.startsWith("wallet_") ? `@${username}` : "";
+  const avatarUrl = usableHandle ? xAvatarUrl(usableHandle) : "";
+  return { avatarUrl, fallback: "X" };
+}
+
+function paintScoreBar(bar, score) {
+  if (!bar) return;
+  const fill = Math.max(18, Math.min(100, Math.round(Number(score) || 0)));
+  bar.style.background = `linear-gradient(90deg, currentColor 0 ${fill}%, transparent ${fill}% 100%), repeating-linear-gradient(90deg, currentColor 0 2px, transparent 2px 10px)`;
+  bar.title = currentLang === "en" ? `Score ${fill}` : `综合评分 ${fill}`;
+}
+
+function renderLeaderboardRows(entries = activeLeaderboardEntries) {
+  const rarity = document.querySelector(".ref-rarity-page");
+  const list = rarity?.querySelector(".rank-list");
+  if (!rarity || !list) return;
+  const rows = entries.slice(0, 7);
+  if (!rows.length) return;
+  list.replaceChildren();
+  rows.forEach((entry, index) => {
+    const row = document.createElement("article");
+    row.className = `rank-row ${tierClassForEntry(entry)}`;
+    row.dataset.rarityRow = leaderboardCategory(entry);
+
+    const rank = document.createElement("b");
+    rank.textContent = index === 6 && leaderboardRarityLabel(entry) === "1/1" ? "1/1" : `#${index + 1}`;
+
+    const avatarSlot = document.createElement("i");
+    const avatar = rankAvatarMarkup(entry);
+    if (avatar.avatarUrl) {
+      const image = document.createElement("img");
+      image.className = "rank-avatar";
+      image.alt = "";
+      image.referrerPolicy = "no-referrer";
+      image.src = avatar.avatarUrl;
+      image.onerror = () => {
+        image.remove();
+        avatarSlot.textContent = avatar.fallback;
+      };
+      avatarSlot.append(image);
+    } else {
+      avatarSlot.textContent = avatar.fallback;
+    }
+
+    const handle = document.createElement("strong");
+    handle.textContent = entry.handle || entry.shortAddress || shortWallet(entry.address) || "@handle";
+
+    const personality = document.createElement("span");
+    personality.textContent = entry.personality || finalText("report", "personalityValue");
+
+    const rarityLabel = document.createElement("em");
+    rarityLabel.textContent = leaderboardRarityLabel(entry);
+
+    const score = document.createElement("small");
+    paintScoreBar(score, leaderboardRarityScore(entry));
+
+    row.append(rank, avatarSlot, handle, personality, rarityLabel, score);
+    list.append(row);
+  });
+  syncRarityReadout(rarity);
+}
+
+function syncRarityReadout(page = document.querySelector(".ref-rarity-page")) {
+  if (!page) return;
+  const activeFilter = page.querySelector("[data-rarity-filter].active")?.dataset.rarityFilter || "all";
+  let visible = 0;
+  const rows = page.querySelectorAll("[data-rarity-row]");
+  rows.forEach((row) => {
+    const shouldShow = activeFilter === "all" || row.dataset.rarityRow === activeFilter;
+    row.hidden = !shouldShow;
+    if (shouldShow) visible += 1;
+  });
+  const readout = page.querySelector("[data-rarity-readout]");
+  if (readout) readout.textContent = `${visible} / ${rows.length}`;
+}
+
+function localLeaderboardEntry(address, handle, apiReport) {
+  const api = normalizeReportApiData(apiReport);
+  const rawAddress = String(address || activeReportIdentity.rawWallet || "").trim();
+  const displayHandle = normalizeHandle(handle, "");
+  const hasXHandle = displayHandle.startsWith("@") && displayHandle !== "@handle";
+  const degen = clampReportScore(api?.scores.degen ?? activeReportScores.degen);
+  const diamond = clampReportScore(api?.scores.diamond ?? activeReportScores.diamond);
+  const airdrop = clampReportScore(api?.scores.airdrop ?? (32 + ((degen * 3 + diamond) % 59)));
+  const tier = reportRarityFromScore(degen);
+  const personality = api?.personality || activeReportNarrative?.personality || finalText("report", "personalityValue");
+  const rarityScore = Number((api?.rarity?.score ?? Math.min(100, degen * 0.68 + airdrop * 0.18 + diamond * 0.14)).toFixed?.(2) ?? degen);
+  return {
+    id: `${hasXHandle ? displayHandle.slice(1).toLowerCase() : "wallet"}:${rawAddress.toLowerCase()}:${currentLang}`,
+    username: hasXHandle ? displayHandle.slice(1) : `wallet_${rawAddress.slice(2, 10).toLowerCase()}`,
+    handle: hasXHandle ? displayHandle : shortWallet(rawAddress),
+    name: hasXHandle ? displayHandle.slice(1) : shortWallet(rawAddress),
+    avatarUrl: hasXHandle ? xAvatarUrl(displayHandle) : "",
+    profileUrl: hasXHandle ? `https://x.com/${encodeURIComponent(displayHandle.slice(1))}` : "",
+    address: rawAddress,
+    shortAddress: shortWallet(rawAddress),
+    personality,
+    degen,
+    diamond,
+    airdrop,
+    rankScore: api?.rankScore ?? Number((degen * 0.54 + diamond * 0.18 + airdrop * 0.28).toFixed(2)),
+    rarity: api?.rarity || { tier: tier.key === "one" ? "unique" : tier.key, tierName: tier.label, score: rarityScore },
+    generatedAt: new Date().toISOString(),
+    language: currentLang,
+    category: leaderboardCategory({ degen, diamond, airdrop })
+  };
+}
+
+function addLocalLeaderboardEntry(address, handle, apiReport) {
+  const entry = localLeaderboardEntry(address, handle, apiReport);
+  const merged = mergeLeaderboardEntries(entry, readLocalLeaderboard(), activeLeaderboardEntries);
+  activeLeaderboardEntries = merged;
+  writeLocalLeaderboard(merged);
+  renderLeaderboardRows(merged);
+  return entry;
+}
+
+async function fetchJsonPayload(url, options = {}) {
+  const response = await fetch(url, options);
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+  return payload;
+}
+
+async function refreshLeaderboard() {
+  const local = readLocalLeaderboard();
+  try {
+    const payload = await fetchJsonPayload(`/api/leaderboard?lang=${encodeURIComponent(currentLang)}`);
+    activeLeaderboardEntries = mergeLeaderboardEntries(payload.entries || [], local);
+  } catch {
+    activeLeaderboardEntries = mergeLeaderboardEntries(local);
+  }
+  renderLeaderboardRows(activeLeaderboardEntries);
+}
+
+async function syncLeaderboardEntry(address, handle) {
+  const username = normalizeHandle(handle, "").replace(/^@/, "");
+  try {
+    const payload = await fetchJsonPayload(`/api/leaderboard?lang=${encodeURIComponent(currentLang)}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ address, username, lang: currentLang })
+    });
+    if (payload.entry) addLocalLeaderboardEntry(address, handle, { ...payload.entry, scores: { degen: payload.entry.degen, diamond: payload.entry.diamond, airdrop: payload.entry.airdrop } });
+    if (payload.entries) {
+      activeLeaderboardEntries = mergeLeaderboardEntries(payload.entries, readLocalLeaderboard());
+      writeLocalLeaderboard(activeLeaderboardEntries);
+      renderLeaderboardRows(activeLeaderboardEntries);
+    }
+  } catch {
+    // Auto-ranking should never block report generation.
+  }
+}
+
+async function enrichReportFromApi(address, handle) {
+  try {
+    const report = await fetchJsonPayload(`/api/analyze?address=${encodeURIComponent(address)}&lang=${encodeURIComponent(currentLang)}`);
+    updateReportScores(report.scores?.degen ?? activeReportScores.degen, report.scores?.diamond ?? activeReportScores.diamond, {
+      rawWallet: address,
+      apiReport: report
+    });
+    addLocalLeaderboardEntry(address, handle, report);
+  } catch {
+    // The deterministic local report remains the fallback if live chain reads are unavailable.
+  } finally {
+    syncLeaderboardEntry(address, handle);
+  }
 }
 
 function setPlaceholder(element, value) {
@@ -980,14 +1518,18 @@ function hydrateFinalPages() {
     const rarityCopy = FINAL_PAGE_COPY[currentLang].rarity;
     rarity.querySelectorAll("[data-rarity-filter]").forEach((button, index) => setText(button, rarityCopy.tabs[index]));
     rarity.querySelectorAll(".rank-label-row span").forEach((label, index) => setText(label, rarityCopy.labels[index]));
-    rarity.querySelectorAll("[data-rarity-row]").forEach((row, index) => {
-      const data = rarityCopy.rows[index];
-      if (!data) return;
-      setText(row.querySelector("b"), data[0]);
-      setText(row.querySelector("strong"), data[1]);
-      setText(row.querySelector("span"), data[2]);
-      setText(row.querySelector("em"), data[3]);
-    });
+    if (activeLeaderboardEntries.length) {
+      renderLeaderboardRows(activeLeaderboardEntries);
+    } else {
+      rarity.querySelectorAll("[data-rarity-row]").forEach((row, index) => {
+        const data = rarityCopy.rows[index];
+        if (!data) return;
+        setText(row.querySelector("b"), data[0]);
+        setText(row.querySelector("strong"), data[1]);
+        setText(row.querySelector("span"), data[2]);
+        setText(row.querySelector("em"), data[3]);
+      });
+    }
     setText(rarity.querySelector(".anomaly-card h3"), rarityCopy.cardTitle);
     rarity.querySelectorAll(".anomaly-card p").forEach((line, index) => {
       const span = line.querySelector("span");
@@ -1077,6 +1619,7 @@ function hydrateFinalPages() {
       if (input) input.value = reportCopy.tweet;
     }
     setText(report.querySelector(".gold-action"), reportCopy.nft);
+    applyReportNarrative(report, activeReportNarrative);
   }
 }
 
@@ -1174,6 +1717,14 @@ function applyPage(page, options = {}) {
     window.history.pushState(null, "", `#${nextPage}`);
   }
 
+  if (nextPage === "rarity") {
+    if (activeLeaderboardEntries.length) {
+      renderLeaderboardRows(activeLeaderboardEntries);
+    } else {
+      syncRarityReadout(document.querySelector(".ref-rarity-page"));
+    }
+  }
+
   clearStatus();
 }
 
@@ -1187,10 +1738,15 @@ form?.addEventListener("submit", (event) => {
     return;
   }
 
+  const handle = xHandleInput?.value || "";
+  const degen = scoreFromText(address);
+  const diamond = 100 - (degen % 48);
   setStatus(t("status.success"));
-  updateReportIdentity({ wallet: address, handle: xHandleInput?.value });
-  updateReportScores(scoreFromText(address), 100 - (scoreFromText(address) % 48));
+  updateReportIdentity({ wallet: address, handle });
+  updateReportScores(degen, diamond, { rawWallet: address });
+  addLocalLeaderboardEntry(address, handle);
   applyPage("report");
+  enrichReportFromApi(address, handle);
 });
 
 languageButton?.addEventListener("click", () => {
@@ -1271,20 +1827,11 @@ document.querySelectorAll("[data-wallet-pk-form]").forEach((walletForm) => {
 document.querySelectorAll("[data-rarity-filter]").forEach((button) => {
   button.addEventListener("click", () => {
     const page = button.closest("[data-page-screen]") || document;
-    const filter = button.dataset.rarityFilter;
     page.querySelectorAll("[data-rarity-filter]").forEach((item) => {
       item.classList.toggle("active", item === button);
     });
 
-    let visible = 0;
-    page.querySelectorAll("[data-rarity-row]").forEach((row) => {
-      const shouldShow = filter === "all" || row.dataset.rarityRow === filter;
-      row.hidden = !shouldShow;
-      if (shouldShow) visible += 1;
-    });
-
-    const total = page.querySelectorAll("[data-rarity-row]").length;
-    page.querySelector("[data-rarity-readout]").textContent = `${visible} / ${total}`;
+    syncRarityReadout(page);
     setStatus(t("status.rarity"));
   });
 });
@@ -3066,3 +3613,4 @@ document.querySelectorAll(".gold-action").forEach((button) => {
 
 applyLanguage();
 applyPage(currentPage, { updateHash: false });
+refreshLeaderboard();

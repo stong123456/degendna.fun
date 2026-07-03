@@ -28,7 +28,7 @@ const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL || "https://ethereum-sepolia
 const SEPOLIA_MINTER_PRIVATE_KEY = process.env.SEPOLIA_MINTER_PRIVATE_KEY || "";
 const SEPOLIA_NFT_CONTRACT_ADDRESS = process.env.SEPOLIA_NFT_CONTRACT_ADDRESS || "";
 
-const REPORT_VERSION = "20260703-release-v105";
+const REPORT_VERSION = "20260703-release-v106";
 const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;
 const ANALYZE_CACHE_TTL_MS = 6 * HOUR_MS;
@@ -3608,19 +3608,24 @@ function leaderboardCategories(entries) {
 
 async function submitLeaderboardEntry({ address, lang, username }) {
   const normalizedAddress = normalizeAddress(address);
-  const profile = await resolveXProfile(username);
-  if (!isAddress(normalizedAddress) || !profile) {
-    throw new Error(pickLocalized(lang, "请输入有效的钱包地址和 @X 用户名。", "Enter a valid wallet address and @X username."));
+  if (!isAddress(normalizedAddress)) {
+    throw new Error(pickLocalized(lang, "请输入有效的钱包地址。", "Enter a valid wallet address."));
   }
 
+  const xUsername = normalizeXUsername(username);
+  const profile = xUsername
+    ? await resolveXProfile(xUsername)
+    : {
+        username: `wallet_${normalizedAddress.slice(2, 10).toLowerCase()}`,
+        handle: shortAddress(normalizedAddress),
+        name: shortAddress(normalizedAddress),
+        avatarUrl: "",
+        rawAvatarUrl: "",
+        profileUrl: "",
+        source: "wallet"
+      };
+
   const report = await analyzeWallet(normalizedAddress, lang);
-  if (report.metrics.txCount < 20 || report.metrics.sampleWindowDays < 30) {
-    throw new Error(pickLocalized(
-      lang,
-      "这个钱包样本太薄，可以生成 Degen DNA 报告，但暂时不能进入稀有度排行榜。",
-      "This wallet can generate a report, but the sample is too thin for the rarity leaderboard."
-    ));
-  }
   const entry = {
     id: `${profile.username.toLowerCase()}:${normalizedAddress.toLowerCase()}:${normalizeLang(lang)}`,
     username: profile.username,
@@ -3651,7 +3656,7 @@ async function submitLeaderboardEntry({ address, lang, username }) {
     entry,
     ...current.filter((item) =>
       item.id !== entry.id &&
-      String(item.username || "").toLowerCase() !== entryUsername &&
+      (!entryUsername || String(item.username || "").toLowerCase() !== entryUsername) &&
       normalizedAddressKey(item.address) !== entryAddress
     )
   ]);

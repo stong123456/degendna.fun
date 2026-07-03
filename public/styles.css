@@ -18696,6 +18696,19 @@ body.degen-persona-quiz:not(.degen-persona-result-mode)[data-page="psyche-test"]
   transform: translateX(4px) !important;
 }
 
+/* Rarity Rank v34: keep dynamic X avatars inside the existing rank icon slot. */
+body[data-page="rarity"] .ref-rarity-page .rank-row i {
+  overflow: hidden !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row i .rank-avatar {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+}
+
 body.degen-persona-quiz:not(.degen-persona-result-mode)[data-page="psyche-test"] .degen-persona-archetypes i {
   font-size: clamp(13.8px, 1.04vw, 18.8px) !important;
   transform: translate(-3px, 5px) !important;
