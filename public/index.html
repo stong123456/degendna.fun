@@ -3,492 +3,767 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>链上照妖镜 - Degen DNA Report</title>
+    <title>链上照妖镜 - DEGEN DNA REPORT</title>
     <meta
       name="description"
-      content="输入钱包地址，生成能晒、能比、能自嘲的链上人格报告。"
+      content="输入 EVM 钱包地址，生成链上人格报告、钱包 PK、稀有度榜与心理自测。"
     />
-    <link rel="stylesheet" href="/styles.css?v=20260621-cyber-clinic" />
+    <link rel="stylesheet" href="./styles.css?v=20260703-release-v105" />
   </head>
-  <body>
-    <div class="app-shell">
-      <header class="topbar">
-        <a class="brand" href="/" aria-label="链上照妖镜" data-i18n-aria="brand.aria">
-          <span class="brand-mark" data-i18n="brand.mark">照</span>
-          <span>
-            <strong data-i18n="brand.name">链上照妖镜</strong>
-            <small data-i18n="brand.sub">Degen DNA Report</small>
-          </span>
-        </a>
-        <nav class="nav-actions" aria-label="工具入口" data-i18n-aria="nav.aria">
-          <button id="language-toggle" class="ghost-button lang-toggle" type="button" aria-label="Switch language">
-            <span data-lang-option="zh">中文</span>
-            <i>/</i>
-            <span data-lang-option="en">EN</span>
+  <body data-page="home">
+    <main class="terminal-shell" aria-label="链上照妖镜应用">
+      <section class="homepage-stage">
+        <header class="topbar">
+          <a class="brand" href="#home" aria-label="链上照妖镜首页" data-route="home">
+            <span class="brand-mark" aria-hidden="true">
+              <img class="logo-image" src="./assets/degendna-logo-symbol-glass-transparent-crop-v1.png" alt="" />
+            </span>
+            <span>
+              <strong data-i18n="brand.name">链上照妖镜</strong>
+              <small>DEGEN DNA REPORT</small>
+            </span>
+          </a>
+
+          <nav class="primary-nav" aria-label="首页导航">
+            <button class="active" type="button" data-page-target="home" data-i18n="nav.home">首页</button>
+            <button type="button" data-degen-persona-nav data-i18n="nav.degenPersona">交易人格自查</button>
+            <button type="button" data-page-target="rarity" data-i18n="nav.rank">稀有度榜</button>
+            <button type="button" data-page-target="psyche" data-i18n="nav.test">心理自测中心</button>
+            <button type="button" data-page-target="about" data-i18n="nav.about">关于</button>
+          </nav>
+
+          <div class="top-actions">
+            <button
+              id="language-toggle"
+              class="wallet-button language-toggle"
+              type="button"
+              aria-label="切换语言"
+              data-i18n-aria="language.aria"
+            >
+              <span class="language-mark" aria-hidden="true">⇄</span>
+              <b data-language-current>中文</b>
+              <i>/ EN</i>
+            </button>
+            <button class="menu-button" type="button" aria-label="打开扩展菜单" aria-expanded="false" aria-controls="top-more-menu">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+            <div class="top-more-menu" id="top-more-menu" data-top-more-menu hidden>
+              <button type="button" data-menu-page-target="wallet" data-i18n="nav.wallet">钱包PK</button>
+              <a href="https://x.com/Stone141319" target="_blank" rel="noopener noreferrer">X @Stone141319</a>
+              <a href="https://app.lhdao.top/?ref=cmkamdijn000cc94wijye0uz7" target="_blank" rel="noopener noreferrer">加入灯塔</a>
+              <a href="https://t.me/Stone141319" target="_blank" rel="noopener noreferrer">TG 频道</a>
+            </div>
+          </div>
+        </header>
+
+        <div class="hero-copy">
+          <div class="clinic-chip">
+            <span>Onchain Clinic</span>
+            <b data-i18n="hero.chip">链上精神健康诊断终端</b>
+          </div>
+          <h1>
+            <span data-i18n="hero.titleTop">输入地址，</span><br />
+            <span data-i18n="hero.titleBottom">照出链上病历。</span>
+          </h1>
+          <p class="hero-lead" data-i18n="hero.lead">链上数据不会撒谎，但文案会补刀。</p>
+          <p class="hero-note" data-i18n="hero.note">
+            Onchain Clinic · 首个区块链心理状态分析与病历生成系统
+          </p>
+        </div>
+
+        <div class="scan-glass" aria-hidden="true">
+          <span class="scan-beam"></span>
+          <span class="scan-reticle scan-reticle-a"></span>
+          <span class="scan-reticle scan-reticle-b"></span>
+        </div>
+
+        <form class="intake-panel" id="scan-form" autocomplete="off">
+          <div class="panel-title">
+            <span data-i18n="form.title">患者信息录入</span>
+            <b data-i18n="form.sub">Patient Intake · Public Data Only</b>
+          </div>
+
+          <label for="wallet-address" data-i18n="form.wallet">EVM 钱包地址</label>
+          <input
+            id="wallet-address"
+            name="address"
+            inputmode="text"
+            spellcheck="false"
+            placeholder="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+            required
+          />
+
+          <label for="x-handle" data-i18n="form.x">X 用户名（可选）</label>
+          <input
+            id="x-handle"
+            name="xHandle"
+            inputmode="text"
+            spellcheck="false"
+            placeholder="@Stone141319"
+          />
+
+          <button class="scan-button" type="submit">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 4h6M14 4h6M4 20h6M14 20h6M4 4v6M20 4v6M4 14v6M20 14v6" />
+              <path d="M8 12h8M12 8v8" />
+            </svg>
+            <span data-i18n="form.submit">开始扫描 / 生成链上病历</span>
           </button>
-          <button class="ghost-button" data-view="mirror" type="button" data-i18n="nav.mirror">照钱包</button>
-          <button class="ghost-button" data-view="pk" type="button" data-i18n="nav.pk">钱包 PK</button>
-          <button class="ghost-button" data-view="board" type="button" data-i18n="nav.board">X 排行榜</button>
-          <button class="ghost-button" data-view="mental" type="button" data-i18n="nav.mental">心理自测</button>
-          <button class="ghost-button" data-view="about" type="button" data-i18n="nav.about">关于</button>
-          <a class="ghost-button link-button" href="https://t.me/Stone141319" target="_blank" rel="noreferrer" data-i18n="nav.tg">TG 频道</a>
-          <a class="ghost-button link-button" href="https://degendna.fun" target="_blank" rel="noreferrer">degendna.fun</a>
-        </nav>
-      </header>
 
-      <main>
-        <section id="follow-gate" class="follow-gate" aria-label="关注任务" data-i18n-aria="gate.aria">
-          <div class="creator-card">
-            <img src="/assets/stone-avatar.png" alt="Stone141319 头像" data-i18n-alt="gate.avatarAlt" />
-            <div>
-              <h2 data-i18n="gate.title">先关注石头，再照钱包</h2>
-              <p data-i18n="gate.copy">关注后就能照钱包；填 @X 用户名会显示头像和名字，并自动加入公开排行榜。</p>
-            </div>
+          <div class="trust-row" aria-label="安全提示">
+            <span data-i18n="trust.keys">不存储私钥</span>
+            <span data-i18n="trust.read">只读链上数据</span>
+            <span data-i18n="trust.privacy">100% 隐私保护</span>
           </div>
-          <div class="gate-actions">
-            <a
-              id="follow-link"
-              class="primary-button link-button"
-              href="https://x.com/Stone141319"
-              target="_blank"
-              rel="noreferrer"
-              data-i18n="gate.follow"
-            >关注 @Stone141319</a>
-            <button id="unlock-follow" class="ghost-button" type="button">我已关注，解锁工具</button>
+          <p class="form-status" id="form-status" aria-live="polite"></p>
+        </form>
+
+        <aside class="scan-status" aria-label="扫描状态">
+          <div class="scan-title">
+            <span data-i18n="scan.title">大脑 · DNA 扫描中</span>
+            <b>BRAIN-DNA MAPPING v2.2</b>
           </div>
+          <div class="signal-card">
+            <span data-i18n="scan.ekg">心电图 EKG</span>
+            <i class="ekg-line" aria-hidden="true"></i>
+          </div>
+          <div class="signal-card">
+            <span data-i18n="scan.wave">脑波 BRAINWAVE</span>
+            <i class="wave-line" aria-hidden="true"></i>
+          </div>
+          <div class="scan-progress">
+            <span data-i18n="scan.status">扫描状态 SCAN STATUS</span>
+            <strong>78%</strong>
+            <i><em></em></i>
+          </div>
+          <div class="data-source">
+            <span data-i18n="scan.source">数据源 DATA SOURCE</span>
+            <b>Ethereum</b>
+            <b>BNB Chain</b>
+            <b>Polygon</b>
+            <b>Arbitrum</b>
+          </div>
+          <div class="case-id">
+            <span data-i18n="scan.case">病例编号 / CASE ID</span>
+            <b>DN-7C9-TEST-001</b>
+          </div>
+        </aside>
+
+        <div class="diagnostic-caption" aria-hidden="true">
+          <span>Onchain psychiatry protocol</span>
+          <b>DEGEN DNA REPORT · CLINIC SHELL</b>
+        </div>
+
+        <section class="symptom-strip" aria-label="症状标签">
+          <strong data-i18n="symptoms.title">症状标签</strong>
+          <button type="button" data-i18n="symptoms.overthinking">过度脑补</button>
+          <button type="button" data-i18n="symptoms.volatility">波动焦虑</button>
+          <button type="button" data-i18n="symptoms.fomo">踏空恐惧</button>
+          <button type="button" data-i18n="symptoms.sleep">土狗失眠</button>
+          <button type="button" data-i18n="symptoms.hopium">希望麻醉</button>
+          <button type="button" data-i18n="symptoms.more">查看更多 +</button>
         </section>
 
-        <section id="mirror-view" class="view-panel active" data-view-panel="mirror">
-        <section class="scanner">
-          <div class="scanner-copy">
-            <p class="eyebrow" data-i18n="hero.eyebrow">Degen DNA Report</p>
-            <div class="portal-titleplate" aria-label="Degen DNA Portal">
-              <span>Degen DNA Portal</span>
-              <b>中文：链上精神健康门户</b>
-            </div>
-            <h1 data-i18n="hero.title">输入地址，照出链上病历。</h1>
-            <p data-i18n="hero.copy">链上数据不会撒谎，但文案会补刀。</p>
-            <p class="portal-subline">Onchain Clinic · 首个区块链心理状态分析与病例生成系统</p>
-            <div class="portal-actions" aria-label="Degen DNA portal actions">
-              <a class="portal-cta primary" href="#scan-form"><span>[ 立即诊断 ]</span><b>START DIAGNOSIS</b></a>
-              <a class="portal-cta" href="#report-view"><span>[ 提取病历 ]</span><b>RETRIEVE RECORD</b></a>
-            </div>
-            <div class="clinic-flow" aria-label="链上精神科就诊流程" data-i18n-aria="clinic.aria">
-              <div>
-                <span>01</span>
-                <b data-i18n="clinic.step1Title">挂号</b>
-                <small data-i18n="clinic.step1Copy">输入公开地址</small>
-              </div>
-              <div>
-                <span>02</span>
-                <b data-i18n="clinic.step2Title">听诊</b>
-                <small data-i18n="clinic.step2Copy">读取链上心电图</small>
-              </div>
-              <div>
-                <span>03</span>
-                <b data-i18n="clinic.step3Title">诊断</b>
-                <small data-i18n="clinic.step3Copy">生成精神病历</small>
-              </div>
-              <div>
-                <span>04</span>
-                <b data-i18n="clinic.step4Title">出院</b>
-                <small data-i18n="clinic.step4Copy">晒图或领取 NFT</small>
-              </div>
-            </div>
-            <div class="symptom-marquee" aria-hidden="true">
-              <div>
-                <span>Overthinking</span>
-                <span>Volatility Anxiety</span>
-                <span>FOMO</span>
-                <span>Degen Sleep</span>
-                <span>Hopium Dependence</span>
-                <span>Paper Hand Tremor</span>
-              </div>
-            </div>
+        <section class="capabilities" aria-label="产品能力">
+          <article>
+            <span data-i18n="cap.engine">数据分析引擎</span>
+            <b>Onchain Psyche AI</b>
+            <small>v2.2.0</small>
+          </article>
+          <article>
+            <span data-i18n="cap.privacy">隐私保护</span>
+            <b data-i18n="cap.zk">零知识分析</b>
+            <small data-i18n="cap.zkSub">100% 隐私保护</small>
+          </article>
+          <article>
+            <span data-i18n="cap.case">病例生成</span>
+            <b data-i18n="cap.ai">AI 模型驱动</b>
+            <small data-i18n="cap.aiSub">链上行为心理分析</small>
+          </article>
+          <article>
+            <span data-i18n="cap.report">可信报告</span>
+            <b data-i18n="cap.verify">可验证 · 不可篡改</b>
+            <small data-i18n="cap.verifySub">上链存证</small>
+          </article>
+          <article>
+            <span data-i18n="cap.community">社区信任</span>
+            <b data-i18n="cap.count">10,231+ 份报告</b>
+            <small data-i18n="cap.countSub">来自全球患者</small>
+          </article>
+        </section>
+
+        <section class="app-page wallet-page" data-page-screen="wallet" aria-label="钱包PK">
+          <div class="page-head">
+            <span>WALLET COMBAT LAB</span>
+            <h2 data-i18n="wallet.title">钱包 PK 病区</h2>
+            <p data-i18n="wallet.lead">输入两个地址，对比链上人格、交易冲动和胜率诊断。</p>
           </div>
-          <div class="portal-visual" aria-hidden="true">
-            <div class="portal-brain">
-              <span class="dna-strand"></span>
-              <span class="brain-core"></span>
-            </div>
-            <small>BRAIN-DNA MAPPING v2.1<br />[ cite: DEGEN PROTOCOL ]</small>
-          </div>
-          <form id="scan-form" class="scan-form">
-            <label for="wallet-address" data-i18n="form.label">EVM 钱包地址</label>
-            <div class="input-row">
-              <input
-                id="wallet-address"
-                name="address"
-                autocomplete="off"
-                spellcheck="false"
-                placeholder="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
-              />
-              <button class="primary-button" type="submit" data-i18n="form.submit">生成报告</button>
-            </div>
-            <label class="x-label" for="x-username" data-i18n="form.xLabel">X 用户名（可选，上榜用）</label>
-            <div class="x-input-row">
-              <input
-                id="x-username"
-                name="xUsername"
-                autocomplete="off"
-                spellcheck="false"
-                placeholder="@Stone141319"
-                data-i18n-placeholder="form.xPlaceholder"
-              />
-              <span data-i18n="form.xHelp">填 @用户名后会读取 X 头像，自动加入公开排行榜。</span>
-            </div>
-            <div class="trust-list" aria-label="安全提示" data-i18n-aria="form.trustAria">
-              <span data-i18n="trust.public">只分析公开链上数据</span>
-              <span data-i18n="trust.noConnect">不连接钱包</span>
-              <span data-i18n="trust.noSign">不需要签名</span>
-              <span data-i18n="trust.noKey">不读取私钥</span>
-              <span data-i18n="trust.noAsset">不触碰资产</span>
-            </div>
-            <p class="sample-title" data-i18n="form.sampleTitle">不知道测什么？先照这几个钱包。</p>
-            <div class="quick-row" aria-label="示例钱包" data-i18n-aria="form.samples">
-              <button type="button" data-sample="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" data-i18n="samples.vitalik">照 Vitalik 钱包</button>
-              <button type="button" data-sample="0x28C6c06298d514Db089934071355E5743bf21d60" data-i18n="samples.binance">照 Binance 热钱包</button>
-              <button type="button" data-sample-random="1" data-i18n="samples.random">照随机 Degen 钱包</button>
-            </div>
-            <p id="form-note" class="form-note"></p>
+          <form class="pk-console" id="wallet-pk-form" autocomplete="off">
+            <label data-i18n="wallet.aLabel" for="pk-wallet-a">左侧患者钱包</label>
+            <input id="pk-wallet-a" placeholder="0x742d35Cc6634C0532925a3b844Bc454e4438f44e" />
+            <label data-i18n="wallet.bLabel" for="pk-wallet-b">右侧患者钱包</label>
+            <input id="pk-wallet-b" placeholder="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" />
+            <button type="submit" class="page-action" data-i18n="wallet.run">启动链上会诊</button>
           </form>
+          <div class="pk-versus">
+            <article>
+              <span data-i18n="wallet.left">左侧钱包</span>
+              <strong data-pk-score-a>72</strong>
+              <small data-i18n="wallet.leftTrait">钻石手偏执型</small>
+            </article>
+            <div class="versus-core">VS</div>
+            <article>
+              <span data-i18n="wallet.right">右侧钱包</span>
+              <strong data-pk-score-b>64</strong>
+              <small data-i18n="wallet.rightTrait">FOMO 冲动型</small>
+            </article>
+          </div>
+          <div class="diagnosis-list">
+            <p><b data-i18n="wallet.metric1">胜率诊断</b><span data-i18n="wallet.metric1Value">左侧钱包更稳，右侧钱包更会整活。</span></p>
+            <p><b data-i18n="wallet.metric2">亏损免疫</b><span data-i18n="wallet.metric2Value">双方均存在追涨后遗症。</span></p>
+            <p><b data-i18n="wallet.metric3">治疗建议</b><span data-i18n="wallet.metric3Value">减少凌晨三点下单，增加睡眠。</span></p>
+          </div>
         </section>
 
-        <section id="status" class="status-line" hidden></section>
-
-        <section id="report-view" class="report-grid" hidden>
-          <div class="report-main">
-            <section class="diagnosis-panel">
-              <div class="section-kicker">Onchain Mirror</div>
-              <div class="diagnosis-heading">
-                <div>
-                  <p id="report-address" class="address-line"></p>
-                  <h2 id="personality">钱包人格</h2>
-                  <div id="x-profile-pill" class="x-profile-pill" hidden>
-                    <img id="x-profile-avatar" src="/assets/stone-avatar.png" alt="@X" />
-                    <span id="x-profile-name">@X</span>
-                  </div>
-                </div>
-                <div class="grade-stamp" id="degen-band">正常韭菜</div>
-              </div>
-              <p id="verdict" class="verdict"></p>
-              <div id="label-list" class="label-list"></div>
-              <div class="mode-switcher" aria-label="报告模式" data-i18n-aria="mode.aria">
-                <button type="button" data-report-mode="normal" data-i18n="mode.normal">普通版</button>
-                <button type="button" data-report-mode="roast" data-i18n="mode.roast">嘴毒版</button>
-                <button type="button" data-report-mode="abstract" data-i18n="mode.abstract">抽象版</button>
-                <button type="button" data-report-mode="kol" data-i18n="mode.kol">KOL 版</button>
-              </div>
-              <div class="medical-note">
-                <b data-i18n="medical.title">链上精神病历（娱乐版）</b>
-                <span data-i18n="medical.copy">这是一份只看钱包行为的娱乐诊断，不是医学诊断。照妖镜可以补刀，但真实的人要被好好照顾。</span>
-              </div>
-            </section>
-
-            <section class="metric-strip" aria-label="核心指数" data-i18n-aria="metrics.aria">
-              <article>
-                <span data-i18n="metrics.degen">Degen 指数</span>
-                <strong id="degen-score">--</strong>
-                <div class="meter"><i id="degen-meter"></i></div>
-              </article>
-              <article>
-                <span data-i18n="metrics.diamond">钻石手指数</span>
-                <strong id="diamond-score">--</strong>
-                <div class="meter green"><i id="diamond-meter"></i></div>
-              </article>
-              <article>
-                <span data-i18n="metrics.airdrop">空投雷达</span>
-                <strong id="airdrop-score">--</strong>
-                <div class="meter yellow"><i id="airdrop-meter"></i></div>
-              </article>
-            </section>
-
-            <section class="report-section rarity-panel">
-              <div class="rarity-grid">
-                <div>
-                  <span data-i18n="rarity.personalityTitle">钱包人格稀有度</span>
-                  <strong id="rarity-tier">--</strong>
-                  <p id="rarity-detail"></p>
-                </div>
-                <div>
-                  <span data-i18n="rarity.comboTitle">组合稀有度</span>
-                  <strong id="combo-rarity">--</strong>
-                  <p id="combo-detail"></p>
-                </div>
-              </div>
-              <div id="badge-list" class="badge-list"></div>
-              <p id="rarity-season" class="section-note"></p>
-            </section>
-
-            <section class="report-section">
-              <h3 data-i18n="sections.asset">链上资产性格</h3>
-              <p id="asset-personality"></p>
-              <div id="chain-list" class="chain-list"></div>
-            </section>
-
-            <section class="report-split">
-              <article class="report-section danger">
-                <h3 data-i18n="sections.loss">亏损黑匣子</h3>
-                <p id="loss-black-box"></p>
-              </article>
-              <article class="report-section">
-                <h3 data-i18n="sections.holding">钻石手 / 纸手</h3>
-                <p id="holding-behavior"></p>
-              </article>
-            </section>
-
-            <section class="report-split">
-              <article class="report-section">
-                <h3 data-i18n="sections.alpha">Alpha 雷达</h3>
-                <ul id="alpha-list" class="clean-list"></ul>
-              </article>
-              <article class="report-section">
-                <h3 data-i18n="sections.fate">90 天钱包命运</h3>
-                <ol id="fate-list" class="clean-list ordered"></ol>
-              </article>
-            </section>
-
-            <section class="report-section">
-              <h3 data-i18n="sections.strategy">适合你的交易风格</h3>
-              <p class="section-note" data-i18n="sections.strategyNote">由 Hermes 策略映射生成</p>
-              <p id="strategy-fit"></p>
-              <div id="token-list" class="token-list"></div>
-            </section>
+        <section class="app-page rarity-page" data-page-screen="rarity" aria-label="稀有度排行榜">
+          <div class="page-head">
+            <span>RARITY TRIAGE BOARD</span>
+            <h2 data-i18n="rarity.title">稀有度排行榜</h2>
+            <p data-i18n="rarity.lead">按链上行为样本，把患者分成珍稀病症、常见病症和高危病症。</p>
           </div>
-
-          <aside class="share-rail">
-            <section class="share-card-wrap">
-              <div id="share-card" class="share-card">
-                <div class="share-card-top">
-                  <span class="card-owner card-owner-top">
-                    <img id="card-owner-avatar" src="/assets/stone-avatar.png" alt="@Stone141319" />
-                    <b id="card-owner-name">@Stone141319</b>
-                  </span>
-                  <span>
-                    <i data-i18n="card.reportTitle">链上听诊器诊断报告</i>
-                    <b>Degen DNA</b>
-                  </span>
-                  <span class="medical-pulse-icon" aria-hidden="true"></span>
-                </div>
-                <div class="share-card-body">
-                  <div class="medical-card-head">
-                    <span>Degen DNA Medical Record</span>
-                    <b id="card-record-id">DDNA-CLINIC-S0-0001</b>
-                  </div>
-                  <div class="medical-scan">
-                    <div>
-                      <span>PRIMARY DIAGNOSIS</span>
-                      <strong id="card-diagnosis-en">Onchain Clinic Case</strong>
-                    </div>
-                    <div class="brain-scan" aria-hidden="true">
-                      <span></span>
-                    </div>
-                  </div>
-                  <p class="share-wallet" id="card-address">0x...</p>
-                  <h2 id="card-personality">钱包人格</h2>
-                  <div class="card-rarity">
-                    <span data-i18n="card.rarity">稀有度</span>
-                    <strong id="card-rarity">--</strong>
-                    <small id="card-rarity-detail">--</small>
-                  </div>
-                  <div class="card-score-row">
-                    <span data-i18n="card.degen">Degen 指数</span>
-                    <strong id="card-degen">--/100</strong>
-                  </div>
-                  <div class="card-score-row">
-                    <span data-i18n="card.diamond">钻石手指数</span>
-                    <strong id="card-diamond">--/100</strong>
-                  </div>
-                  <div class="card-loss">
-                    <span data-i18n="card.loss">亏损主因</span>
-                    <p id="card-loss-cause">--</p>
-                  </div>
-                  <div id="card-tags" class="card-tags"></div>
-                  <div id="card-mystic" class="card-mystic"></div>
-                  <blockquote id="card-verdict">你的判断力偶尔在线，但下一根阳线总能让它下线。</blockquote>
-                </div>
-                <div class="share-card-foot">
-                  <span class="card-doctor" data-i18n="card.doctor">链上主治医生：石头</span>
-                  <span id="card-care-note">照完钱包，也记得照顾好自己。</span>
-                  <b>degendna.fun</b>
-                </div>
-              </div>
-              <div class="share-actions">
-                <button id="share-card-button" class="primary-button" type="button" data-i18n="card.share">生成晒图并发到 X</button>
-              </div>
-              <div id="nft-claim-panel" class="nft-claim-panel" hidden>
-                <div class="nft-claim-head">
-                  <span>Sepolia NFT</span>
-                  <b data-i18n="nft.title">领取测试网病历 NFT</b>
-                </div>
-                <p data-i18n="nft.copy">不用连接钱包，不签名，不授权。输入接收地址后，由链上主治医生把病例发送到 Sepolia。</p>
-                <label for="nft-receiver" data-i18n="nft.receiver">NFT 接收地址</label>
-                <div class="nft-claim-row">
-                  <input id="nft-receiver" autocomplete="off" spellcheck="false" placeholder="0x..." />
-                  <button id="nft-claim-button" class="ghost-button" type="button" data-i18n="nft.claim">领取病历</button>
-                </div>
-                <p id="nft-claim-status" class="nft-claim-status"></p>
-              </div>
-              <div class="tweet-box">
-                <div class="tweet-box-head">
-                  <span data-i18n="tweet.title">可复制推文</span>
-                  <button id="copy-tweet" class="ghost-button" type="button" data-i18n="tweet.copy">复制推文</button>
-                </div>
-                <textarea id="tweet-text" readonly></textarea>
-              </div>
-            </section>
-
-            <section class="mini-panel">
-              <h3 data-i18n="stats.title">样本数据</h3>
-              <dl class="data-list">
-                <div><dt data-i18n="stats.portfolio">估算资产</dt><dd id="stat-portfolio">--</dd></div>
-                <div><dt data-i18n="stats.tx">交易次数</dt><dd id="stat-tx">--</dd></div>
-                <div><dt data-i18n="stats.token">Token 样本</dt><dd id="stat-token">--</dd></div>
-                <div><dt data-i18n="stats.meme">Meme 暴露</dt><dd id="stat-meme">--</dd></div>
-              </dl>
-            </section>
+          <div class="rarity-toolbar" aria-label="排行榜筛选">
+            <button type="button" class="active" data-rarity-filter="all" data-i18n="rarity.filterAll">全部</button>
+            <button type="button" data-rarity-filter="rare" data-i18n="rarity.filterRare">稀有症状</button>
+            <button type="button" data-rarity-filter="risk" data-i18n="rarity.filterRisk">高危行为</button>
+          </div>
+          <div class="rank-board">
+            <article data-rarity-row="rare">
+              <b>#01</b>
+              <strong data-i18n="rarity.rank1">冷钱包隐士</strong>
+              <span>R-99</span>
+              <small data-i18n="rarity.rank1Note">三年无卖出，疑似已飞升。</small>
+            </article>
+            <article data-rarity-row="risk">
+              <b>#02</b>
+              <strong data-i18n="rarity.rank2">凌晨梭哈者</strong>
+              <span>R-92</span>
+              <small data-i18n="rarity.rank2Note">Gas 高峰期仍坚持冲锋。</small>
+            </article>
+            <article data-rarity-row="rare">
+              <b>#03</b>
+              <strong data-i18n="rarity.rank3">空投考古学家</strong>
+              <span>R-88</span>
+              <small data-i18n="rarity.rank3Note">钱包里全是早期足迹。</small>
+            </article>
+            <article data-rarity-row="risk">
+              <b>#04</b>
+              <strong data-i18n="rarity.rank4">土狗连环追踪者</strong>
+              <span>R-81</span>
+              <small data-i18n="rarity.rank4Note">买入速度超过思考速度。</small>
+            </article>
+          </div>
+          <aside class="rarity-readout">
+            <span data-i18n="rarity.readout">当前样本</span>
+            <strong data-rarity-readout>4 / 4</strong>
+            <small data-i18n="rarity.readoutNote">筛选会同步更新病症样本池。</small>
           </aside>
         </section>
+
+        <section class="app-page psyche-page" data-page-screen="psyche" aria-label="心理自测">
+          <div class="page-head">
+            <span>PSYCHE SELF CHECK</span>
+            <h2 data-i18n="psyche.title">链上心理自测</h2>
+            <p data-i18n="psyche.lead">回答三个症状问题，生成你的链上精神状态快照。</p>
+          </div>
+          <div class="quiz-panel">
+            <p data-i18n="psyche.question">看到代币突然拉升 40%，你的第一反应是？</p>
+            <button type="button" data-psyche-option="26" data-i18n="psyche.option1">先看链上数据</button>
+            <button type="button" data-psyche-option="51" data-i18n="psyche.option2">先冲一点再说</button>
+            <button type="button" data-psyche-option="78" data-i18n="psyche.option3">满仓，命运会眷顾我</button>
+          </div>
+          <div class="psyche-result">
+            <span data-i18n="psyche.resultLabel">精神波动指数</span>
+            <strong data-psyche-score>51</strong>
+            <i><em data-psyche-meter></em></i>
+            <p data-psyche-diagnosis data-i18n="psyche.defaultDiagnosis">轻度 FOMO，建议先喝水再交易。</p>
+          </div>
+          <div class="therapy-grid">
+            <article>
+              <b data-i18n="psyche.therapy1">睡前禁盘</b>
+              <span data-i18n="psyche.therapy1Text">睡前 30 分钟不看 K 线。</span>
+            </article>
+            <article>
+              <b data-i18n="psyche.therapy2">仓位处方</b>
+              <span data-i18n="psyche.therapy2Text">单次冲动仓位不超过 12%。</span>
+            </article>
+            <article>
+              <b data-i18n="psyche.therapy3">复盘治疗</b>
+              <span data-i18n="psyche.therapy3Text">每周导出一次链上病历。</span>
+            </article>
+          </div>
         </section>
 
-        <section id="pk-panel" class="pk-panel view-panel" data-view-panel="pk" hidden>
-          <div>
-            <h2 data-i18n="pk.title">钱包 PK</h2>
-            <p data-i18n="pk.copy">你说你比我会交易？地址拿来。链上照妖镜帮你们打一架。</p>
+        <section class="app-page about-page" data-page-screen="about" aria-label="关于">
+          <div class="page-head">
+            <span>ABOUT THE CLINIC</span>
+            <h2 data-i18n="about.title">关于链上照妖镜</h2>
+            <p data-i18n="about.lead">我们把公开链上数据翻译成更好笑、更好懂、也更扎心的行为报告。</p>
           </div>
-          <form id="pk-form" class="pk-form">
-            <input id="pk-a" placeholder="钱包 A：0x..." autocomplete="off" spellcheck="false" data-i18n-placeholder="pk.a" />
-            <input id="pk-b" placeholder="钱包 B：0x..." autocomplete="off" spellcheck="false" data-i18n-placeholder="pk.b" />
-            <button class="primary-button" type="submit" data-i18n="pk.submit">开始 PK</button>
-          </form>
-          <div id="pk-result" class="pk-result" hidden></div>
+          <div class="about-mission">
+            <article>
+              <b data-i18n="about.mission1">只读公开数据</b>
+              <span data-i18n="about.mission1Text">不连接钱包、不索要签名、不触碰私钥。</span>
+            </article>
+            <article>
+              <b data-i18n="about.mission2">医疗风叙事</b>
+              <span data-i18n="about.mission2Text">用诊断报告的形式呈现链上人格。</span>
+            </article>
+            <article>
+              <b data-i18n="about.mission3">社区可玩性</b>
+              <span data-i18n="about.mission3Text">适合分享、PK、排行榜和自测扩展。</span>
+            </article>
+          </div>
+          <ol class="protocol-list">
+            <li><span>01</span><b data-i18n="about.step1">采集公开足迹</b><small data-i18n="about.step1Text">读取交易、交互和资产行为。</small></li>
+            <li><span>02</span><b data-i18n="about.step2">生成心理画像</b><small data-i18n="about.step2Text">映射成 FOMO、钻石手、波动焦虑等标签。</small></li>
+            <li><span>03</span><b data-i18n="about.step3">输出链上病历</b><small data-i18n="about.step3Text">生成可分享的赛博医疗报告。</small></li>
+          </ol>
         </section>
 
-        <section id="leaderboard" class="leaderboard view-panel" data-view-panel="board" hidden>
-          <div class="section-title-row">
-            <div>
-              <h2 data-i18n="board.title">X 用户名排行榜</h2>
-              <p data-i18n="board.copy">填 @X 用户名生成报告后，头像、名字、钱包人格和综合评分会自动上榜。</p>
-            </div>
-            <button id="refresh-board" class="ghost-button" type="button" data-i18n="board.refresh">刷新榜单</button>
-          </div>
-          <div class="auth-teaser">
-            <span data-i18n="board.teaser">上榜后会显示：X 头像 / @handle / 钱包人格 / Degen 指数 / 钻石手指数 / 综合处刑分</span>
-          </div>
-          <div class="lighthouse-card">
-            <div class="lighthouse-identity">
-              <img class="lighthouse-logo" src="/api/x-avatar?username=Lighthouse_2026" alt="@Lighthouse_2026" referrerpolicy="no-referrer" />
-              <div>
-                <b data-i18n="board.lighthouseTitle">灯塔蓝 V 入口</b>
-                <p data-i18n="board.lighthouseCopy">1000 粉以上蓝 V / KOL 如果已经被链上听诊器诊断出来，可以顺手加入灯塔，把链上人格样本带进更大的社交实验。</p>
+        <section class="app-page reference-page ref-report-page" data-page-screen="report" data-rarity-tier="legendary" aria-label="照钱包报告页">
+          <div class="report-share-capture" aria-label="可截屏分享的钱包链上报告">
+            <article class="report-main-card">
+              <div class="report-ribbon">链上精神科病例</div>
+              <div class="patient-strip">
+                <span class="x-avatar" data-x-avatar>
+                  <img alt="" data-x-avatar-img hidden />
+                  <b>X</b>
+                </span>
+                <div>
+                  <strong>@handle</strong>
+                  <small>short wallet: 00000039...</small>
+                </div>
               </div>
+              <div class="report-dossier">
+                <div>
+                  <span>钱包人格</span>
+                  <b>高位接盘艺术家</b>
+                </div>
+                <div>
+                  <span>稀有度</span>
+                  <b class="rarity-current">Legendary</b>
+                </div>
+                <p><em>报告编号</em><strong>DN-7C9-TEST-001</strong></p>
+                <p><em>Degen 指数:</em><strong data-report-degen>86/100</strong></p>
+                <p><em>钻石手指数:</em><strong data-report-diamond>31/100</strong></p>
+                <p><em>亏损主因</em><strong>看到别人赚钱后手速过快</strong></p>
+                <p><em>一句话判词</em><strong>你的钱包最大问题，是太容易相信下一根阳线。</strong></p>
+              </div>
+              <div class="rarity-ladder" aria-label="七种稀有度">
+                <span class="tier-common">Common</span>
+                <span class="tier-uncommon">Uncommon</span>
+                <span class="tier-rare">Rare</span>
+                <span class="tier-epic">Epic</span>
+                <span class="tier-legendary active">Legendary</span>
+                <span class="tier-mythic">Mythic</span>
+                <span class="tier-one">1/1</span>
+              </div>
+            </article>
+
+            <article class="report-core-panel">
+              <span class="report-section-label">核心会诊指数</span>
+              <div class="dimension-curves" aria-hidden="true">
+                <span data-dimension-curve="0"></span>
+                <span data-dimension-curve="1"></span>
+                <span data-dimension-curve="2"></span>
+                <span data-dimension-curve="3"></span>
+                <span data-dimension-curve="4"></span>
+                <span data-dimension-curve="5"></span>
+              </div>
+              <div class="score-orbit">
+                <i></i>
+                <strong data-report-score>86</strong>
+                <small>综合评分</small>
+              </div>
+              <div class="metric-grid">
+                <p><span>Degen 指数</span><b data-report-degen-mini>86</b><i><em data-report-degen-bar style="width: 86%"></em></i></p>
+                <p><span>钻石手指数</span><b data-report-diamond-mini>31</b><i><em data-report-diamond-bar style="width: 31%"></em></i></p>
+                <p><span>纸手指数</span><b>69</b><i><em style="width: 69%"></em></i></p>
+                <p><span>深夜内耗</span><b>78</b><i><em style="width: 78%"></em></i></p>
+                <p><span>抽象浓度</span><b>92</b><i><em style="width: 92%"></em></i></p>
+                <p><span>自愈速率</span><b>44</b><i><em style="width: 44%"></em></i></p>
+              </div>
+              <div class="report-waveform" aria-hidden="true"><span></span><span></span></div>
+            </article>
+
+            <article class="share-widget report-share-panel">
+              <div class="share-card-preview">
+                <div class="share-x" data-x-avatar-clone>
+                  <img alt="" data-x-avatar-img-clone hidden />
+                  <b>X</b>
+                </div>
+                <strong data-report-rarity-card>Legendary</strong>
+                <span>@handle</span>
+                <p>高位接盘艺术家</p>
+                <div class="share-card-meta">
+                  <i><em>报告类型</em><b>链上精神科病例</b></i>
+                  <i><em>稀有等级</em><b data-report-rarity-card-mini>Legendary</b></i>
+                  <i><em>分享状态</em><b>可截图转发</b></i>
+                </div>
+                <div class="share-card-tags">
+                  <small>FOMO</small>
+                  <small>高位接盘</small>
+                  <small>夜间内耗</small>
+                </div>
+                <div class="share-card-digest">
+                  <p>这是一份可截图转发的钱包链上病历。</p>
+                  <p>结果只做娱乐化人格摘要，不定义真实人生。</p>
+                </div>
+                <div class="share-card-readout">
+                  <div><b data-report-score-card>86</b><span>综合评分</span></div>
+                  <div><b data-report-degen-card>86</b><span>Degen</span></div>
+                  <div><b data-report-diamond-card>31</b><span>钻石手</span></div>
+                </div>
+                <div class="share-card-scan">
+                  <i><span style="width: 86%"></span></i>
+                  <i><span style="width: 62%"></span></i>
+                  <i><span style="width: 44%"></span></i>
+                </div>
+              </div>
+              <button type="button" class="share-button">复制晒图文案</button>
+              <label>复制推文<input value="我的链上精神科病例已生成。" readonly /></label>
+              <button type="button" class="gold-action">领取测试网 NFT 病例</button>
+            </article>
+
+            <div class="report-grid">
+              <article class="report-widget asset-widget">
+                <h3>链上资产性格</h3>
+                <div class="word-cloud">大户跟随 稳健幻想 高位接盘 资产轮动</div>
+                <div class="asset-orbit" aria-hidden="true"><i></i><i></i><i></i></div>
+                <div class="mini-chart wave-chart"></div>
+                <dl class="widget-facts">
+                  <div><dt>主导人格</dt><dd>冲锋型</dd></div>
+                  <div><dt>持仓气质</dt><dd>波动敏感</dd></div>
+                </dl>
+              </article>
+              <article class="report-widget black-widget">
+                <h3>亏损黑匣子</h3>
+                <div class="scan-box"></div>
+                <div class="loss-stack" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+                <ul class="widget-lines">
+                  <li>追涨触发</li>
+                  <li>回撤复盘</li>
+                  <li>深夜下单</li>
+                </ul>
+              </article>
+              <article class="report-widget luck-widget">
+                <h3>90 天钱包命运</h3>
+                <div class="trend-chart"></div>
+                <div class="fate-meter" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+                <div class="fate-strip"><span>回撤</span><span>修复</span><span>反弹</span></div>
+              </article>
+              <article class="report-widget radar-widget">
+                <h3>Alpha 雷达</h3>
+                <div class="radar-shape"></div>
+                <div class="radar-pings" aria-hidden="true"><i></i><i></i><i></i></div>
+                <ul>
+                  <li><span></span>解锁</li>
+                  <li><span></span>持仓</li>
+                  <li><span></span>冲动</li>
+                </ul>
+              </article>
+              <article class="report-widget badge-widget">
+                <h3>核心徽章</h3>
+                <div class="badge-row">
+                  <span><i>♕</i><strong>纸手之王</strong><em>Paper</em></span>
+                  <span><i>◆</i><strong>土狗采样员</strong><em>Meme</em></span>
+                  <span><i>✦</i><strong>手速比脑子快</strong><em>Impulse</em></span>
+                </div>
+                <p class="badge-note">徽章仅用于娱乐化摘要，不构成投资建议。</p>
+              </article>
             </div>
-            <div class="lighthouse-actions">
-              <a class="lighthouse-button lighthouse-button-x" href="https://x.com/Lighthouse_2026" target="_blank" rel="noopener noreferrer">
-                <span>X</span>
-                <b data-i18n="board.lighthouseFollow">关注灯塔 @Lighthouse_2026</b>
-              </a>
-              <a class="lighthouse-button lighthouse-button-join" href="https://app.lhdao.top/?ref=cmkamdijn000cc94wijye0uz7" target="_blank" rel="noopener noreferrer">
-                <span>LH</span>
-                <b data-i18n="board.lighthouseJoin">加入灯塔</b>
-              </a>
-            </div>
+
+            <footer class="report-care-banner">钱包可以被吐槽，但你的人生不由一笔交易定义。照完钱包，也记得照顾好自己。</footer>
           </div>
-          <div class="rank-prompts" aria-label="排行榜分类" data-i18n-aria="board.rankAria">
-            <button class="active" type="button" data-board-rank="composite" data-i18n="board.tabComposite">综合处刑榜</button>
-            <button type="button" data-board-rank="degen" data-i18n="board.tabDegen">Degen 冲锋榜</button>
-            <button type="button" data-board-rank="diamond" data-i18n="board.tabDiamond">钻石手榜</button>
-            <button type="button" data-board-rank="airdrop" data-i18n="board.tabAirdrop">空投游牧榜</button>
-            <button type="button" data-board-rank="rarity" data-i18n="board.tabRarity">稀有人格榜</button>
-            <button type="button" data-board-rank="medical" data-i18n="board.tabMedical">精神病历榜</button>
-          </div>
-          <div id="leaderboard-list" class="leaderboard-list"></div>
         </section>
 
-        <section id="about-panel" class="about-panel view-panel" data-view-panel="about" hidden>
-          <div class="section-title-row">
-            <div>
-              <h2 data-i18n="about.title">为什么我做链上照妖镜？</h2>
-              <p data-i18n="about.kicker">一个用代码和抽象感对抗情绪低谷的加密实验。</p>
+        <section class="app-page reference-page ref-wallet-page" data-page-screen="wallet" aria-label="钱包PK">
+          <form class="pk-arena" data-wallet-pk-form autocomplete="off">
+            <article class="duel-wallet duel-wallet-a">
+              <h2>A 钱包</h2>
+              <input name="leftWallet" placeholder="输入 A 钱包地址" />
+              <input name="leftName" placeholder="钱包指名" />
+              <div class="duel-meter">
+                <span>Degen 指数</span><i><em data-pk-left-bar></em></i>
+                <span>钻石手指数</span><i><em class="wide"></em></i>
+              </div>
+              <strong data-pk-score-a>稀有度</strong>
+            </article>
+
+            <div class="duel-core">
+              <div class="duel-screen">
+                <div class="brain brain-a" aria-hidden="true"></div>
+                <div class="dna-helix" aria-hidden="true"></div>
+                <b>VS</b>
+                <div class="brain brain-b" aria-hidden="true"></div>
+              </div>
+              <button type="submit" class="pk-start">开始 PK</button>
             </div>
-          </div>
-          <div class="about-copy">
-            <p data-i18n="about.p1">我是石头，DegenDNA.fun 的创建者，也是链上照妖镜的主理人。</p>
-            <p data-i18n="about.p2">我平时研究 AI Agent、自动交易、预测市场和链上数据，也长期在用各种小工具观察市场和观察自己。</p>
-            <p data-i18n="about.p3">我本人也是中度抑郁症患者。做这个网站的起点其实很简单：币圈太容易让人焦虑了，钱包盈亏、K 线波动、错过机会、追高回撤，都会不断放大人的情绪。</p>
-            <p data-i18n="about.p4">所以我想做一个有点抽象、有点嘴毒，但最后还能提醒大家好好爱自己的链上人格实验。</p>
-            <p data-i18n="about.p5">它可以吐槽你的钱包，但不会定义你的人生。</p>
-          </div>
+
+            <article class="duel-wallet duel-wallet-b">
+              <h2>B 钱包</h2>
+              <input name="rightWallet" placeholder="输入 B 钱包地址" />
+              <input name="rightName" placeholder="钱包指名" />
+              <div class="duel-meter purple">
+                <span>Degen 指数</span><i><em data-pk-right-bar></em></i>
+                <span>钻石手指数</span><i><em class="wide"></em></i>
+              </div>
+              <strong data-pk-score-b>稀有度</strong>
+            </article>
+
+            <section class="system-judge">
+              <h3>系统判定</h3>
+              <div><b>牛市冲锋</b><span></span></div>
+              <div><b>熊市苟住</b><span></span></div>
+              <div><b>谁更像链上异常体</b><span></span></div>
+              <p data-pk-verdict>输入两个钱包，启动链上会诊。</p>
+            </section>
+          </form>
         </section>
 
-        <section id="mental-panel" class="mental-center view-panel" data-view-panel="mental" hidden>
-          <div class="mental-hero">
-            <p class="section-kicker">Mental Health Self-Check</p>
+        <section class="app-page reference-page ref-rarity-page" data-page-screen="rarity" aria-label="稀有度排行榜">
+          <div class="rarity-tabs" aria-label="排行榜筛选">
+            <button type="button" class="active" data-rarity-filter="all">综合处罚榜</button>
+            <button type="button" data-rarity-filter="degen">Degen 冲锋榜</button>
+            <button type="button" data-rarity-filter="diamond">钻石手榜</button>
+            <button type="button" data-rarity-filter="airdrop">空投游牧榜</button>
+            <button type="button" data-rarity-filter="psyche">精神病历榜</button>
+          </div>
+          <div class="rank-label-row">
+            <span>排名</span><span>@handle</span><span>钱包人格</span><span>稀有度</span><span>综合评分</span>
+          </div>
+          <div class="rank-list">
+            <article class="rank-row tier-gold" data-rarity-row="degen"><b>#1</b><i>X</i><strong>@handle</strong><span>钱包人格</span><em>Common</em><small></small></article>
+            <article class="rank-row tier-green" data-rarity-row="diamond"><b>#2</b><i>X</i><strong>@handle</strong><span>钱包人格</span><em>Uncommon</em><small></small></article>
+            <article class="rank-row tier-blue" data-rarity-row="airdrop"><b>#3</b><i>X</i><strong>@handle</strong><span>钱包人格</span><em>Uncommon</em><small></small></article>
+            <article class="rank-row tier-purple" data-rarity-row="psyche"><b>#4</b><i>X</i><strong>@handle</strong><span>钱包人格</span><em>Epic</em><small></small></article>
+            <article class="rank-row tier-gold" data-rarity-row="degen"><b>#2</b><i>X</i><strong>@handle</strong><span>钱包人格</span><em>Legendary</em><small></small></article>
+            <article class="rank-row tier-red" data-rarity-row="psyche"><b>#3</b><i>X</i><strong>@handle</strong><span>钱包人格</span><em>Mythic</em><small></small></article>
+            <article class="rank-row tier-glitch" data-rarity-row="airdrop"><b>1/1</b><i>X</i><strong>@handle</strong><span>钱包人格</span><em>1/1</em><small></small></article>
+          </div>
+          <div class="rank-pager" aria-label="榜单页码切换">
+            <button type="button" data-rank-page-prev aria-label="上一页">&lt;</button>
+            <span data-rank-page-current>01 / 03</span>
+            <button type="button" data-rank-page-next aria-label="下一页">&gt;</button>
+          </div>
+          <aside class="weekly-anomaly">
+            <div class="anomaly-card">
+              <div class="brain-icon" aria-hidden="true"></div>
+              <h3>本周链上异常体</h3>
+              <p>本周链上异常 <span></span></p>
+              <p>异常链分 <span></span></p>
+              <p>综合评分 <span></span></p>
+              <p>链接上异常体 <span></span></p>
+              <strong data-rarity-readout>7 / 7</strong>
+              <small>degendna.fun</small>
+            </div>
+          </aside>
+        </section>
+
+        <section class="app-page reference-page ref-psyche-page soft-page" data-page-screen="psyche" aria-label="心理自测">
+          <div class="mental-health-center" data-mental-app aria-label="心理健康自测中心">
+            <aside class="mental-panel mental-intake">
+              <span class="mental-kicker">心理健康自测中心</span>
+              <h2>照完钱包，也照顾一下自己。</h2>
+              <p>这里没有排行榜，没有 NFT，也不会公开你的结果。自测只帮助你观察最近状态，不能替代医生、心理咨询师或精神科医生的判断。</p>
+              <ul>
+                <li>结果默认只保存在本浏览器</li>
+                <li>不上传服务器，不进入排行榜</li>
+                <li>不生成分享图，不和钱包绑定</li>
+                <li>可以一键清除本地记录</li>
+              </ul>
+              <div class="mental-privacy-note">
+                <b>私密模式</b>
+                <span>心理健康数据比钱包地址更敏感，本页只做本地自评与复测记录。</span>
+              </div>
+            </aside>
+
+            <main class="mental-panel mental-console">
+              <div class="mental-mode-tabs" role="tablist" aria-label="自测模式">
+                <button class="active" type="button" data-mental-mode="quick">快速体检<small>约 3 分钟</small></button>
+                <button type="button" data-mental-mode="full">完整自测<small>约 15 分钟</small></button>
+                <button type="button" data-mental-mode="deep">深度长卷<small>分模块保存</small></button>
+                <button type="button" data-mental-mode="crisis">危机支持<small>安全优先</small></button>
+              </div>
+              <button class="degen-persona-entry" type="button" data-degen-persona-entry>
+                Degen 交易人格自查
+                <small>DegenDNA 自研 · 约 8 分钟</small>
+              </button>
+
+              <section class="mental-question-card" data-mental-question-card aria-live="polite">
+                <span class="mental-section-label">准备开始</span>
+                <h3>选择一种自测模式</h3>
+                <p>建议先做快速体检。如果最近情绪、睡眠或交易冲动明显影响生活，再进入完整自测。</p>
+                <button type="button" data-mental-start>开始快速体检</button>
+              </section>
+
+              <section class="mental-result-card" data-mental-result hidden aria-live="polite"></section>
+            </main>
+
+            <aside class="mental-panel mental-library">
+              <div class="mental-module-list" data-mental-modules></div>
+              <div class="mental-records" data-mental-records></div>
+            </aside>
+
+            <section class="mental-crisis-card" data-mental-crisis hidden aria-live="assertive">
+              <h3>安全支持优先</h3>
+              <p>如果你担心自己此刻无法保持安全，请先离开可能伤害自己的环境，联系当地紧急服务，或让身边可信任的人陪伴你。这个页面不会生成娱乐分数，也不会要求你分享结果。</p>
+              <ul>
+                <li>美国可拨打或短信 988 联系危机支持热线。</li>
+                <li>如有即时危险，请拨打当地紧急电话（例：香港 999 / 2382 0000 / 2389 2222；澳门 999 / 110 / 112；台湾 110 / 119 / 1925）。</li>
+                <li>中国大陆可联系 120 / 110，或尽快前往急诊。</li>
+                <li>尽量把电话号码、门锁密码、当前位置和当前情况告诉一个可信任的人。</li>
+              </ul>
+            </section>
+          </div>
+
+          <article class="soft-intro">
             <h2>心理健康自测中心</h2>
             <p>不是诊断，只是帮你更早看见自己的状态。</p>
-            <div class="mental-privacy-grid">
-              <span>不登录</span>
-              <span>不上传答案</span>
-              <span>不公开结果</span>
-              <span>不绑定钱包</span>
-              <span>不进排行榜</span>
-              <span>不生成 NFT</span>
-            </div>
+            <strong>照亮钱包，<br />也照顾一下自己。</strong>
+            <ul>
+              <li>不登录</li><li>不上载</li><li>不公开</li><li>不和钱包绑定</li><li>本地保存可选</li>
+            </ul>
+            <div><button type="button">本地保存</button><button type="button">清除记录</button></div>
+          </article>
+          <div class="self-test-grid">
+            <button class="active" type="button" data-psyche-option="26">快速体检</button>
+            <button type="button" data-psyche-option="64">情绪低落</button>
+            <button type="button" data-psyche-option="58">焦虑</button>
+            <button type="button" data-psyche-option="31">幸福感</button>
+            <button type="button" data-psyche-option="72">睡眠自测</button>
+            <button type="button" data-psyche-option="81">压力自测</button>
+            <button type="button" data-psyche-option="51">交易心理自查</button>
           </div>
-
-          <div class="mental-safe-card">
-            <b>进入这里以后，我们先把玩笑收起来。</b>
-            <p>这些自测只能帮助你观察最近两周到一个月的情绪、焦虑、压力、睡眠和自我照顾状态，不能替代医生、心理咨询师或精神科医生的判断。</p>
-            <p>如果你现在有强烈自伤冲动、觉得自己可能会伤害自己，或已经处在危险中，请立刻联系当地紧急服务、身边可信任的人，或专业危机热线。</p>
-            <button id="mental-help-now" class="mental-danger-button" type="button">我现在感觉撑不住</button>
-          </div>
-
-          <div class="mental-tabs" role="tablist" aria-label="心理健康自测模块">
-            <button type="button" data-mental-test="quick" class="active">快速体检</button>
-            <button type="button" data-mental-test="who5">WHO-5 幸福感</button>
-            <button type="button" data-mental-test="phq9">情绪低落 PHQ-9</button>
-            <button type="button" data-mental-test="gad7">焦虑 GAD-7</button>
-            <button type="button" data-mental-test="sleep">睡眠自测</button>
-            <button type="button" data-mental-test="stress">压力与内耗</button>
-            <button type="button" data-mental-test="trading">交易心理自查</button>
-            <button type="button" data-mental-test="support">风险支持</button>
-          </div>
-
-          <section class="mental-test-card">
-            <div class="mental-test-head">
-              <div>
-                <span id="mental-test-range">过去两周</span>
-                <h3 id="mental-test-title">快速体检</h3>
-                <p id="mental-test-copy">用 3 分钟看见最近的整体状态。</p>
-              </div>
-              <small id="mental-test-time">预计用时：3 分钟</small>
-            </div>
-            <form id="mental-form" class="mental-form"></form>
-            <div class="mental-actions">
-              <button id="mental-submit" class="primary-button" type="button">查看结果</button>
-              <button id="mental-save" class="ghost-button" type="button" disabled>保存到本地</button>
-              <button id="mental-clear" class="ghost-button" type="button">清除本地记录</button>
-            </div>
-            <div id="mental-result" class="mental-result" hidden></div>
-          </section>
-
-          <section id="mental-support" class="mental-support">
-            <h3>安全支持</h3>
-            <p>你现在最重要的事情不是继续测分数，而是先保证自己安全。请尽量不要一个人待着，可以联系一个你信任的人，让 TA 现在陪你。</p>
-            <textarea id="mental-friend-message" readonly>我现在状态很不好，可能需要你陪我一下。你能不能现在联系我，或者过来陪我一会儿？</textarea>
-            <button id="mental-copy-help" class="ghost-button" type="button">复制给朋友</button>
-            <p class="mental-resource-note">如果你已经有具体计划、工具或强烈冲动，请立刻联系当地紧急服务，或去最近的急诊。美国可拨打或短信 988；其他地区请联系当地危机热线或紧急服务。</p>
-          </section>
+          <aside class="brain-monitor">
+            <span>心电图</span>
+            <i class="ekg-line"></i>
+            <span>呼吸波</span>
+            <i class="wave-line"></i>
+            <div class="soft-brain" aria-hidden="true"></div>
+            <strong data-psyche-score>26</strong>
+            <p data-psyche-diagnosis>状态平稳，适合先观察再下单。</p>
+            <i class="hidden-meter"><em data-psyche-meter></em></i>
+          </aside>
+          <footer class="soft-slogan">你不是账户余额，也不是一次交易结果。<b>degendna.fun</b></footer>
         </section>
-      </main>
 
-      <footer class="wellbeing-footer">
-        <p data-i18n="footer.line1">你有多久没有照过自己的钱包了？</p>
-        <p data-i18n="footer.line2">也许更该问的是：</p>
-        <p data-i18n="footer.line3">你有多久没有认真看看自己，好好爱自己了？记得好好照顾自己！</p>
-      </footer>
-    </div>
-    <canvas id="card-canvas" width="1200" height="1600" hidden></canvas>
-    <script src="/app.js?v=20260621-cyber-clinic" type="module"></script>
+        <section class="app-page reference-page ref-psyche-quiz-page soft-page" data-page-screen="psyche-test" data-mental-quiz-page aria-label="心理自测答题页">
+          <div class="mental-quiz-shell">
+            <header class="mental-quiz-head">
+              <button type="button" data-mental-back>返回自测中心</button>
+              <span data-mental-quiz-kicker>心理健康自测</span>
+              <h2 data-mental-quiz-title>准备开始</h2>
+              <p data-mental-quiz-subtitle>所有结果只保存在当前浏览器。本页不是诊断，不能替代医生、心理咨询师或精神科医生的判断。</p>
+            </header>
+
+            <aside class="degen-persona-methodology" data-degen-methodology hidden></aside>
+
+            <section class="mental-quiz-main" data-mental-question-card aria-live="polite">
+              <span class="mental-section-label">当前模式</span>
+              <h3>快速体检</h3>
+              <p>点击左侧入口后，将在这里开始答题。</p>
+              <button type="button" data-mental-start>开始</button>
+            </section>
+
+            <div class="degen-persona-dim-strip" data-degen-dim-strip hidden></div>
+            <section class="mental-quiz-result mental-result-card" data-mental-result hidden aria-live="polite"></section>
+
+            <aside class="mental-quiz-side">
+              <div class="mental-quiz-progress" data-mental-quiz-progress>
+                <b>答题进度</b>
+                <i><em></em></i>
+                <span>0 / 0</span>
+              </div>
+              <div class="degen-persona-preview" data-degen-preview hidden></div>
+              <div class="mental-records" data-mental-records></div>
+            </aside>
+
+            <section class="degen-persona-archetypes" data-degen-archetypes hidden></section>
+
+            <section class="mental-quiz-crisis mental-crisis-card" data-mental-crisis hidden aria-live="assertive">
+              <h3>安全支持优先</h3>
+              <p>如果你担心自己此刻无法保持安全，请先离开可能伤害自己的环境，联系当地紧急服务，或让身边可信任的人陪伴你。这个页面不会生成娱乐分数，也不会要求你分享结果。</p>
+              <ul>
+                <li>美国可拨打或短信 988 联系危机支持热线。</li>
+                <li>如有即时危险，请拨打当地紧急电话（例：香港 999 / 2382 0000 / 2389 2222；澳门 999 / 110 / 112；台湾 110 / 119 / 1925）。</li>
+                <li>中国大陆可联系 120 / 110，或尽快前往急诊。</li>
+                <li>尽量把电话号码、门锁密码、当前位置和当前情况告诉一个可信任的人。</li>
+              </ul>
+            </section>
+          </div>
+        </section>
+
+        <section class="app-page reference-page ref-about-page soft-page" data-page-screen="about" aria-label="关于">
+          <aside class="doctor-card">
+            <div class="doctor-orb"></div>
+            <strong>石头</strong>
+            <span>Onchain Clinic 值班医生</span>
+          </aside>
+          <article class="about-copy">
+            <h2>为什么我做链上照妖镜？</h2>
+            <p>它可以吐槽你的钱包，但不会定义你的人生。</p>
+            <small>石头 · DegenDNA.fun 创建者 · 链上照妖镜主理人</small>
+            <div class="reason-card">1. 币圈太容易让人焦虑</div>
+            <div class="reason-card">2. 用抽象感释放压力</div>
+            <div class="reason-card">3. 钱包报告只是娱乐，不是人生评价</div>
+            <div class="reason-card">它可以吐槽你的钱包，但不会定义你的人生。</div>
+          </article>
+          <aside class="brain-monitor about-monitor">
+            <span>心电图</span>
+            <i class="ekg-line"></i>
+            <span>呼吸波</span>
+            <i class="wave-line"></i>
+            <div class="soft-brain paper-brain" aria-hidden="true"></div>
+          </aside>
+          <section class="about-system-stack" aria-label="项目系统概览">
+            <article>
+              <b>项目档案</b>
+              <span>链上人格实验 / AI Agent / 预测市场 / 自动交易观察</span>
+              <i class="about-wave" aria-hidden="true"></i>
+            </article>
+            <article>
+              <b>开源与安全</b>
+              <span>只读公开数据，不连接钱包，不签名，不触碰私钥。</span>
+              <i class="about-dna-bars" aria-hidden="true"></i>
+            </article>
+            <article>
+              <b>心理健康提醒</b>
+              <span>钱包可以被吐槽，但人生不该被一次波动定义。</span>
+              <i class="about-progress" aria-hidden="true"></i>
+            </article>
+            <article>
+              <b>Github开源</b>
+              <span>github.com/stong123456/degendna.fun</span>
+              <i class="about-wave" aria-hidden="true"></i>
+            </article>
+          </section>
+          <section class="about-bottom-modules" aria-label="项目信息模块">
+            <article><b>开源透明</b><span>代码可审计</span></article>
+            <article><b>隐私保护</b><span>本地优先</span></article>
+            <article><b>娱乐非诊断</b><span>不替代医疗建议</span></article>
+            <article><b>链上数据</b><span>公开只读分析</span></article>
+          </section>
+          <footer class="soft-slogan">市场会波动，钱包会回撤，人也要好好休息。<a class="about-site-link" href="https://degendna.fun" target="_blank" rel="noopener noreferrer">degendna.fun</a></footer>
+          <a class="about-twitter-button" href="https://x.com/Stone141319" target="_blank" rel="noopener noreferrer" aria-label="打开 Stone 的 X 主页">X @Stone141319</a>
+          <a class="about-lighthouse-button" href="https://app.lhdao.top/?ref=cmkamdijn000cc94wijye0uz7" target="_blank" rel="noopener noreferrer">加入灯塔</a>
+          <div class="about-signature" aria-label="署名">— 石头</div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js?v=20260703-release-v105" type="module"></script>
   </body>
 </html>
