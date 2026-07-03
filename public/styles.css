@@ -18696,6 +18696,15 @@ body.degen-persona-quiz:not(.degen-persona-result-mode)[data-page="psyche-test"]
   transform: translateX(4px) !important;
 }
 
+/* Rarity Rank v114: keep wallet personality to one compact name and make pager functional. */
+body[data-page="rarity"] .ref-rarity-page .rank-row span {
+  display: block !important;
+  max-width: 142px !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
 /* Rarity Rank v34: keep dynamic X avatars inside the existing rank icon slot. */
 body[data-page="rarity"] .ref-rarity-page .rank-row i {
   overflow: hidden !important;

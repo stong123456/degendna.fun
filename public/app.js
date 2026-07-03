@@ -1070,6 +1070,8 @@ let activeReportIdentity = { handle: "@handle", wallet: "00000039...", rawWallet
 let activeReportDimensions = [86, 31, 69, 78, 92, 44];
 let activeReportNarrative = null;
 let activeLeaderboardEntries = [];
+let activeRankPage = 0;
+const RANK_PAGE_SIZE = 7;
 const REPORT_BADGE_CATALOG = [
   { key: "paper-king", icon: "♕", code: "PAPER", dimension: 2, min: 48, color: "#ffe58f", zh: "纸手之王", en: "Paperhand King" },
   { key: "diamond-fever", icon: "◆", code: "DIAMOND", dimension: 1, min: 70, color: "#7ff7ff", zh: "钻石执念", en: "Diamond Fever" },
@@ -1680,12 +1682,50 @@ function paintScoreBar(bar, score) {
   bar.title = currentLang === "en" ? `Score ${fill}` : `综合评分 ${fill}`;
 }
 
+function leaderboardDisplayPersonality(entry) {
+  const raw = String(entry?.personality || finalText("report", "personalityValue") || "").trim();
+  const [firstSegment] = raw.split(/\s*[·•|｜]\s*/);
+  return (firstSegment || raw).replace(/\s+[A-Z0-9]{3,}$/i, "").trim() || raw;
+}
+
+function leaderboardActiveFilter(page) {
+  return page?.querySelector("[data-rarity-filter].active")?.dataset.rarityFilter || "all";
+}
+
+function leaderboardFilteredEntries(entries, page) {
+  const activeFilter = leaderboardActiveFilter(page);
+  if (activeFilter === "all") return entries;
+  return entries.filter((entry) => leaderboardCategory(entry) === activeFilter);
+}
+
+function updateRankPager(page, totalPages) {
+  const pager = page?.querySelector(".rank-pager");
+  if (!pager) return;
+  const safeTotal = Math.max(1, totalPages);
+  const output = pager.querySelector("[data-rank-page-current]");
+  if (output) output.textContent = `${String(activeRankPage + 1).padStart(2, "0")} / ${String(safeTotal).padStart(2, "0")}`;
+  pager.querySelectorAll("button").forEach((button) => {
+    const disabled = safeTotal <= 1;
+    button.disabled = disabled;
+    button.setAttribute("aria-disabled", String(disabled));
+  });
+}
+
 function renderLeaderboardRows(entries = activeLeaderboardEntries) {
   const rarity = document.querySelector(".ref-rarity-page");
   const list = rarity?.querySelector(".rank-list");
   if (!rarity || !list) return;
-  const rows = entries.slice(0, 7);
-  if (!rows.length) return;
+  const filteredEntries = leaderboardFilteredEntries(entries, rarity);
+  const totalPages = Math.max(1, Math.ceil(filteredEntries.length / RANK_PAGE_SIZE));
+  activeRankPage = Math.max(0, Math.min(activeRankPage, totalPages - 1));
+  const offset = activeRankPage * RANK_PAGE_SIZE;
+  const rows = filteredEntries.slice(offset, offset + RANK_PAGE_SIZE);
+  updateRankPager(rarity, totalPages);
+  if (!rows.length) {
+    list.replaceChildren();
+    syncRarityReadout(rarity, 0, filteredEntries.length);
+    return;
+  }
   list.replaceChildren();
   rows.forEach((entry, index) => {
     const row = document.createElement("article");
@@ -1693,7 +1733,8 @@ function renderLeaderboardRows(entries = activeLeaderboardEntries) {
     row.dataset.rarityRow = leaderboardCategory(entry);
 
     const rank = document.createElement("b");
-    rank.textContent = index === 6 && leaderboardRarityLabel(entry) === "1/1" ? "1/1" : `#${index + 1}`;
+    const rankNumber = offset + index + 1;
+    rank.textContent = rankNumber === 7 && leaderboardRarityLabel(entry) === "1/1" ? "1/1" : `#${rankNumber}`;
 
     const avatarSlot = document.createElement("i");
     const avatar = rankAvatarMarkup(entry);
@@ -1716,7 +1757,8 @@ function renderLeaderboardRows(entries = activeLeaderboardEntries) {
     handle.textContent = entry.handle || entry.shortAddress || shortWallet(entry.address) || "@handle";
 
     const personality = document.createElement("span");
-    personality.textContent = entry.personality || finalText("report", "personalityValue");
+    personality.textContent = leaderboardDisplayPersonality(entry);
+    personality.title = entry.personality || personality.textContent;
 
     const rarityLabel = document.createElement("em");
     rarityLabel.textContent = leaderboardRarityLabel(entry);
@@ -1727,11 +1769,16 @@ function renderLeaderboardRows(entries = activeLeaderboardEntries) {
     row.append(rank, avatarSlot, handle, personality, rarityLabel, score);
     list.append(row);
   });
-  syncRarityReadout(rarity);
+  syncRarityReadout(rarity, rows.length, filteredEntries.length);
 }
 
-function syncRarityReadout(page = document.querySelector(".ref-rarity-page")) {
+function syncRarityReadout(page = document.querySelector(".ref-rarity-page"), visibleOverride, totalOverride) {
   if (!page) return;
+  if (Number.isFinite(visibleOverride) && Number.isFinite(totalOverride)) {
+    const readout = page.querySelector("[data-rarity-readout]");
+    if (readout) readout.textContent = `${visibleOverride} / ${totalOverride}`;
+    return;
+  }
   const activeFilter = page.querySelector("[data-rarity-filter].active")?.dataset.rarityFilter || "all";
   let visible = 0;
   const rows = page.querySelectorAll("[data-rarity-row]");
@@ -2183,27 +2230,30 @@ document.querySelectorAll("[data-rarity-filter]").forEach((button) => {
       item.classList.toggle("active", item === button);
     });
 
-    syncRarityReadout(page);
+    if (page.classList?.contains("ref-rarity-page")) {
+      activeRankPage = 0;
+      renderLeaderboardRows(activeLeaderboardEntries);
+    } else {
+      syncRarityReadout(page);
+    }
     setStatus(t("status.rarity"));
   });
 });
 
 document.querySelectorAll(".rank-pager").forEach((pager) => {
-  const total = 3;
-  let current = 1;
-  const output = pager.querySelector("[data-rank-page-current]");
-  const render = () => {
-    output.textContent = `${String(current).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
-  };
   pager.querySelector("[data-rank-page-prev]")?.addEventListener("click", () => {
-    current = current === 1 ? total : current - 1;
-    render();
+    const page = pager.closest(".ref-rarity-page");
+    const total = Math.max(1, Math.ceil(leaderboardFilteredEntries(activeLeaderboardEntries, page).length / RANK_PAGE_SIZE));
+    activeRankPage = activeRankPage <= 0 ? total - 1 : activeRankPage - 1;
+    renderLeaderboardRows(activeLeaderboardEntries);
   });
   pager.querySelector("[data-rank-page-next]")?.addEventListener("click", () => {
-    current = current === total ? 1 : current + 1;
-    render();
+    const page = pager.closest(".ref-rarity-page");
+    const total = Math.max(1, Math.ceil(leaderboardFilteredEntries(activeLeaderboardEntries, page).length / RANK_PAGE_SIZE));
+    activeRankPage = activeRankPage >= total - 1 ? 0 : activeRankPage + 1;
+    renderLeaderboardRows(activeLeaderboardEntries);
   });
-  render();
+  updateRankPager(pager.closest(".ref-rarity-page"), 1);
 });
 
 const MENTAL_STORAGE_KEY = "degendna:mental-records:v1";
