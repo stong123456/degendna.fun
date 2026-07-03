@@ -28,7 +28,7 @@ const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL || "https://ethereum-sepolia
 const SEPOLIA_MINTER_PRIVATE_KEY = process.env.SEPOLIA_MINTER_PRIVATE_KEY || "";
 const SEPOLIA_NFT_CONTRACT_ADDRESS = process.env.SEPOLIA_NFT_CONTRACT_ADDRESS || "";
 
-const REPORT_VERSION = "20260703-release-v106";
+const REPORT_VERSION = "20260703-release-v113";
 const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;
 const ANALYZE_CACHE_TTL_MS = 6 * HOUR_MS;

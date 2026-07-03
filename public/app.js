@@ -489,6 +489,9 @@ function setText(element, value) {
 }
 
 const captureAssetCache = new Map();
+const REPORT_CAPTURE_DESKTOP_WIDTH = 1376;
+const REPORT_CAPTURE_DESKTOP_HEIGHT = 768;
+const REPORT_CAPTURE_NAV_CROP = 147;
 
 async function blobToDataUrl(blob) {
   return new Promise((resolve, reject) => {
@@ -529,15 +532,47 @@ function getDocumentCssText() {
   }).join("\n");
 }
 
+function cdataForSvg(value) {
+  return String(value).replaceAll("]]>", "]]]]><![CDATA[>");
+}
+
+function attrForSvg(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("\"", "&quot;")
+    .replaceAll("<", "&lt;");
+}
+
+function xhtmlForForeignObject(element) {
+  return element.outerHTML.replace(/<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)(\s[^<>]*?)?>/gi, (match, tag, attrs = "") => {
+    if (/\/\s*>$/.test(match)) return match;
+    return `<${tag}${attrs} />`;
+  });
+}
+
 async function inlineCaptureCssAssets(cssText) {
   let nextCssText = absolutizeCssUrls(cssText);
-  const urls = [...nextCssText.matchAll(/url\(["']?(http:\/\/127\.0\.0\.1:8793\/assets\/[^"')]+)["']?\)/g)]
-    .map((match) => match[1])
-    .filter((url) => /report-result-cyber-shell-v3|degendna-logo-symbol-glass-transparent-crop-v1/.test(url));
+  const urls = [...nextCssText.matchAll(/url\(["']?((?:https?:\/\/[^"')]+)?\/assets\/[^"')]+)["']?\)/g)]
+    .map((match) => {
+      try {
+        return new URL(match[1], window.location.href);
+      } catch {
+        return null;
+      }
+    })
+    .filter((url) =>
+      url &&
+      url.origin === window.location.origin
+    )
+    .map((url) => url.href);
 
   for (const url of new Set(urls)) {
-    const dataUrl = await resourceToDataUrl(url);
-    nextCssText = nextCssText.split(url).join(dataUrl);
+    try {
+      const dataUrl = await resourceToDataUrl(url);
+      nextCssText = nextCssText.split(url).join(dataUrl);
+    } catch {
+      // A missing decorative asset should not block the share screenshot.
+    }
   }
 
   return nextCssText;
@@ -568,35 +603,69 @@ async function inlineCloneAssets(root) {
   }
 }
 
-async function svgMarkupForReportCapture(stage, cropTop) {
-  const stageRect = stage.getBoundingClientRect();
+async function svgMarkupForReportCapture(stage, captureLayout) {
   const clone = stage.cloneNode(true);
   clone.querySelector(".topbar")?.remove();
   await inlineCloneAssets(clone);
-  clone.style.width = `${stageRect.width}px`;
-  clone.style.height = `${stageRect.height}px`;
+  clone.style.width = `${captureLayout.width}px`;
+  clone.style.height = `${captureLayout.stageHeight}px`;
   clone.style.minHeight = "0";
+  clone.style.maxWidth = "none";
+  clone.style.aspectRatio = "auto";
+  clone.style.padding = "0";
   clone.style.margin = "0";
   clone.style.transform = "none";
 
   const cssText = await inlineCaptureCssAssets(getDocumentCssText());
-  const width = Math.round(stageRect.width);
-  const height = Math.max(1, Math.round(stageRect.height - cropTop));
+  const width = captureLayout.width;
+  const stageHeight = captureLayout.stageHeight;
+  const height = Math.max(1, stageHeight - captureLayout.cropTop);
+  const captureCss = `
+    body.report-capture-desktop[data-page="report"] .homepage-stage {
+      width: ${width}px !important;
+      height: ${stageHeight}px !important;
+      min-height: 0 !important;
+      max-width: none !important;
+      aspect-ratio: auto !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      transform: none !important;
+    }
+    body.report-capture-desktop[data-page="report"] .reference-page,
+    body.report-capture-desktop[data-page="report"] .ref-report-page {
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      transform: none !important;
+      display: block !important;
+    }
+    body.report-capture-desktop[data-page="report"] .report-share-capture {
+      position: absolute !important;
+      inset: 0 !important;
+    }
+    body.report-capture-desktop[data-page="report"] .ref-report-page .report-dossier p {
+      font-size: clamp(10px, 0.78vw, 13px) !important;
+    }
+  `;
   return {
     width,
     height,
     markup: `
-      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 ${cropTop} ${width} ${height}">
-        <foreignObject x="0" y="0" width="${width}" height="${Math.round(stageRect.height)}">
+      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 ${captureLayout.cropTop} ${width} ${height}">
+        <foreignObject x="0" y="0" width="${width}" height="${stageHeight}">
           <html xmlns="http://www.w3.org/1999/xhtml">
             <head>
-              <style>
-                html, body { margin: 0; width: ${width}px; height: ${Math.round(stageRect.height)}px; overflow: hidden; background: #020407; }
-                ${cssText}
-              </style>
+              <style><![CDATA[
+                html, body { margin: 0; width: ${width}px; height: ${stageHeight}px; overflow: hidden; background: #020407; }
+                ${cdataForSvg(cssText)}
+                ${cdataForSvg(captureCss)}
+              ]]></style>
             </head>
-            <body data-page="${document.body.dataset.page}" class="${document.body.className}">
-              ${clone.outerHTML}
+            <body data-page="${attrForSvg(document.body.dataset.page)}" class="${attrForSvg(`${document.body.className} report-capture-desktop`)}">
+              ${xhtmlForForeignObject(clone)}
             </body>
           </html>
         </foreignObject>
@@ -613,14 +682,281 @@ async function imageFromObjectUrl(url) {
   });
 }
 
-async function createReportScreenshotBlob(page) {
+function loadCanvasImage(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = new URL(src, window.location.href).href;
+  });
+}
+
+function canvasToPngBlob(canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error("Report screenshot export failed"));
+    }, "image/png", 0.94);
+  });
+}
+
+function reportText(page, selector, fallback = "") {
+  return page.querySelector(selector)?.textContent?.trim() || fallback;
+}
+
+function drawRoundedRect(ctx, x, y, width, height, radius, fill, stroke) {
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  if (fill) {
+    ctx.fillStyle = fill;
+    ctx.fill();
+  }
+  if (stroke) {
+    ctx.strokeStyle = stroke;
+    ctx.stroke();
+  }
+}
+
+function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 3) {
+  const chars = [...String(text || "")];
+  let line = "";
+  let lineCount = 0;
+  chars.forEach((char, index) => {
+    const test = line + char;
+    const isLast = index === chars.length - 1;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      ctx.fillText(line, x, y + lineCount * lineHeight);
+      line = char;
+      lineCount += 1;
+      if (lineCount >= maxLines) line = "";
+    } else {
+      line = test;
+    }
+    if (isLast && line && lineCount < maxLines) ctx.fillText(line, x, y + lineCount * lineHeight);
+  });
+}
+
+function drawFittedText(ctx, text, x, y, maxWidth) {
+  const value = String(text || "");
+  if (ctx.measureText(value).width <= maxWidth) {
+    ctx.fillText(value, x, y);
+    return;
+  }
+  let next = value;
+  while (next.length > 1 && ctx.measureText(`${next}...`).width > maxWidth) next = next.slice(0, -1);
+  ctx.fillText(`${next}...`, x, y);
+}
+
+function drawMetricBar(ctx, label, value, x, y, width) {
+  const score = clampReportScore(value);
+  ctx.fillStyle = "rgba(170, 230, 238, 0.78)";
+  ctx.font = "700 14px Arial, 'Microsoft YaHei', sans-serif";
+  ctx.fillText(label, x, y);
+  ctx.fillStyle = "rgba(255, 231, 156, 0.96)";
+  ctx.font = "900 18px Arial, 'Microsoft YaHei', sans-serif";
+  ctx.fillText(String(score), x + width - 34, y);
+  ctx.fillStyle = "rgba(62, 185, 204, 0.18)";
+  drawRoundedRect(ctx, x, y + 10, width, 7, 4, "rgba(62, 185, 204, 0.18)");
+  const gradient = ctx.createLinearGradient(x, y, x + width, y);
+  gradient.addColorStop(0, "rgba(77, 245, 255, 0.94)");
+  gradient.addColorStop(1, "rgba(255, 224, 138, 0.88)");
+  drawRoundedRect(ctx, x, y + 10, Math.max(8, width * score / 100), 7, 4, gradient);
+}
+
+function collectReportShareData(page) {
+  const dossierRows = [...page.querySelectorAll(".report-dossier p")];
+  const metricRows = [...page.querySelectorAll(".metric-grid p")];
+  const badges = [...page.querySelectorAll(".badge-row span")].map((item) => ({
+    icon: item.querySelector("i")?.textContent?.trim() || "",
+    name: item.querySelector("strong")?.textContent?.trim() || "",
+    code: item.querySelector("em")?.textContent?.trim() || ""
+  }));
+  return {
+    handle: reportText(page, ".patient-strip strong", activeReportIdentity.handle),
+    wallet: reportText(page, ".patient-strip small", `short wallet: ${activeReportIdentity.wallet}`),
+    personality: reportText(page, ".report-dossier > div:first-child b", activeReportNarrative?.personality || ""),
+    rarity: reportText(page, ".rarity-current", reportRarityFromScore(activeReportScores.degen).label),
+    reportId: dossierRows[0]?.querySelector("strong")?.textContent?.trim() || "DN-7C9-TEST-001",
+    degen: activeReportScores.degen,
+    diamond: activeReportScores.diamond,
+    cause: dossierRows[3]?.querySelector("strong")?.textContent?.trim() || activeReportNarrative?.cause || "",
+    sentence: dossierRows[4]?.querySelector("strong")?.textContent?.trim() || activeReportNarrative?.sentence || "",
+    dimensions: activeReportDimensions,
+    metricLabels: metricRows.map((row) => row.querySelector("span")?.textContent?.trim()).filter(Boolean),
+    tags: [...page.querySelectorAll(".share-card-tags small")].map((item) => item.textContent.trim()).filter(Boolean),
+    digest: [...page.querySelectorAll(".share-card-digest p")].map((item) => item.textContent.trim()).filter(Boolean),
+    wordCloud: reportText(page, ".word-cloud", activeReportNarrative?.wordCloud || ""),
+    assetFacts: [...page.querySelectorAll(".asset-widget .widget-facts div")].map((row) => [
+      row.querySelector("dt")?.textContent?.trim() || "",
+      row.querySelector("dd")?.textContent?.trim() || ""
+    ]),
+    lossLines: [...page.querySelectorAll(".black-widget .widget-lines li")].map((item) => item.textContent.trim()),
+    fateStrip: [...page.querySelectorAll(".luck-widget .fate-strip span")].map((item) => item.textContent.trim()),
+    radar: [...page.querySelectorAll(".radar-widget li")].map((item) => item.textContent.trim()),
+    badges
+  };
+}
+
+async function createReportCanvasScreenshotBlob(page) {
+  const width = REPORT_CAPTURE_DESKTOP_WIDTH;
+  const stageHeight = REPORT_CAPTURE_DESKTOP_HEIGHT;
+  const cropTop = REPORT_CAPTURE_NAV_CROP;
+  const outputHeight = stageHeight - cropTop;
+  const scale = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
+  const fullCanvas = document.createElement("canvas");
+  fullCanvas.width = Math.round(width * scale);
+  fullCanvas.height = Math.round(stageHeight * scale);
+  const ctx = fullCanvas.getContext("2d");
+  ctx.scale(scale, scale);
+
+  const data = collectReportShareData(page);
+  const background = await loadCanvasImage("./assets/report-result-cyber-shell-v3.png?v=20260701-report-result-v34");
+  ctx.fillStyle = "#020407";
+  ctx.fillRect(0, 0, width, stageHeight);
+  ctx.drawImage(background, 0, 0, width, stageHeight);
+
+  const y0 = cropTop;
+  ctx.textBaseline = "top";
+  ctx.shadowColor = "rgba(76, 246, 255, 0.26)";
+  ctx.shadowBlur = 10;
+
+  drawRoundedRect(ctx, 58, y0 + 24, 404, 310, 16, "rgba(2, 9, 14, 0.28)", "rgba(91, 246, 255, 0.18)");
+  ctx.fillStyle = "rgba(255, 238, 184, 0.98)";
+  ctx.font = "950 30px Arial, 'Microsoft YaHei', sans-serif";
+  ctx.fillText("链上精神科病例", 88, y0 + 46);
+  drawRoundedRect(ctx, 90, y0 + 92, 44, 44, 22, "rgba(8, 20, 27, 0.78)", "rgba(91, 246, 255, 0.62)");
+  ctx.fillStyle = "rgba(230, 252, 255, 0.96)";
+  ctx.font = "900 18px Arial, 'Microsoft YaHei', sans-serif";
+  ctx.fillText("X", 106, y0 + 104);
+  ctx.font = "900 18px Arial, 'Microsoft YaHei', sans-serif";
+  ctx.fillText(data.handle, 150, y0 + 92);
+  ctx.fillStyle = "rgba(157, 226, 236, 0.82)";
+  ctx.font = "700 13px Arial, 'Microsoft YaHei', sans-serif";
+  ctx.fillText(data.wallet, 150, y0 + 118);
+  ctx.fillStyle = "rgba(109, 255, 238, 0.94)";
+  ctx.font = "800 13px Arial, 'Microsoft YaHei', sans-serif";
+  ctx.fillText("钱包人格", 88, y0 + 156);
+  ctx.fillStyle = "rgba(255, 232, 160, 0.98)";
+  ctx.font = "900 18px Arial, 'Microsoft YaHei', sans-serif";
+  drawFittedText(ctx, data.personality, 88, y0 + 178, 330);
+  ctx.fillStyle = "rgba(157, 226, 236, 0.86)";
+  ctx.font = "800 13px Arial, 'Microsoft YaHei', sans-serif";
+  ctx.fillText(`稀有度 ${data.rarity}`, 88, y0 + 230);
+  ctx.fillText(`报告编号 ${data.reportId}`, 88, y0 + 254);
+  ctx.fillStyle = "rgba(231, 252, 255, 0.94)";
+  ctx.font = "800 14px Arial, 'Microsoft YaHei', sans-serif";
+  drawWrappedText(ctx, data.sentence, 88, y0 + 282, 340, 20, 2);
+
+  drawRoundedRect(ctx, 498, y0 + 22, 360, 318, 16, "rgba(2, 10, 15, 0.22)", "rgba(91, 246, 255, 0.16)");
+  ctx.fillStyle = "rgba(238, 254, 255, 0.98)";
+  ctx.font = "900 20px Arial, 'Microsoft YaHei', sans-serif";
+  ctx.fillText("核心会诊指数", 526, y0 + 46);
+  ctx.save();
+  ctx.translate(680, y0 + 146);
+  const orbitGradient = ctx.createRadialGradient(0, 0, 24, 0, 0, 88);
+  orbitGradient.addColorStop(0, "rgba(80, 248, 255, 0.22)");
+  orbitGradient.addColorStop(1, "rgba(184, 92, 255, 0.04)");
+  ctx.fillStyle = orbitGradient;
+  ctx.beginPath();
+  ctx.arc(0, 0, 92, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(91, 246, 255, 0.46)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(0, 0, 78, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * data.degen / 100));
+  ctx.stroke();
+  ctx.fillStyle = "rgba(255, 234, 166, 0.98)";
+  ctx.font = "950 54px Arial, 'Microsoft YaHei', sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(String(data.degen), 0, -34);
+  ctx.fillStyle = "rgba(162, 232, 240, 0.78)";
+  ctx.font = "800 14px Arial, 'Microsoft YaHei', sans-serif";
+  ctx.fillText("综合评分", 0, 28);
+  ctx.restore();
+  ctx.textAlign = "start";
+  const labels = data.metricLabels.length ? data.metricLabels : ["Degen 指数", "钻石手指数", "纸手指数", "深夜内耗", "抽象浓度", "自愈速率"];
+  labels.slice(0, 6).forEach((label, index) => {
+    const col = index % 2;
+    const row = Math.floor(index / 2);
+    drawMetricBar(ctx, label, data.dimensions[index] ?? 50, 526 + col * 156, y0 + 242 + row * 42, 128);
+  });
+
+  drawRoundedRect(ctx, 920, y0 + 24, 386, 310, 16, "rgba(2, 10, 15, 0.30)", "rgba(255, 224, 138, 0.18)");
+  ctx.fillStyle = "rgba(255, 232, 160, 0.98)";
+  ctx.font = "950 24px Arial, 'Microsoft YaHei', sans-serif";
+  ctx.fillText(data.rarity, 952, y0 + 48);
+  ctx.fillStyle = "rgba(238, 252, 255, 0.96)";
+  ctx.font = "900 18px Arial, 'Microsoft YaHei', sans-serif";
+  ctx.fillText(data.handle, 952, y0 + 84);
+  ctx.fillStyle = "rgba(109, 255, 238, 0.92)";
+  ctx.font = "800 15px Arial, 'Microsoft YaHei', sans-serif";
+  drawFittedText(ctx, data.personality, 952, y0 + 116, 300);
+  ctx.fillStyle = "rgba(198, 244, 248, 0.86)";
+  ctx.font = "700 14px Arial, 'Microsoft YaHei', sans-serif";
+  data.digest.slice(0, 2).forEach((line, index) => drawWrappedText(ctx, line, 952, y0 + 170 + index * 42, 310, 18, 2));
+  data.tags.slice(0, 3).forEach((tag, index) => {
+    drawRoundedRect(ctx, 952 + index * 96, y0 + 260, 84, 26, 13, "rgba(91, 246, 255, 0.10)", "rgba(91, 246, 255, 0.30)");
+    ctx.fillStyle = "rgba(214, 252, 255, 0.90)";
+    ctx.font = "800 12px Arial, 'Microsoft YaHei', sans-serif";
+    ctx.fillText(tag.slice(0, 6), 964 + index * 96, y0 + 267);
+  });
+
+  const widgetY = y0 + 372;
+  const widgetW = 236;
+  const widgetGap = 18;
+  const widgetTitles = ["链上资产性格", "亏损黑匣子", "90 天钱包命运", "Alpha 雷达", "核心徽章"];
+  const widgetBodies = [
+    [data.wordCloud, ...(data.assetFacts || []).map((row) => `${row[0]} ${row[1]}`)],
+    data.lossLines,
+    data.fateStrip,
+    data.radar,
+    data.badges.map((badge) => `${badge.name} ${badge.code}`)
+  ];
+  widgetTitles.forEach((title, index) => {
+    const x = 62 + index * (widgetW + widgetGap);
+    drawRoundedRect(ctx, x, widgetY, widgetW, 150, 14, "rgba(2, 10, 15, 0.24)", "rgba(91, 246, 255, 0.14)");
+    ctx.fillStyle = "rgba(238, 254, 255, 0.96)";
+    ctx.font = "900 16px Arial, 'Microsoft YaHei', sans-serif";
+    ctx.fillText(title, x + 18, widgetY + 18);
+    ctx.fillStyle = "rgba(164, 232, 239, 0.84)";
+    ctx.font = "700 11px Arial, 'Microsoft YaHei', sans-serif";
+    widgetBodies[index].slice(0, 3).forEach((line, lineIndex) => {
+      drawFittedText(ctx, line, x + 18, widgetY + 52 + lineIndex * 25, widgetW - 36);
+    });
+  });
+  ctx.fillStyle = "rgba(214, 245, 247, 0.78)";
+  ctx.font = "760 14px Arial, 'Microsoft YaHei', sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("钱包可以被吐槽，但你的人生不由一笔交易定义。照完钱包，也记得照顾好自己。", width / 2, y0 + 548);
+
+  const outputCanvas = document.createElement("canvas");
+  outputCanvas.width = Math.round(width * scale);
+  outputCanvas.height = Math.round(outputHeight * scale);
+  const outputContext = outputCanvas.getContext("2d");
+  outputContext.drawImage(fullCanvas, 0, Math.round(cropTop * scale), outputCanvas.width, outputCanvas.height, 0, 0, outputCanvas.width, outputCanvas.height);
+  return canvasToPngBlob(outputCanvas);
+}
+
+async function createDomReportScreenshotBlob(page) {
   const stage = page.closest(".homepage-stage");
   if (!stage) throw new Error("Report stage not found");
 
-  const stageRect = stage.getBoundingClientRect();
-  const topbarRect = stage.querySelector(".topbar")?.getBoundingClientRect();
-  const cropTop = Math.max(0, Math.min(stageRect.height - 1, Math.ceil((topbarRect?.bottom ?? stageRect.top) - stageRect.top + 10)));
-  const { width, height, markup } = await svgMarkupForReportCapture(stage, cropTop);
+  const captureLayout = {
+    width: REPORT_CAPTURE_DESKTOP_WIDTH,
+    stageHeight: REPORT_CAPTURE_DESKTOP_HEIGHT,
+    cropTop: REPORT_CAPTURE_NAV_CROP
+  };
+  const { width, height, markup } = await svgMarkupForReportCapture(stage, captureLayout);
   const svgBlob = new Blob([markup], { type: "image/svg+xml;charset=utf-8" });
   const svgUrl = URL.createObjectURL(svgBlob);
 
@@ -634,14 +970,18 @@ async function createReportScreenshotBlob(page) {
     context.fillStyle = "#020407";
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    return await new Promise((resolve, reject) => {
-      canvas.toBlob((blob) => {
-        if (blob) resolve(blob);
-        else reject(new Error("Report screenshot export failed"));
-      }, "image/png", 0.94);
-    });
+    return await canvasToPngBlob(canvas);
   } finally {
     URL.revokeObjectURL(svgUrl);
+  }
+}
+
+async function createReportScreenshotBlob(page) {
+  try {
+    return await createDomReportScreenshotBlob(page);
+  } catch (error) {
+    console.info("DegenDNA DOM screenshot fallback", error);
+    return createReportCanvasScreenshotBlob(page);
   }
 }
 
@@ -650,10 +990,11 @@ function downloadBlob(blob, fileName) {
   const link = document.createElement("a");
   link.href = url;
   link.download = fileName;
+  link.rel = "noopener";
   document.body.append(link);
-  link.click();
+  link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
   link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1200);
+  window.setTimeout(() => URL.revokeObjectURL(url), 8000);
 }
 
 async function copySharePayload(text, imageBlob) {
@@ -695,12 +1036,23 @@ function openXComposer(text, popup) {
 function reportShareStatus(result) {
   if (currentLang === "en") {
     return result === "image"
-      ? "Report screenshot copied and downloaded. Opening X compose."
+      ? "Report screenshot copied and downloaded. Paste it into X with Ctrl+V."
       : "Report screenshot downloaded. Opening X compose.";
   }
   return result === "image"
-    ? "报告截图已复制并下载，正在打开 X 发推页面。"
+    ? "报告截图已复制并下载，X 打开后按 Ctrl+V 可把图片贴进推文。"
     : "报告截图已下载，正在打开 X 发推页面。";
+}
+
+function waitForDownloadDispatch() {
+  return new Promise((resolve) => window.setTimeout(resolve, 420));
+}
+
+function withTimeout(promise, timeoutMs, fallback) {
+  return Promise.race([
+    promise,
+    new Promise((resolve) => window.setTimeout(() => resolve(fallback), timeoutMs))
+  ]);
 }
 
 const REPORT_RARITY_TIERS = [
@@ -3584,11 +3936,15 @@ document.querySelectorAll(".share-button").forEach((button) => {
 
     try {
       const screenshotBlob = page ? await createReportScreenshotBlob(page) : null;
-      if (screenshotBlob) downloadBlob(screenshotBlob, "degendna-report-share.png");
-      const clipboardResult = await copySharePayload(shareText, screenshotBlob);
+      if (screenshotBlob) {
+        downloadBlob(screenshotBlob, "degendna-report-share.png");
+        await waitForDownloadDispatch();
+      }
+      const clipboardResult = await withTimeout(copySharePayload(shareText, screenshotBlob), 1800, "none");
       openXComposer(shareText);
       setStatus(reportShareStatus(clipboardResult));
     } catch (error) {
+      console.warn("DegenDNA share screenshot capture failed", error);
       try {
         await navigator.clipboard?.writeText(shareText);
       } catch {
