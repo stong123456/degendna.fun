@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 650" preserveAspectRatio="none">
+  <defs>
+    <filter id="glow" x="-20%" y="-70%" width="140%" height="240%">
+      <feGaussianBlur stdDeviation="3.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="micro-grid" width="34" height="34" patternUnits="userSpaceOnUse">
+      <path d="M34 0H0V34" fill="none" stroke="#1cecff" stroke-opacity=".08" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="shade" x1="0" x2="1">
+      <stop offset="0" stop-color="#09212b" stop-opacity=".95"/>
+      <stop offset=".38" stop-color="#07121a" stop-opacity=".88"/>
+      <stop offset="1" stop-color="#03070d" stop-opacity=".94"/>
+    </linearGradient>
+    <linearGradient id="glitch" x1="0" x2="1">
+      <stop offset="0" stop-color="#39fff3"/>
+      <stop offset=".18" stop-color="#70ff6b"/>
+      <stop offset=".36" stop-color="#fff45e"/>
+      <stop offset=".56" stop-color="#ff5c5c"/>
+      <stop offset=".76" stop-color="#b65cff"/>
+      <stop offset="1" stop-color="#45d7ff"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" x2="1">
+      <stop offset="0" stop-color="#ff583f"/>
+      <stop offset="1" stop-color="#ff9463"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" x2="1">
+      <stop offset="0" stop-color="#ffcf51"/>
+      <stop offset="1" stop-color="#fff0a0"/>
+    </linearGradient>
+    <linearGradient id="purple" x1="0" x2="1">
+      <stop offset="0" stop-color="#bd60ff"/>
+      <stop offset="1" stop-color="#f28cff"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" x2="1">
+      <stop offset="0" stop-color="#31a8ff"/>
+      <stop offset="1" stop-color="#56f7ff"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" x2="1">
+      <stop offset="0" stop-color="#35e883"/>
+      <stop offset="1" stop-color="#77ffd8"/>
+    </linearGradient>
+    <linearGradient id="silver" x1="0" x2="1">
+      <stop offset="0" stop-color="#eafaff"/>
+      <stop offset=".56" stop-color="#8efbff"/>
+      <stop offset="1" stop-color="#55d6ff"/>
+    </linearGradient>
+    <clipPath id="row-shape">
+      <path d="M24 0H1096L1120 32V50L1096 82H24L0 50V32Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1120" height="650" fill="#02070d"/>
+  <rect width="1120" height="650" fill="url(#micro-grid)" opacity=".42"/>
+  <g opacity=".36">
+    <path d="M28 22H1092M28 628H1092" stroke="#32f4ff" stroke-width="2"/>
+    <path d="M78 18H320M780 632H1042" stroke="#b663ff" stroke-width="3"/>
+  </g>
+
+  <g filter="url(#glow)">
+    <g transform="translate(0 4)" color="url(#glitch)">
+      <path d="M24 0H1096L1120 32V50L1096 82H24L0 50V32Z" fill="url(#shade)" stroke="url(#glitch)" stroke-width="3"/>
+      <g clip-path="url(#row-shape)">
+        <rect x="18" y="10" width="128" height="62" rx="8" fill="#38fff1" opacity=".08"/>
+        <rect x="165" y="11" width="330" height="60" rx="9" fill="#ffffff" opacity=".035"/>
+        <rect x="514" y="11" width="300" height="60" rx="9" fill="#ffffff" opacity=".03"/>
+        <rect x="835" y="11" width="250" height="60" rx="9" fill="#ffffff" opacity=".035"/>
+        <path d="M188 52H476M536 52H785M858 52H1056" stroke="url(#glitch)" stroke-width="3" opacity=".55"/>
+        <path d="M922 22h16v20h-16zm26 8h16v30h-16zm28-12h16v44h-16" fill="url(#glitch)" opacity=".5"/>
+      </g>
+    </g>
+    <g transform="translate(0 98)">
+      <path d="M24 0H1096L1120 32V50L1096 82H24L0 50V32Z" fill="url(#shade)" stroke="url(#red)" stroke-width="3"/>
+      <g clip-path="url(#row-shape)">
+        <rect x="18" y="10" width="128" height="62" rx="8" fill="#ff684a" opacity=".08"/>
+        <rect x="165" y="11" width="330" height="60" rx="9" fill="#ffffff" opacity=".035"/>
+        <rect x="514" y="11" width="300" height="60" rx="9" fill="#ffffff" opacity=".03"/>
+        <rect x="835" y="11" width="250" height="60" rx="9" fill="#ffffff" opacity=".035"/>
+        <path d="M188 52H476M536 52H785M858 52H1056" stroke="url(#red)" stroke-width="3" opacity=".55"/>
+        <path d="M922 22h16v20h-16zm26 8h16v30h-16zm28-12h16v44h-16" fill="url(#red)" opacity=".48"/>
+      </g>
+    </g>
+    <g transform="translate(0 192)">
+      <path d="M24 0H1096L1120 32V50L1096 82H24L0 50V32Z" fill="url(#shade)" stroke="url(#gold)" stroke-width="3"/>
+      <g clip-path="url(#row-shape)">
+        <rect x="18" y="10" width="128" height="62" rx="8" fill="#ffe070" opacity=".08"/>
+        <rect x="165" y="11" width="330" height="60" rx="9" fill="#ffffff" opacity=".035"/>
+        <rect x="514" y="11" width="300" height="60" rx="9" fill="#ffffff" opacity=".03"/>
+        <rect x="835" y="11" width="250" height="60" rx="9" fill="#ffffff" opacity=".035"/>
+        <path d="M188 52H476M536 52H785M858 52H1056" stroke="url(#gold)" stroke-width="3" opacity=".55"/>
+        <path d="M922 22h16v20h-16zm26 8h16v30h-16zm28-12h16v44h-16" fill="url(#gold)" opacity=".48"/>
+      </g>
+    </g>
+    <g transform="translate(0 286)">
+      <path d="M24 0H1096L1120 32V50L1096 82H24L0 50V32Z" fill="url(#shade)" stroke="url(#purple)" stroke-width="3"/>
+      <g clip-path="url(#row-shape)">
+        <rect x="18" y="10" width="128" height="62" rx="8" fill="#c869ff" opacity=".08"/>
+        <rect x="165" y="11" width="330" height="60" rx="9" fill="#ffffff" opacity=".035"/>
+        <rect x="514" y="11" width="300" height="60" rx="9" fill="#ffffff" opacity=".03"/>
+        <rect x="835" y="11" width="250" height="60" rx="9" fill="#ffffff" opacity=".035"/>
+        <path d="M188 52H476M536 52H785M858 52H1056" stroke="url(#purple)" stroke-width="3" opacity=".55"/>
+        <path d="M922 22h16v20h-16zm26 8h16v30h-16zm28-12h16v44h-16" fill="url(#purple)" opacity=".48"/>
+      </g>
+    </g>
+    <g transform="translate(0 380)">
+      <path d="M24 0H1096L1120 32V50L1096 82H24L0 50V32Z" fill="url(#shade)" stroke="url(#blue)" stroke-width="3"/>
+      <g clip-path="url(#row-shape)">
+        <rect x="18" y="10" width="128" height="62" rx="8" fill="#42bfff" opacity=".08"/>
+        <rect x="165" y="11" width="330" height="60" rx="9" fill="#ffffff" opacity=".035"/>
+        <rect x="514" y="11" width="300" height="60" rx="9" fill="#ffffff" opacity=".03"/>
+        <rect x="835" y="11" width="250" height="60" rx="9" fill="#ffffff" opacity=".035"/>
+        <path d="M188 52H476M536 52H785M858 52H1056" stroke="url(#blue)" stroke-width="3" opacity=".55"/>
+        <path d="M922 22h16v20h-16zm26 8h16v30h-16zm28-12h16v44h-16" fill="url(#blue)" opacity=".48"/>
+      </g>
+    </g>
+    <g transform="translate(0 474)">
+      <path d="M24 0H1096L1120 32V50L1096 82H24L0 50V32Z" fill="url(#shade)" stroke="url(#green)" stroke-width="3"/>
+      <g clip-path="url(#row-shape)">
+        <rect x="18" y="10" width="128" height="62" rx="8" fill="#44f28c" opacity=".08"/>
+        <rect x="165" y="11" width="330" height="60" rx="9" fill="#ffffff" opacity=".035"/>
+        <rect x="514" y="11" width="300" height="60" rx="9" fill="#ffffff" opacity=".03"/>
+        <rect x="835" y="11" width="250" height="60" rx="9" fill="#ffffff" opacity=".035"/>
+        <path d="M188 52H476M536 52H785M858 52H1056" stroke="url(#green)" stroke-width="3" opacity=".55"/>
+        <path d="M922 22h16v20h-16zm26 8h16v30h-16zm28-12h16v44h-16" fill="url(#green)" opacity=".48"/>
+      </g>
+    </g>
+    <g transform="translate(0 568)">
+      <path d="M24 0H1096L1120 32V50L1096 82H24L0 50V32Z" fill="url(#shade)" stroke="url(#silver)" stroke-width="3"/>
+      <g clip-path="url(#row-shape)">
+        <rect x="18" y="10" width="128" height="62" rx="8" fill="#dffcff" opacity=".08"/>
+        <rect x="165" y="11" width="330" height="60" rx="9" fill="#ffffff" opacity=".035"/>
+        <rect x="514" y="11" width="300" height="60" rx="9" fill="#ffffff" opacity=".03"/>
+        <rect x="835" y="11" width="250" height="60" rx="9" fill="#ffffff" opacity=".035"/>
+        <path d="M188 52H476M536 52H785M858 52H1056" stroke="url(#silver)" stroke-width="3" opacity=".55"/>
+        <path d="M922 22h16v20h-16zm26 8h16v30h-16zm28-12h16v44h-16" fill="url(#silver)" opacity=".48"/>
+      </g>
+    </g>
+  </g>
+</svg>

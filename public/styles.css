@@ -20627,3 +20627,344 @@ body[data-page="home"] .symptom-strip button {
 body[data-page="home"] .capabilities article:first-child {
   transform: translateX(-12px) !important;
 }
+
+/* Rarity Rank v118: cancel stale row lift after the 1586x992 stage restore. */
+body[data-page="rarity"] .ref-rarity-page .rank-row,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(1),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(2),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(3),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(4),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(5),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(6),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(7) {
+  transform: none !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row span {
+  top: 0 !important;
+}
+
+/* Rarity Rank v119: regenerate only the 7 leaderboard row slots; keep nav, tabs, header, and right card unchanged. */
+body[data-page="rarity"] .ref-rarity-page {
+  --rarity-row-left: 4.35%;
+  --rarity-row-top: 23.55%;
+  --rarity-row-width: 66.95%;
+  --rarity-row-height: 63.75%;
+  --rarity-row-gap: 1.28%;
+  --rarity-row-pad-x: 1.55%;
+}
+
+body[data-page="rarity"] .ref-rarity-page::before {
+  content: "";
+  display: block !important;
+  position: absolute;
+  left: var(--rarity-row-left);
+  top: var(--rarity-row-top);
+  z-index: 2;
+  width: var(--rarity-row-width);
+  height: var(--rarity-row-height);
+  pointer-events: none;
+  background: url("./assets/rarity-seven-row-slots-v119.svg?v=20260710-rarity-rows-v120") center / 100% 100% no-repeat;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rarity-tabs,
+body[data-page="rarity"] .ref-rarity-page .rank-label-row,
+body[data-page="rarity"] .ref-rarity-page .rank-list,
+body[data-page="rarity"] .ref-rarity-page .rank-pager,
+body[data-page="rarity"] .ref-rarity-page .weekly-anomaly {
+  position: absolute !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rarity-tabs {
+  z-index: 7 !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .weekly-anomaly {
+  z-index: 7 !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-label-row {
+  left: var(--rarity-row-left) !important;
+  top: 21.55% !important;
+  z-index: 6 !important;
+  width: var(--rarity-row-width) !important;
+  height: 2.2% !important;
+  display: grid !important;
+  grid-template-columns: 10.8% 31.2% 27.2% 13.2% 13.4% !important;
+  align-items: center !important;
+  gap: 1.05% !important;
+  padding: 0 calc(var(--rarity-row-pad-x) + 0.45%) !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-label-row span,
+body[data-page="rarity"] .ref-rarity-page .rank-label-row span:nth-child(1),
+body[data-page="rarity"] .ref-rarity-page .rank-label-row span:nth-child(2),
+body[data-page="rarity"] .ref-rarity-page .rank-label-row span:nth-child(3),
+body[data-page="rarity"] .ref-rarity-page .rank-label-row span:nth-child(4),
+body[data-page="rarity"] .ref-rarity-page .rank-label-row span:nth-child(5) {
+  left: 0 !important;
+  top: 0 !important;
+  transform: none !important;
+  justify-self: center !important;
+  color: rgba(211, 242, 248, 0.68) !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-list {
+  left: var(--rarity-row-left) !important;
+  top: var(--rarity-row-top) !important;
+  z-index: 5 !important;
+  display: grid !important;
+  width: var(--rarity-row-width) !important;
+  height: var(--rarity-row-height) !important;
+  grid-template-rows: repeat(7, minmax(0, 1fr)) !important;
+  gap: var(--rarity-row-gap) !important;
+  align-content: stretch !important;
+  padding: 0 var(--rarity-row-pad-x) !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(1),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(2),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(3),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(4),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(5),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(6),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(7) {
+  position: relative !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: 10.8% 7.4% 22.8% 27.2% 13.2% 13.4% !important;
+  gap: 1.05% !important;
+  align-items: center !important;
+  padding: 0 0.8% !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(1) {
+  --rank-row-accent: #5dfff1;
+  --rank-row-accent-soft: rgba(255, 87, 245, 0.45);
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(2) {
+  --rank-row-accent: #ff7258;
+  --rank-row-accent-soft: rgba(255, 114, 88, 0.42);
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(3) {
+  --rank-row-accent: #ffe070;
+  --rank-row-accent-soft: rgba(255, 224, 112, 0.38);
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(4) {
+  --rank-row-accent: #cf78ff;
+  --rank-row-accent-soft: rgba(207, 120, 255, 0.42);
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(5) {
+  --rank-row-accent: #4ac8ff;
+  --rank-row-accent-soft: rgba(74, 200, 255, 0.38);
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(6) {
+  --rank-row-accent: #58f49b;
+  --rank-row-accent-soft: rgba(88, 244, 155, 0.36);
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(7) {
+  --rank-row-accent: #dffcff;
+  --rank-row-accent-soft: rgba(111, 238, 255, 0.36);
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row b,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(1) b,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(2) b,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(3) b,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(4) b,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(5) b,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(6) b,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(7) b,
+body[data-page="rarity"] .ref-rarity-page .rank-row i,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(1) i,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(2) i,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(3) i,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(4) i,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(5) i,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(6) i,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(7) i,
+body[data-page="rarity"] .ref-rarity-page .rank-row strong,
+body[data-page="rarity"] .ref-rarity-page .rank-row span,
+body[data-page="rarity"] .ref-rarity-page .rank-row em,
+body[data-page="rarity"] .ref-rarity-page .rank-row small {
+  position: relative !important;
+  left: 0 !important;
+  top: 0 !important;
+  transform: none !important;
+  align-self: center !important;
+  min-width: 0 !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row b,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(1) b,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(2) b,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(3) b,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(4) b,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(5) b,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(6) b,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(7) b {
+  justify-self: center !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  color: var(--rank-row-accent) !important;
+  font-size: clamp(20px, 1.8vw, 30px) !important;
+  text-shadow: 0 0 12px var(--rank-row-accent-soft) !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row i,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(1) i,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(2) i,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(3) i,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(4) i,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(5) i,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(6) i,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(7) i {
+  justify-self: center !important;
+  width: clamp(34px, 2.85vw, 46px) !important;
+  height: clamp(34px, 2.85vw, 46px) !important;
+  color: #f4fdff !important;
+  border-radius: 50% !important;
+  background: rgba(1, 5, 10, 0.82) !important;
+  box-shadow: inset 0 0 0 2px var(--rank-row-accent), 0 0 16px var(--rank-row-accent-soft) !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row i .rank-avatar {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row strong,
+body[data-page="rarity"] .ref-rarity-page .rank-row span {
+  justify-self: start !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  color: rgba(239, 252, 255, 0.94) !important;
+  text-align: left !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row strong {
+  font-size: clamp(16px, 1.28vw, 22px) !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row span,
+body[data-page="rarity"] .ref-rarity-page .rank-row em {
+  font-size: clamp(13px, 1.02vw, 17px) !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row em {
+  justify-self: center !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  color: rgba(222, 251, 255, 0.88) !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row small {
+  justify-self: stretch !important;
+  width: 100% !important;
+  height: clamp(18px, 1.55vw, 24px) !important;
+  color: var(--rank-row-accent) !important;
+  background:
+    linear-gradient(90deg, currentColor 0 48%, transparent 48%),
+    repeating-linear-gradient(90deg, currentColor 0 12px, transparent 12px 24px) !important;
+  opacity: 0.86 !important;
+  filter: drop-shadow(0 0 8px var(--rank-row-accent-soft)) !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-pager {
+  z-index: 8 !important;
+}
+
+/* Rarity Rank v120: row-level frames override the old baked row colors without touching the nav/right card. */
+body[data-page="rarity"] .ref-rarity-page {
+  --rarity-row-top: 22.85%;
+  --rarity-row-height: 64.45%;
+}
+
+body[data-page="rarity"] .ref-rarity-page::before {
+  top: 21.35%;
+  height: 66.25%;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-list {
+  top: var(--rarity-row-top) !important;
+  height: var(--rarity-row-height) !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(1),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(2),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(3),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(4),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(5),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(6),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(7) {
+  isolation: isolate !important;
+  overflow: visible !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row::before {
+  content: "";
+  position: absolute;
+  inset: -4px -9px -4px -36px;
+  z-index: 0;
+  pointer-events: none;
+  clip-path: polygon(22px 0, calc(100% - 22px) 0, 100% 50%, calc(100% - 22px) 100%, 22px 100%, 0 50%);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--rank-row-accent) 14%, transparent), transparent 28%, rgba(4, 12, 18, 0.96) 56%, color-mix(in srgb, var(--rank-row-accent) 10%, transparent)),
+    rgba(2, 8, 13, 0.98);
+  box-shadow:
+    inset 0 0 0 2px var(--rank-row-accent),
+    inset 0 0 34px var(--rank-row-accent-soft),
+    0 0 18px var(--rank-row-accent-soft) !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row::after {
+  content: "";
+  position: absolute;
+  inset: 11px 18px;
+  z-index: 1;
+  pointer-events: none;
+  clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0 50%);
+  background:
+    linear-gradient(90deg,
+      rgba(255, 255, 255, 0.035) 0 13%,
+      transparent 13% 16%,
+      rgba(255, 255, 255, 0.045) 16% 44%,
+      transparent 44% 48%,
+      rgba(255, 255, 255, 0.035) 48% 73%,
+      transparent 73% 77%,
+      rgba(255, 255, 255, 0.045) 77% 100%);
+  box-shadow: inset 0 0 0 1px rgba(225, 252, 255, 0.12);
+  opacity: 0.9;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row b,
+body[data-page="rarity"] .ref-rarity-page .rank-row i,
+body[data-page="rarity"] .ref-rarity-page .rank-row strong,
+body[data-page="rarity"] .ref-rarity-page .rank-row span,
+body[data-page="rarity"] .ref-rarity-page .rank-row em,
+body[data-page="rarity"] .ref-rarity-page .rank-row small {
+  z-index: 3 !important;
+}

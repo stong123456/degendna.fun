@@ -312,6 +312,10 @@ function resetViewportScroll() {
   window.scrollTo(0, 0);
   document.documentElement.scrollTop = 0;
   document.body.scrollTop = 0;
+  document.querySelectorAll(".terminal-shell").forEach((shell) => {
+    shell.scrollTop = 0;
+    shell.scrollLeft = 0;
+  });
 }
 
 function t(key) {
@@ -1841,6 +1845,12 @@ function renderLeaderboardRows(entries = activeLeaderboardEntries) {
     row.append(rank, avatarSlot, handle, personality, rarityLabel, score);
     list.append(row);
   });
+  for (let index = rows.length; index < RANK_PAGE_SIZE; index += 1) {
+    const row = document.createElement("article");
+    row.className = "rank-row rank-row-empty";
+    row.setAttribute("aria-hidden", "true");
+    list.append(row);
+  }
   syncRarityReadout(rarity, rows.length, filteredEntries.length);
 }
 
@@ -2311,6 +2321,7 @@ document.querySelectorAll("[data-rarity-filter]").forEach((button) => {
     if (page.classList?.contains("ref-rarity-page")) {
       activeRankPage = 0;
       renderLeaderboardRows(activeLeaderboardEntries);
+      resetViewportScroll();
     } else {
       syncRarityReadout(page);
     }
@@ -2324,12 +2335,14 @@ document.querySelectorAll(".rank-pager").forEach((pager) => {
     const total = Math.max(1, Math.ceil(leaderboardFilteredEntries(activeLeaderboardEntries, page).length / RANK_PAGE_SIZE));
     activeRankPage = activeRankPage <= 0 ? total - 1 : activeRankPage - 1;
     renderLeaderboardRows(activeLeaderboardEntries);
+    resetViewportScroll();
   });
   pager.querySelector("[data-rank-page-next]")?.addEventListener("click", () => {
     const page = pager.closest(".ref-rarity-page");
     const total = Math.max(1, Math.ceil(leaderboardFilteredEntries(activeLeaderboardEntries, page).length / RANK_PAGE_SIZE));
     activeRankPage = activeRankPage >= total - 1 ? 0 : activeRankPage + 1;
     renderLeaderboardRows(activeLeaderboardEntries);
+    resetViewportScroll();
   });
   updateRankPager(pager.closest(".ref-rarity-page"), 1);
 });
