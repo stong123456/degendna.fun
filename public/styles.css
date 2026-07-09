@@ -20432,7 +20432,7 @@ body.degen-persona-quiz:not(.degen-persona-result-mode)[data-page="psyche-test"]
   transform: translateX(4px) !important;
 }
 
-/* Stage Scale v116: lock every page to its design canvas and scale as one unit. */
+/* Stage Scale v117: lock every page to the current 1586x992 shell and scale as one unit. */
 :root {
   --app-stage-design-width: 1586px;
   --app-stage-design-height: 992px;

@@ -17,7 +17,7 @@ const LOCAL_LEADERBOARD_KEY = "degendna:wallet-leaderboard:v1";
 const PAGE_NAMES = ["home", "report", "wallet", "rarity", "psyche", "psyche-test", "about"];
 const STAGE_DESIGNS = {
   home: { width: 1586, height: 992 },
-  app: { width: 1366, height: 768 }
+  app: { width: 1586, height: 992 }
 };
 
 const I18N = {
@@ -306,6 +306,12 @@ function queueViewportStageScale() {
     stageScaleFrame = 0;
     updateViewportStageScale();
   });
+}
+
+function resetViewportScroll() {
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
 }
 
 function t(key) {
@@ -2182,6 +2188,7 @@ function applyPage(page, options = {}) {
   if (options.updateHash !== false && window.location.hash !== `#${nextPage}`) {
     window.history.pushState(null, "", `#${nextPage}`);
   }
+  resetViewportScroll();
 
   if (nextPage === "rarity") {
     if (activeLeaderboardEntries.length) {
