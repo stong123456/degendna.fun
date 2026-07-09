@@ -15,6 +15,10 @@ const EVM_ADDRESS = /^0x[a-fA-F0-9]{40}$/;
 const LANG_KEY = "degendna-home-language";
 const LOCAL_LEADERBOARD_KEY = "degendna:wallet-leaderboard:v1";
 const PAGE_NAMES = ["home", "report", "wallet", "rarity", "psyche", "psyche-test", "about"];
+const STAGE_DESIGNS = {
+  home: { width: 1586, height: 992 },
+  app: { width: 1366, height: 768 }
+};
 
 const I18N = {
   zh: {
@@ -255,6 +259,7 @@ const I18N = {
 
 let currentLang = readStoredLang() === "en" ? "en" : "zh";
 let currentPage = pageFromHash();
+let stageScaleFrame = 0;
 
 function readStoredLang() {
   try {
@@ -275,6 +280,32 @@ function writeStoredLang(value) {
 function pageFromHash() {
   const page = window.location.hash.replace("#", "");
   return PAGE_NAMES.includes(page) ? page : "home";
+}
+
+function stageDesignForPage(page = document.body.dataset.page || currentPage) {
+  return page === "home" ? STAGE_DESIGNS.home : STAGE_DESIGNS.app;
+}
+
+function updateViewportStageScale(page = document.body.dataset.page || currentPage) {
+  const design = stageDesignForPage(page);
+  const viewportWidth = Math.max(320, window.innerWidth || design.width);
+  const viewportHeight = Math.max(320, window.innerHeight || design.height);
+  const scale = Math.min(viewportWidth / design.width, viewportHeight / design.height);
+  const offsetY = Math.max(0, (viewportHeight - design.height * scale) / 2);
+  const root = document.documentElement;
+
+  root.style.setProperty("--app-stage-design-width", `${design.width}px`);
+  root.style.setProperty("--app-stage-design-height", `${design.height}px`);
+  root.style.setProperty("--app-stage-scale", scale.toFixed(5));
+  root.style.setProperty("--app-stage-offset-y", `${offsetY.toFixed(2)}px`);
+}
+
+function queueViewportStageScale() {
+  if (stageScaleFrame) window.cancelAnimationFrame(stageScaleFrame);
+  stageScaleFrame = window.requestAnimationFrame(() => {
+    stageScaleFrame = 0;
+    updateViewportStageScale();
+  });
 }
 
 function t(key) {
@@ -489,9 +520,47 @@ function setText(element, value) {
 }
 
 const captureAssetCache = new Map();
-const REPORT_CAPTURE_DESKTOP_WIDTH = 1376;
-const REPORT_CAPTURE_DESKTOP_HEIGHT = 768;
-const REPORT_CAPTURE_NAV_CROP = 147;
+const REPORT_CAPTURE_NAV_FALLBACK_CROP = 112;
+const REPORT_CAPTURE_NAV_GAP = 8;
+
+function currentStageScaleForCapture(stage, design) {
+  const cssScale = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--app-stage-scale"));
+  if (Number.isFinite(cssScale) && cssScale > 0) return cssScale;
+
+  const rect = stage?.getBoundingClientRect();
+  const scaleFromRect = rect?.width ? rect.width / design.width : 1;
+  return Number.isFinite(scaleFromRect) && scaleFromRect > 0 ? scaleFromRect : 1;
+}
+
+function reportCaptureNavCrop(stage, design) {
+  const stageRect = stage?.getBoundingClientRect();
+  if (!stageRect) return REPORT_CAPTURE_NAV_FALLBACK_CROP;
+
+  const scale = currentStageScaleForCapture(stage, design);
+  const navNodes = [
+    stage.querySelector(".brand"),
+    stage.querySelector(".primary-nav"),
+    stage.querySelector(".top-actions")
+  ].filter(Boolean);
+
+  const navBottom = navNodes.reduce((bottom, node) => {
+    const rect = node.getBoundingClientRect();
+    if (!rect.width || !rect.height) return bottom;
+    return Math.max(bottom, rect.bottom);
+  }, stageRect.top);
+
+  const cropTop = Math.ceil((navBottom - stageRect.top) / scale + REPORT_CAPTURE_NAV_GAP);
+  return Math.max(0, Math.min(design.height - 1, cropTop || REPORT_CAPTURE_NAV_FALLBACK_CROP));
+}
+
+function reportCaptureLayout(stage) {
+  const design = stageDesignForPage("report");
+  return {
+    width: design.width,
+    stageHeight: design.height,
+    cropTop: stage ? reportCaptureNavCrop(stage, design) : REPORT_CAPTURE_NAV_FALLBACK_CROP
+  };
+}
 
 async function blobToDataUrl(blob) {
   return new Promise((resolve, reject) => {
@@ -807,10 +876,10 @@ function collectReportShareData(page) {
   };
 }
 
-async function createReportCanvasScreenshotBlob(page) {
-  const width = REPORT_CAPTURE_DESKTOP_WIDTH;
-  const stageHeight = REPORT_CAPTURE_DESKTOP_HEIGHT;
-  const cropTop = REPORT_CAPTURE_NAV_CROP;
+async function createReportCanvasScreenshotBlob(page, captureLayout = reportCaptureLayout(page?.closest(".homepage-stage"))) {
+  const width = captureLayout.width;
+  const stageHeight = captureLayout.stageHeight;
+  const cropTop = captureLayout.cropTop;
   const outputHeight = stageHeight - cropTop;
   const scale = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
   const fullCanvas = document.createElement("canvas");
@@ -947,16 +1016,12 @@ async function createReportCanvasScreenshotBlob(page) {
   return canvasToPngBlob(outputCanvas);
 }
 
-async function createDomReportScreenshotBlob(page) {
+async function createDomReportScreenshotBlob(page, captureLayout = null) {
   const stage = page.closest(".homepage-stage");
   if (!stage) throw new Error("Report stage not found");
 
-  const captureLayout = {
-    width: REPORT_CAPTURE_DESKTOP_WIDTH,
-    stageHeight: REPORT_CAPTURE_DESKTOP_HEIGHT,
-    cropTop: REPORT_CAPTURE_NAV_CROP
-  };
-  const { width, height, markup } = await svgMarkupForReportCapture(stage, captureLayout);
+  const layout = captureLayout || reportCaptureLayout(stage);
+  const { width, height, markup } = await svgMarkupForReportCapture(stage, layout);
   const svgBlob = new Blob([markup], { type: "image/svg+xml;charset=utf-8" });
   const svgUrl = URL.createObjectURL(svgBlob);
 
@@ -977,11 +1042,12 @@ async function createDomReportScreenshotBlob(page) {
 }
 
 async function createReportScreenshotBlob(page) {
+  const captureLayout = reportCaptureLayout(page?.closest(".homepage-stage"));
   try {
-    return await createDomReportScreenshotBlob(page);
+    return await createDomReportScreenshotBlob(page, captureLayout);
   } catch (error) {
     console.info("DegenDNA DOM screenshot fallback", error);
-    return createReportCanvasScreenshotBlob(page);
+    return createReportCanvasScreenshotBlob(page, captureLayout);
   }
 }
 
@@ -2093,6 +2159,7 @@ function applyPage(page, options = {}) {
   const isDegenPersonaPage = nextPage === "psyche-test" && activeMentalState?.mode === "degen-persona";
   document.body.classList.toggle("degen-persona-quiz", isDegenPersonaPage);
   document.body.classList.toggle("degen-persona-result-mode", Boolean(isDegenPersonaPage && activeMentalState?.completed));
+  updateViewportStageScale(nextPage);
 
   const activeNavPage = isDegenPersonaPage ? "__degenPersona" : nextPage === "psyche-test" ? "psyche" : nextPage;
   navButtons.forEach((button) => {
@@ -2196,6 +2263,10 @@ document.addEventListener("click", (event) => {
 window.addEventListener("hashchange", () => {
   applyPage(pageFromHash(), { updateHash: false });
 });
+
+window.addEventListener("resize", queueViewportStageScale, { passive: true });
+window.addEventListener("orientationchange", queueViewportStageScale, { passive: true });
+window.visualViewport?.addEventListener("resize", queueViewportStageScale, { passive: true });
 
 document.querySelectorAll("[data-wallet-pk-form]").forEach((walletForm) => {
   walletForm.addEventListener("submit", (event) => {

@@ -20431,3 +20431,199 @@ body[data-page="report"] .primary-nav {
 body.degen-persona-quiz:not(.degen-persona-result-mode)[data-page="psyche-test"] .degen-persona-dim-strip article:nth-child(4) {
   transform: translateX(4px) !important;
 }
+
+/* Stage Scale v116: lock every page to its design canvas and scale as one unit. */
+:root {
+  --app-stage-design-width: 1586px;
+  --app-stage-design-height: 992px;
+  --app-stage-scale: 1;
+  --app-stage-offset-y: 0px;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  overflow: hidden !important;
+}
+
+.terminal-shell,
+body:not([data-page="home"]) .terminal-shell {
+  width: 100vw !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  padding: var(--app-stage-offset-y) 0 0 !important;
+  place-items: start center !important;
+  overflow: hidden !important;
+  background: #020407 !important;
+}
+
+.homepage-stage,
+body:not([data-page="home"]) .homepage-stage,
+body[data-page="report"] .homepage-stage,
+body[data-page="psyche-test"] .homepage-stage,
+body.degen-persona-quiz[data-page="psyche-test"] .homepage-stage,
+body.degen-persona-quiz.degen-persona-result-mode[data-page="psyche-test"] .homepage-stage {
+  width: var(--app-stage-design-width) !important;
+  height: var(--app-stage-design-height) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: none !important;
+  aspect-ratio: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  transform: scale(var(--app-stage-scale)) translateZ(0) !important;
+  transform-origin: top center !important;
+}
+
+body[data-page="home"] .homepage-stage {
+  background: url("./assets/homepage-cyber-medical-shell.png") center top / 100% 100% no-repeat #020407 !important;
+}
+
+body[data-page="home"] .homepage-stage::after {
+  display: block !important;
+}
+
+body[data-page="home"] .topbar {
+  position: absolute !important;
+  left: 5.4% !important;
+  right: 5.2% !important;
+  top: 4.2% !important;
+  z-index: 5 !important;
+  display: grid !important;
+  width: auto !important;
+  min-width: 0 !important;
+  grid-template-columns: minmax(220px, 27%) minmax(0, 1fr) minmax(160px, 18%) !important;
+  align-items: center !important;
+  gap: 24px !important;
+  margin: 0 !important;
+}
+
+body[data-page="home"] .primary-nav {
+  display: grid !important;
+  grid-column: auto !important;
+  order: 0 !important;
+  grid-template-columns: repeat(5, minmax(92px, 1fr)) !important;
+  justify-self: center !important;
+  width: min(100%, 730px) !important;
+}
+
+body[data-page="home"] .top-actions {
+  gap: 14px !important;
+}
+
+body[data-page="home"] .language-toggle {
+  transform: translateX(-46px) !important;
+}
+
+body[data-page="home"] .hero-copy,
+body[data-page="home"] .intake-panel,
+body[data-page="home"] .scan-status,
+body[data-page="home"] .scan-glass,
+body[data-page="home"] .diagnostic-caption,
+body[data-page="home"] .symptom-strip,
+body[data-page="home"] .capabilities {
+  position: absolute !important;
+  width: auto !important;
+  min-width: 0 !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body[data-page="home"] .hero-copy {
+  left: 7.5% !important;
+  top: 13.2% !important;
+  z-index: 4 !important;
+  width: 36.4% !important;
+}
+
+body[data-page="home"] .intake-panel {
+  left: 7.6% !important;
+  top: 45.8% !important;
+  z-index: 6 !important;
+  width: 31% !important;
+  min-width: 390px !important;
+}
+
+body[data-page="home"] .scan-status {
+  right: 7.25% !important;
+  top: 14.2% !important;
+  z-index: 4 !important;
+  width: 13.2% !important;
+  min-width: 168px !important;
+  pointer-events: none !important;
+}
+
+body[data-page="home"] .scan-glass {
+  left: 43.15% !important;
+  top: 12.8% !important;
+  z-index: 3 !important;
+  display: block !important;
+  width: 48.3% !important;
+  height: 55.5% !important;
+}
+
+body[data-page="home"] .diagnostic-caption {
+  left: 43.7% !important;
+  top: 64.9% !important;
+  z-index: 5 !important;
+  display: grid !important;
+  transform: translate(28px, -6px) !important;
+}
+
+body[data-page="home"] .symptom-strip {
+  left: 5.2% !important;
+  right: 5.2% !important;
+  top: 72.0% !important;
+  z-index: 5 !important;
+  display: grid !important;
+  grid-template-columns: minmax(190px, 1.28fr) repeat(6, minmax(118px, 1fr)) !important;
+  gap: clamp(8px, 0.7vw, 12px) !important;
+}
+
+body[data-page="home"] .capabilities {
+  left: 5.2% !important;
+  right: 5.2% !important;
+  top: 79.0% !important;
+  z-index: 5 !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: clamp(10px, 1vw, 16px) !important;
+}
+
+body[data-page="home"] .scan-status .signal-card,
+body[data-page="home"] .scan-progress {
+  transform: translateX(34px) !important;
+}
+
+body[data-page="home"] .scan-status .signal-card:nth-of-type(2) > span {
+  transform: translateY(-13px) !important;
+}
+
+body[data-page="home"] .scan-status .signal-card:nth-of-type(3) > span {
+  transform: translateY(3px) !important;
+}
+
+body[data-page="home"] .scan-progress > span {
+  transform: translateY(2px) !important;
+}
+
+body[data-page="home"] .data-source {
+  transform: translate(34px, -16px) !important;
+}
+
+body[data-page="home"] .case-id {
+  transform: translate(34px, 64px) !important;
+}
+
+body[data-page="home"] .symptom-strip button {
+  transform: translateX(-20px) !important;
+}
+
+body[data-page="home"] .capabilities article:first-child {
+  transform: translateX(-12px) !important;
+}
