@@ -20968,3 +20968,62 @@ body[data-page="rarity"] .ref-rarity-page .rank-row em,
 body[data-page="rarity"] .ref-rarity-page .rank-row small {
   z-index: 3 !important;
 }
+
+/* Rarity Rank v123: use the regenerated full background; remove the patched row-cover layer. */
+body[data-page="rarity"] .homepage-stage {
+  background: url("./assets/rarity-rank-cyber-shell-v123.png?v=20260710-rarity-bg-v123") center top / 100% 100% no-repeat #020407 !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page {
+  --rarity-row-left: 4.55%;
+  --rarity-row-top: 23.35%;
+  --rarity-row-width: 66.15%;
+  --rarity-row-height: 64.05%;
+  --rarity-row-gap: 1.34%;
+  --rarity-row-pad-x: 1.05%;
+}
+
+body[data-page="rarity"] .ref-rarity-page::before,
+body[data-page="rarity"] .ref-rarity-page .rank-row::before,
+body[data-page="rarity"] .ref-rarity-page .rank-row::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-list {
+  left: var(--rarity-row-left) !important;
+  top: var(--rarity-row-top) !important;
+  width: var(--rarity-row-width) !important;
+  height: var(--rarity-row-height) !important;
+  padding: 0 var(--rarity-row-pad-x) !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-label-row {
+  left: var(--rarity-row-left) !important;
+  top: 21.75% !important;
+  width: var(--rarity-row-width) !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row,
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(1),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(2),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(3),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(4),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(5),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(6),
+body[data-page="rarity"] .ref-rarity-page .rank-row:nth-child(7) {
+  overflow: hidden !important;
+  isolation: auto !important;
+  background: transparent !important;
+}
+
+body[data-page="rarity"] .ref-rarity-page .rank-row-empty b,
+body[data-page="rarity"] .ref-rarity-page .rank-row-empty i,
+body[data-page="rarity"] .ref-rarity-page .rank-row-empty strong,
+body[data-page="rarity"] .ref-rarity-page .rank-row-empty span,
+body[data-page="rarity"] .ref-rarity-page .rank-row-empty em,
+body[data-page="rarity"] .ref-rarity-page .rank-row-empty small {
+  display: none !important;
+}

@@ -309,13 +309,18 @@ function queueViewportStageScale() {
 }
 
 function resetViewportScroll() {
-  window.scrollTo(0, 0);
-  document.documentElement.scrollTop = 0;
-  document.body.scrollTop = 0;
-  document.querySelectorAll(".terminal-shell").forEach((shell) => {
-    shell.scrollTop = 0;
-    shell.scrollLeft = 0;
-  });
+  const reset = () => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    document.querySelectorAll(".terminal-shell, .homepage-stage").forEach((shell) => {
+      shell.scrollTop = 0;
+      shell.scrollLeft = 0;
+    });
+  };
+
+  reset();
+  window.requestAnimationFrame(reset);
 }
 
 function t(key) {
