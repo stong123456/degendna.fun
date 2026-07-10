@@ -1,6 +1,6 @@
 {
   "name": "onchain-mirror",
-  "version": "2.2.10",
+  "version": "2.2.12",
   "private": true,
   "type": "module",
   "scripts": {

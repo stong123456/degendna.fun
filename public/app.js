@@ -691,6 +691,7 @@ async function svgMarkupForReportCapture(stage, captureLayout) {
   const clone = stage.cloneNode(true);
   clone.querySelector(".topbar")?.remove();
   await inlineCloneAssets(clone);
+  const captureShellDataUrl = await resourceToDataUrl("./assets/psyche-question-blank-shell-v3-framed.png?v=20260710-share-capture-v126");
   clone.style.width = `${captureLayout.width}px`;
   clone.style.height = `${captureLayout.stageHeight}px`;
   clone.style.minHeight = "0";
@@ -714,6 +715,11 @@ async function svgMarkupForReportCapture(stage, captureLayout) {
       padding: 0 !important;
       margin: 0 !important;
       transform: none !important;
+      background: url("${captureShellDataUrl}") center top / 100% 100% no-repeat #020407 !important;
+    }
+    body.report-capture-desktop[data-page="report"] .homepage-stage::before {
+      content: none !important;
+      display: none !important;
     }
     body.report-capture-desktop[data-page="report"] .reference-page,
     body.report-capture-desktop[data-page="report"] .ref-report-page {
@@ -904,7 +910,7 @@ async function createReportCanvasScreenshotBlob(page, captureLayout = reportCapt
   ctx.scale(scale, scale);
 
   const data = collectReportShareData(page);
-  const background = await loadCanvasImage("./assets/report-result-cyber-shell-v3.png?v=20260701-report-result-v34");
+  const background = await loadCanvasImage("./assets/psyche-question-blank-shell-v3-framed.png?v=20260710-share-capture-v126");
   ctx.fillStyle = "#020407";
   ctx.fillRect(0, 0, width, stageHeight);
   ctx.drawImage(background, 0, 0, width, stageHeight);
@@ -996,8 +1002,16 @@ async function createReportCanvasScreenshotBlob(page, captureLayout = reportCapt
   });
 
   const widgetY = y0 + 372;
-  const widgetW = 236;
-  const widgetGap = 18;
+  const widgetGap = 16;
+  const widgetLeft = Math.max(54, width * 0.045);
+  const widgetWeights = [1.24, 1.0, 1.1, 0.92, 1.0];
+  const widgetUnit = (width - widgetLeft * 2 - widgetGap * (widgetWeights.length - 1)) / widgetWeights.reduce((sum, item) => sum + item, 0);
+  let widgetCursor = widgetLeft;
+  const widgetLayouts = widgetWeights.map((weight) => {
+    const layout = { x: widgetCursor, width: widgetUnit * weight };
+    widgetCursor += layout.width + widgetGap;
+    return layout;
+  });
   const widgetTitles = ["链上资产性格", "亏损黑匣子", "90 天钱包命运", "Alpha 雷达", "核心徽章"];
   const widgetBodies = [
     [data.wordCloud, ...(data.assetFacts || []).map((row) => `${row[0]} ${row[1]}`)],
@@ -1007,13 +1021,32 @@ async function createReportCanvasScreenshotBlob(page, captureLayout = reportCapt
     data.badges.map((badge) => `${badge.name} ${badge.code}`)
   ];
   widgetTitles.forEach((title, index) => {
-    const x = 62 + index * (widgetW + widgetGap);
+    const { x, width: widgetW } = widgetLayouts[index];
     drawRoundedRect(ctx, x, widgetY, widgetW, 150, 14, "rgba(2, 10, 15, 0.24)", "rgba(91, 246, 255, 0.14)");
     ctx.fillStyle = "rgba(238, 254, 255, 0.96)";
     ctx.font = "900 16px Arial, 'Microsoft YaHei', sans-serif";
     ctx.fillText(title, x + 18, widgetY + 18);
     ctx.fillStyle = "rgba(164, 232, 239, 0.84)";
     ctx.font = "700 11px Arial, 'Microsoft YaHei', sans-serif";
+    if (index === 0) {
+      drawWrappedText(ctx, data.wordCloud, x + 18, widgetY + 48, widgetW - 36, 15, 2);
+      ctx.fillStyle = "rgba(255, 232, 164, 0.92)";
+      ctx.font = "800 10.5px Arial, 'Microsoft YaHei', sans-serif";
+      (data.assetFacts || []).slice(0, 2).forEach((row, rowIndex) => {
+        const y = widgetY + 84 + rowIndex * 26;
+        drawRoundedRect(ctx, x + 18, y, widgetW - 36, 20, 8, "rgba(80, 248, 255, 0.06)", "rgba(80, 248, 255, 0.12)");
+        drawFittedText(ctx, `${row[0]}  ${row[1]}`, x + 28, y + 5, widgetW - 56);
+      });
+      return;
+    }
+    if (index === 2) {
+      widgetBodies[index].slice(0, 3).forEach((line, lineIndex) => {
+        const y = widgetY + 47 + lineIndex * 29;
+        drawRoundedRect(ctx, x + 18, y, widgetW - 36, 22, 9, "rgba(80, 248, 255, 0.07)", "rgba(80, 248, 255, 0.16)");
+        drawWrappedText(ctx, line, x + 28, y + 5, widgetW - 56, 13, 1);
+      });
+      return;
+    }
     widgetBodies[index].slice(0, 3).forEach((line, lineIndex) => {
       drawFittedText(ctx, line, x + 18, widgetY + 52 + lineIndex * 25, widgetW - 36);
     });
@@ -1057,7 +1090,10 @@ async function createDomReportScreenshotBlob(page, captureLayout = null) {
 }
 
 async function createReportScreenshotBlob(page) {
-  const captureLayout = reportCaptureLayout(page?.closest(".homepage-stage"));
+  const stage = page?.closest(".homepage-stage");
+  if (!stage) throw new Error("Report stage not found");
+
+  const captureLayout = reportCaptureLayout(stage);
   try {
     return await createDomReportScreenshotBlob(page, captureLayout);
   } catch (error) {

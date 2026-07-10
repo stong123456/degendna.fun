@@ -21027,3 +21027,92 @@ body[data-page="rarity"] .ref-rarity-page .rank-row-empty em,
 body[data-page="rarity"] .ref-rarity-page .rank-row-empty small {
   display: none !important;
 }
+
+/* Report Result v126: readable bottom diagnosis widgets and vertical 90-day fate. */
+body[data-page="report"] .ref-report-page .asset-widget,
+body[data-page="report"] .ref-report-page .luck-widget {
+  gap: 4px !important;
+  padding: 8px 12px 7px !important;
+}
+
+body[data-page="report"] .ref-report-page .asset-widget .word-cloud {
+  display: block !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 1px 0 0 !important;
+  padding: 4px 8px !important;
+  overflow: visible !important;
+  color: rgba(225, 254, 255, 0.94) !important;
+  font-size: clamp(8px, 0.62vw, 10px) !important;
+  font-weight: 850 !important;
+  line-height: 1.16 !important;
+  text-align: left !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: anywhere !important;
+}
+
+body[data-page="report"] .ref-report-page .asset-widget .widget-facts {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 3px !important;
+  margin: 2px 0 0 !important;
+  transform: none !important;
+}
+
+body[data-page="report"] .ref-report-page .asset-widget .widget-facts div {
+  display: grid !important;
+  grid-template-columns: 40% minmax(0, 1fr) !important;
+  gap: 5px !important;
+  align-items: center !important;
+  min-height: 17px !important;
+  padding: 2px 6px !important;
+}
+
+body[data-page="report"] .ref-report-page .asset-widget .widget-facts dt,
+body[data-page="report"] .ref-report-page .asset-widget .widget-facts dd {
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+
+body[data-page="report"] .ref-report-page .asset-widget .widget-facts dt {
+  font-size: clamp(6.5px, 0.50vw, 8px) !important;
+  line-height: 1.08 !important;
+}
+
+body[data-page="report"] .ref-report-page .asset-widget .widget-facts dd {
+  font-size: clamp(7.4px, 0.58vw, 9.4px) !important;
+  line-height: 1.08 !important;
+}
+
+body[data-page="report"] .ref-report-page .luck-widget .fate-strip {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  grid-auto-rows: minmax(18px, auto) !important;
+  gap: 3px !important;
+  width: 100% !important;
+  margin: 1px 0 0 !important;
+  transform: none !important;
+}
+
+body[data-page="report"] .ref-report-page .luck-widget .fate-strip span {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  min-width: 0 !important;
+  min-height: 18px !important;
+  padding: 3px 8px !important;
+  overflow: visible !important;
+  color: rgba(233, 254, 255, 0.95) !important;
+  font-size: clamp(7.6px, 0.58vw, 9.6px) !important;
+  font-weight: 860 !important;
+  line-height: 1.12 !important;
+  text-align: left !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: anywhere !important;
+}
