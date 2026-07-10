@@ -534,9 +534,100 @@ function setText(element, value) {
   if (element && value !== undefined) element.textContent = value;
 }
 
-const captureAssetCache = new Map();
 const REPORT_CAPTURE_NAV_FALLBACK_CROP = 112;
 const REPORT_CAPTURE_NAV_GAP = 8;
+const REPORT_CAPTURE_CARD_PADDING = 22;
+const REPORT_CAPTURE_CARD_SELECTORS = [
+  ".ref-report-page .report-main-card",
+  ".ref-report-page .report-core-panel",
+  ".ref-report-page .report-share-panel",
+  ".ref-report-page .report-grid",
+  ".ref-report-page .report-care-banner"
+];
+const REPORT_CAPTURE_SANITIZE_CSS = `
+  body.report-html2canvas-capture .homepage-stage .topbar {
+    visibility: hidden !important;
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+  }
+
+  body.report-html2canvas-capture .homepage-stage .reference-page:not(.ref-report-page) {
+    display: none !important;
+    visibility: hidden !important;
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+  }
+
+  body.report-html2canvas-capture .homepage-stage .topbar *,
+  body.report-html2canvas-capture .homepage-stage .topbar *::before,
+  body.report-html2canvas-capture .homepage-stage .topbar *::after,
+  body.report-html2canvas-capture .homepage-stage .reference-page:not(.ref-report-page) *,
+  body.report-html2canvas-capture .homepage-stage .reference-page:not(.ref-report-page) *::before,
+  body.report-html2canvas-capture .homepage-stage .reference-page:not(.ref-report-page) *::after {
+    background: transparent !important;
+    background-image: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    color: rgba(230, 250, 252, 0.9) !important;
+    filter: none !important;
+    text-shadow: none !important;
+  }
+
+  body.report-html2canvas-capture *,
+  body.report-html2canvas-capture *::before,
+  body.report-html2canvas-capture *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  body.report-html2canvas-capture[data-page="report"] .ref-report-page .badge-row,
+  body.report-html2canvas-capture[data-page="report"] .ref-report-page .badge-row * {
+    filter: none !important;
+  }
+
+  body.report-html2canvas-capture[data-page="report"] .ref-report-page .badge-row span {
+    --badge-accent: #ffe58f !important;
+    background:
+      radial-gradient(circle at 50% 8%, rgba(255, 229, 143, 0.18), transparent 44%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(8, 12, 22, 0.34)),
+      linear-gradient(135deg, rgba(255, 229, 143, 0.14), rgba(184, 92, 255, 0.08)) !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 229, 143, 0.38),
+      inset 0 0 18px rgba(255, 229, 143, 0.10),
+      0 0 12px rgba(255, 229, 143, 0.12) !important;
+  }
+
+  body.report-html2canvas-capture[data-page="report"] .ref-report-page .badge-row span::before {
+    background: linear-gradient(90deg, transparent, rgba(255, 245, 190, 0.82), transparent) !important;
+  }
+
+  body.report-html2canvas-capture[data-page="report"] .ref-report-page .badge-row span::after {
+    background: rgba(255, 229, 143, 0.82) !important;
+    box-shadow: 0 0 9px rgba(255, 224, 138, 0.36) !important;
+  }
+
+  body.report-html2canvas-capture[data-page="report"] .ref-report-page .badge-row i {
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.92), transparent 34%),
+      radial-gradient(circle at 50% 24%, rgba(255, 255, 255, 0.80), transparent 28%),
+      linear-gradient(180deg, rgba(255, 244, 201, 0.94), rgba(214, 155, 67, 0.92)) !important;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.42),
+      inset 0 -6px 10px rgba(10, 6, 18, 0.24),
+      0 0 12px rgba(255, 224, 138, 0.24) !important;
+  }
+
+  body.report-html2canvas-capture[data-page="report"] .ref-report-page .badge-row strong,
+  body.report-html2canvas-capture[data-page="report"] .ref-report-page .badge-row em {
+    text-shadow: 0 0 8px rgba(255, 224, 138, 0.22) !important;
+  }
+`;
 
 function currentStageScaleForCapture(stage, design) {
   const cssScale = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--app-stage-scale"));
@@ -570,214 +661,94 @@ function reportCaptureNavCrop(stage, design) {
 
 function reportCaptureLayout(stage) {
   const design = stageDesignForPage("report");
+  const navCrop = stage ? reportCaptureNavCrop(stage, design) : REPORT_CAPTURE_NAV_FALLBACK_CROP;
+  const crop = stage ? reportCaptureContentCrop(stage, design, navCrop) : null;
+  const cropX = crop?.x ?? 0;
+  const cropY = crop?.y ?? navCrop;
+  const outputWidth = crop?.width ?? design.width;
+  const outputHeight = crop?.height ?? (design.height - navCrop);
+
   return {
     width: design.width,
+    stageWidth: design.width,
     stageHeight: design.height,
-    cropTop: stage ? reportCaptureNavCrop(stage, design) : REPORT_CAPTURE_NAV_FALLBACK_CROP
+    cropTop: cropY,
+    cropX,
+    cropY,
+    outputWidth,
+    outputHeight
   };
 }
 
-async function blobToDataUrl(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
+function reportCaptureContentCrop(stage, design, navCrop) {
+  const stageRect = stage?.getBoundingClientRect();
+  if (!stageRect?.width || !stageRect?.height) return null;
 
-async function resourceToDataUrl(url) {
-  const absoluteUrl = new URL(url, window.location.href).href;
-  if (captureAssetCache.has(absoluteUrl)) return captureAssetCache.get(absoluteUrl);
-  const response = await fetch(absoluteUrl);
-  if (!response.ok) throw new Error(`Unable to load capture asset: ${absoluteUrl}`);
-  const dataUrl = await blobToDataUrl(await response.blob());
-  captureAssetCache.set(absoluteUrl, dataUrl);
-  return dataUrl;
-}
+  const scale = currentStageScaleForCapture(stage, design);
+  const bounds = REPORT_CAPTURE_CARD_SELECTORS
+    .flatMap((selector) => [...stage.querySelectorAll(selector)])
+    .map((node) => node.getBoundingClientRect())
+    .filter((rect) => rect.width > 0 && rect.height > 0)
+    .reduce((next, rect) => ({
+      left: Math.min(next.left, (rect.left - stageRect.left) / scale),
+      top: Math.min(next.top, (rect.top - stageRect.top) / scale),
+      right: Math.max(next.right, (rect.right - stageRect.left) / scale),
+      bottom: Math.max(next.bottom, (rect.bottom - stageRect.top) / scale)
+    }), { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity });
 
-function absolutizeCssUrls(cssText) {
-  return cssText.replace(/url\((['"]?)(?!data:|https?:|blob:|#)([^'")]+)\1\)/g, (_match, _quote, url) => {
-    try {
-      return `url("${new URL(url, window.location.href).href}")`;
-    } catch {
-      return `url("${url}")`;
-    }
-  });
-}
+  if (!Number.isFinite(bounds.left) || !Number.isFinite(bounds.top)) return null;
 
-function getDocumentCssText() {
-  return [...document.styleSheets].map((sheet) => {
-    try {
-      return [...sheet.cssRules].map((rule) => rule.cssText).join("\n");
-    } catch {
-      return "";
-    }
-  }).join("\n");
-}
+  const pad = REPORT_CAPTURE_CARD_PADDING;
+  const x = Math.max(0, Math.floor(bounds.left - pad));
+  const y = Math.max(navCrop, Math.floor(bounds.top - pad));
+  const right = Math.min(design.width, Math.ceil(bounds.right + pad));
+  const bottom = Math.min(design.height, Math.ceil(bounds.bottom + pad));
 
-function cdataForSvg(value) {
-  return String(value).replaceAll("]]>", "]]]]><![CDATA[>");
-}
-
-function attrForSvg(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("\"", "&quot;")
-    .replaceAll("<", "&lt;");
-}
-
-function xhtmlForForeignObject(element) {
-  return element.outerHTML.replace(/<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)(\s[^<>]*?)?>/gi, (match, tag, attrs = "") => {
-    if (/\/\s*>$/.test(match)) return match;
-    return `<${tag}${attrs} />`;
-  });
-}
-
-async function inlineCaptureCssAssets(cssText) {
-  let nextCssText = absolutizeCssUrls(cssText);
-  const urls = [...nextCssText.matchAll(/url\(["']?((?:https?:\/\/[^"')]+)?\/assets\/[^"')]+)["']?\)/g)]
-    .map((match) => {
-      try {
-        return new URL(match[1], window.location.href);
-      } catch {
-        return null;
-      }
-    })
-    .filter((url) =>
-      url &&
-      url.origin === window.location.origin
-    )
-    .map((url) => url.href);
-
-  for (const url of new Set(urls)) {
-    try {
-      const dataUrl = await resourceToDataUrl(url);
-      nextCssText = nextCssText.split(url).join(dataUrl);
-    } catch {
-      // A missing decorative asset should not block the share screenshot.
-    }
-  }
-
-  return nextCssText;
-}
-
-async function inlineCloneAssets(root) {
-  root.querySelectorAll("img[src]").forEach((image) => {
-    const source = image.getAttribute("src");
-    if (!source) return;
-    try {
-      const url = new URL(source, window.location.href);
-      if (url.origin !== window.location.origin) {
-        image.removeAttribute("src");
-        image.hidden = true;
-        const fallback = image.parentElement?.querySelector("b");
-        if (fallback) fallback.hidden = false;
-        return;
-      }
-      image.dataset.captureSource = url.href;
-    } catch {
-      // Keep the existing source if URL parsing fails.
-    }
-  });
-
-  for (const image of root.querySelectorAll("img[data-capture-source]")) {
-    image.setAttribute("src", await resourceToDataUrl(image.dataset.captureSource));
-    image.removeAttribute("data-capture-source");
-  }
-}
-
-async function svgMarkupForReportCapture(stage, captureLayout) {
-  const clone = stage.cloneNode(true);
-  clone.querySelector(".topbar")?.remove();
-  await inlineCloneAssets(clone);
-  const captureShellDataUrl = await resourceToDataUrl("./assets/psyche-question-blank-shell-v3-framed.png?v=20260710-share-capture-v126");
-  clone.style.width = `${captureLayout.width}px`;
-  clone.style.height = `${captureLayout.stageHeight}px`;
-  clone.style.minHeight = "0";
-  clone.style.maxWidth = "none";
-  clone.style.aspectRatio = "auto";
-  clone.style.padding = "0";
-  clone.style.margin = "0";
-  clone.style.transform = "none";
-
-  const cssText = await inlineCaptureCssAssets(getDocumentCssText());
-  const width = captureLayout.width;
-  const stageHeight = captureLayout.stageHeight;
-  const height = Math.max(1, stageHeight - captureLayout.cropTop);
-  const captureCss = `
-    body.report-capture-desktop[data-page="report"] .homepage-stage {
-      width: ${width}px !important;
-      height: ${stageHeight}px !important;
-      min-height: 0 !important;
-      max-width: none !important;
-      aspect-ratio: auto !important;
-      padding: 0 !important;
-      margin: 0 !important;
-      transform: none !important;
-      background: url("${captureShellDataUrl}") center top / 100% 100% no-repeat #020407 !important;
-    }
-    body.report-capture-desktop[data-page="report"] .homepage-stage::before {
-      content: none !important;
-      display: none !important;
-    }
-    body.report-capture-desktop[data-page="report"] .reference-page,
-    body.report-capture-desktop[data-page="report"] .ref-report-page {
-      position: absolute !important;
-      inset: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
-      min-height: 0 !important;
-      padding: 0 !important;
-      transform: none !important;
-      display: block !important;
-    }
-    body.report-capture-desktop[data-page="report"] .report-share-capture {
-      position: absolute !important;
-      inset: 0 !important;
-    }
-    body.report-capture-desktop[data-page="report"] .ref-report-page .report-dossier p {
-      font-size: clamp(10px, 0.78vw, 13px) !important;
-    }
-  `;
   return {
-    width,
-    height,
-    markup: `
-      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 ${captureLayout.cropTop} ${width} ${height}">
-        <foreignObject x="0" y="0" width="${width}" height="${stageHeight}">
-          <html xmlns="http://www.w3.org/1999/xhtml">
-            <head>
-              <style><![CDATA[
-                html, body { margin: 0; width: ${width}px; height: ${stageHeight}px; overflow: hidden; background: #020407; }
-                ${cdataForSvg(cssText)}
-                ${cdataForSvg(captureCss)}
-              ]]></style>
-            </head>
-            <body data-page="${attrForSvg(document.body.dataset.page)}" class="${attrForSvg(`${document.body.className} report-capture-desktop`)}">
-              ${xhtmlForForeignObject(clone)}
-            </body>
-          </html>
-        </foreignObject>
-      </svg>`
+    x,
+    y,
+    width: Math.max(1, right - x),
+    height: Math.max(1, bottom - y)
   };
 }
 
-async function imageFromObjectUrl(url) {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = reject;
-    image.src = url;
-  });
+function applyReportCaptureSanitizer() {
+  const style = document.createElement("style");
+  style.dataset.reportCaptureSanitizer = "true";
+  style.textContent = REPORT_CAPTURE_SANITIZE_CSS;
+  document.head.append(style);
+  document.body.classList.add("report-html2canvas-capture");
+
+  return () => {
+    document.body.classList.remove("report-html2canvas-capture");
+    style.remove();
+  };
 }
 
-function loadCanvasImage(src) {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = reject;
-    image.src = new URL(src, window.location.href).href;
+function hasUnsupportedCaptureColor(value) {
+  return typeof value === "string" && /(?:^|[^\w-])color(?:-mix)?\(/i.test(value);
+}
+
+function stripUnsupportedCaptureColors(clonedDocument) {
+  const view = clonedDocument?.defaultView;
+  if (!view) return;
+
+  clonedDocument.querySelectorAll(".homepage-stage *").forEach((node) => {
+    if (!(node instanceof view.HTMLElement) && !(node instanceof view.SVGElement)) return;
+    const computed = view.getComputedStyle(node);
+    if (hasUnsupportedCaptureColor(computed.backgroundImage)) {
+      node.style.setProperty("background-image", "none", "important");
+      node.style.setProperty("background-color", "rgba(4, 14, 22, 0.68)", "important");
+    }
+    if (hasUnsupportedCaptureColor(computed.boxShadow)) node.style.setProperty("box-shadow", "none", "important");
+    if (hasUnsupportedCaptureColor(computed.textShadow)) node.style.setProperty("text-shadow", "none", "important");
+    if (hasUnsupportedCaptureColor(computed.filter)) node.style.setProperty("filter", "none", "important");
+    if (hasUnsupportedCaptureColor(computed.color)) node.style.setProperty("color", "rgba(230, 250, 252, 0.92)", "important");
+    if (hasUnsupportedCaptureColor(computed.borderTopColor) || hasUnsupportedCaptureColor(computed.borderRightColor) || hasUnsupportedCaptureColor(computed.borderBottomColor) || hasUnsupportedCaptureColor(computed.borderLeftColor)) {
+      node.style.setProperty("border-color", "rgba(96, 234, 246, 0.28)", "important");
+    }
+    if (hasUnsupportedCaptureColor(computed.fill)) node.style.setProperty("fill", "rgba(90, 240, 248, 0.20)", "important");
+    if (hasUnsupportedCaptureColor(computed.stroke)) node.style.setProperty("stroke", "rgba(98, 236, 246, 0.52)", "important");
   });
 }
 
@@ -790,303 +761,56 @@ function canvasToPngBlob(canvas) {
   });
 }
 
-function reportText(page, selector, fallback = "") {
-  return page.querySelector(selector)?.textContent?.trim() || fallback;
-}
-
-function drawRoundedRect(ctx, x, y, width, height, radius, fill, stroke) {
-  const r = Math.min(radius, width / 2, height / 2);
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + width - r, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
-  ctx.lineTo(x + width, y + height - r);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
-  ctx.lineTo(x + r, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-  if (fill) {
-    ctx.fillStyle = fill;
-    ctx.fill();
-  }
-  if (stroke) {
-    ctx.strokeStyle = stroke;
-    ctx.stroke();
-  }
-}
-
-function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 3) {
-  const chars = [...String(text || "")];
-  let line = "";
-  let lineCount = 0;
-  chars.forEach((char, index) => {
-    const test = line + char;
-    const isLast = index === chars.length - 1;
-    if (ctx.measureText(test).width > maxWidth && line) {
-      ctx.fillText(line, x, y + lineCount * lineHeight);
-      line = char;
-      lineCount += 1;
-      if (lineCount >= maxLines) line = "";
-    } else {
-      line = test;
-    }
-    if (isLast && line && lineCount < maxLines) ctx.fillText(line, x, y + lineCount * lineHeight);
-  });
-}
-
-function drawFittedText(ctx, text, x, y, maxWidth) {
-  const value = String(text || "");
-  if (ctx.measureText(value).width <= maxWidth) {
-    ctx.fillText(value, x, y);
-    return;
-  }
-  let next = value;
-  while (next.length > 1 && ctx.measureText(`${next}...`).width > maxWidth) next = next.slice(0, -1);
-  ctx.fillText(`${next}...`, x, y);
-}
-
-function drawMetricBar(ctx, label, value, x, y, width) {
-  const score = clampReportScore(value);
-  ctx.fillStyle = "rgba(170, 230, 238, 0.78)";
-  ctx.font = "700 14px Arial, 'Microsoft YaHei', sans-serif";
-  ctx.fillText(label, x, y);
-  ctx.fillStyle = "rgba(255, 231, 156, 0.96)";
-  ctx.font = "900 18px Arial, 'Microsoft YaHei', sans-serif";
-  ctx.fillText(String(score), x + width - 34, y);
-  ctx.fillStyle = "rgba(62, 185, 204, 0.18)";
-  drawRoundedRect(ctx, x, y + 10, width, 7, 4, "rgba(62, 185, 204, 0.18)");
-  const gradient = ctx.createLinearGradient(x, y, x + width, y);
-  gradient.addColorStop(0, "rgba(77, 245, 255, 0.94)");
-  gradient.addColorStop(1, "rgba(255, 224, 138, 0.88)");
-  drawRoundedRect(ctx, x, y + 10, Math.max(8, width * score / 100), 7, 4, gradient);
-}
-
-function collectReportShareData(page) {
-  const dossierRows = [...page.querySelectorAll(".report-dossier p")];
-  const metricRows = [...page.querySelectorAll(".metric-grid p")];
-  const badges = [...page.querySelectorAll(".badge-row span")].map((item) => ({
-    icon: item.querySelector("i")?.textContent?.trim() || "",
-    name: item.querySelector("strong")?.textContent?.trim() || "",
-    code: item.querySelector("em")?.textContent?.trim() || ""
-  }));
-  return {
-    handle: reportText(page, ".patient-strip strong", activeReportIdentity.handle),
-    wallet: reportText(page, ".patient-strip small", `short wallet: ${activeReportIdentity.wallet}`),
-    personality: reportText(page, ".report-dossier > div:first-child b", activeReportNarrative?.personality || ""),
-    rarity: reportText(page, ".rarity-current", reportRarityFromScore(activeReportScores.degen).label),
-    reportId: dossierRows[0]?.querySelector("strong")?.textContent?.trim() || "DN-7C9-TEST-001",
-    degen: activeReportScores.degen,
-    diamond: activeReportScores.diamond,
-    cause: dossierRows[3]?.querySelector("strong")?.textContent?.trim() || activeReportNarrative?.cause || "",
-    sentence: dossierRows[4]?.querySelector("strong")?.textContent?.trim() || activeReportNarrative?.sentence || "",
-    dimensions: activeReportDimensions,
-    metricLabels: metricRows.map((row) => row.querySelector("span")?.textContent?.trim()).filter(Boolean),
-    tags: [...page.querySelectorAll(".share-card-tags small")].map((item) => item.textContent.trim()).filter(Boolean),
-    digest: [...page.querySelectorAll(".share-card-digest p")].map((item) => item.textContent.trim()).filter(Boolean),
-    wordCloud: reportText(page, ".word-cloud", activeReportNarrative?.wordCloud || ""),
-    assetFacts: [...page.querySelectorAll(".asset-widget .widget-facts div")].map((row) => [
-      row.querySelector("dt")?.textContent?.trim() || "",
-      row.querySelector("dd")?.textContent?.trim() || ""
-    ]),
-    lossLines: [...page.querySelectorAll(".black-widget .widget-lines li")].map((item) => item.textContent.trim()),
-    fateStrip: [...page.querySelectorAll(".luck-widget .fate-strip span")].map((item) => item.textContent.trim()),
-    radar: [...page.querySelectorAll(".radar-widget li")].map((item) => item.textContent.trim()),
-    badges
-  };
-}
-
-async function createReportCanvasScreenshotBlob(page, captureLayout = reportCaptureLayout(page?.closest(".homepage-stage"))) {
-  const width = captureLayout.width;
-  const stageHeight = captureLayout.stageHeight;
-  const cropTop = captureLayout.cropTop;
-  const outputHeight = stageHeight - cropTop;
-  const scale = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
-  const fullCanvas = document.createElement("canvas");
-  fullCanvas.width = Math.round(width * scale);
-  fullCanvas.height = Math.round(stageHeight * scale);
-  const ctx = fullCanvas.getContext("2d");
-  ctx.scale(scale, scale);
-
-  const data = collectReportShareData(page);
-  const background = await loadCanvasImage("./assets/psyche-question-blank-shell-v3-framed.png?v=20260710-share-capture-v126");
-  ctx.fillStyle = "#020407";
-  ctx.fillRect(0, 0, width, stageHeight);
-  ctx.drawImage(background, 0, 0, width, stageHeight);
-
-  const y0 = cropTop;
-  ctx.textBaseline = "top";
-  ctx.shadowColor = "rgba(76, 246, 255, 0.26)";
-  ctx.shadowBlur = 10;
-
-  drawRoundedRect(ctx, 58, y0 + 24, 404, 310, 16, "rgba(2, 9, 14, 0.28)", "rgba(91, 246, 255, 0.18)");
-  ctx.fillStyle = "rgba(255, 238, 184, 0.98)";
-  ctx.font = "950 30px Arial, 'Microsoft YaHei', sans-serif";
-  ctx.fillText("链上精神科病例", 88, y0 + 46);
-  drawRoundedRect(ctx, 90, y0 + 92, 44, 44, 22, "rgba(8, 20, 27, 0.78)", "rgba(91, 246, 255, 0.62)");
-  ctx.fillStyle = "rgba(230, 252, 255, 0.96)";
-  ctx.font = "900 18px Arial, 'Microsoft YaHei', sans-serif";
-  ctx.fillText("X", 106, y0 + 104);
-  ctx.font = "900 18px Arial, 'Microsoft YaHei', sans-serif";
-  ctx.fillText(data.handle, 150, y0 + 92);
-  ctx.fillStyle = "rgba(157, 226, 236, 0.82)";
-  ctx.font = "700 13px Arial, 'Microsoft YaHei', sans-serif";
-  ctx.fillText(data.wallet, 150, y0 + 118);
-  ctx.fillStyle = "rgba(109, 255, 238, 0.94)";
-  ctx.font = "800 13px Arial, 'Microsoft YaHei', sans-serif";
-  ctx.fillText("钱包人格", 88, y0 + 156);
-  ctx.fillStyle = "rgba(255, 232, 160, 0.98)";
-  ctx.font = "900 18px Arial, 'Microsoft YaHei', sans-serif";
-  drawFittedText(ctx, data.personality, 88, y0 + 178, 330);
-  ctx.fillStyle = "rgba(157, 226, 236, 0.86)";
-  ctx.font = "800 13px Arial, 'Microsoft YaHei', sans-serif";
-  ctx.fillText(`稀有度 ${data.rarity}`, 88, y0 + 230);
-  ctx.fillText(`报告编号 ${data.reportId}`, 88, y0 + 254);
-  ctx.fillStyle = "rgba(231, 252, 255, 0.94)";
-  ctx.font = "800 14px Arial, 'Microsoft YaHei', sans-serif";
-  drawWrappedText(ctx, data.sentence, 88, y0 + 282, 340, 20, 2);
-
-  drawRoundedRect(ctx, 498, y0 + 22, 360, 318, 16, "rgba(2, 10, 15, 0.22)", "rgba(91, 246, 255, 0.16)");
-  ctx.fillStyle = "rgba(238, 254, 255, 0.98)";
-  ctx.font = "900 20px Arial, 'Microsoft YaHei', sans-serif";
-  ctx.fillText("核心会诊指数", 526, y0 + 46);
-  ctx.save();
-  ctx.translate(680, y0 + 146);
-  const orbitGradient = ctx.createRadialGradient(0, 0, 24, 0, 0, 88);
-  orbitGradient.addColorStop(0, "rgba(80, 248, 255, 0.22)");
-  orbitGradient.addColorStop(1, "rgba(184, 92, 255, 0.04)");
-  ctx.fillStyle = orbitGradient;
-  ctx.beginPath();
-  ctx.arc(0, 0, 92, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = "rgba(91, 246, 255, 0.46)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.arc(0, 0, 78, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * data.degen / 100));
-  ctx.stroke();
-  ctx.fillStyle = "rgba(255, 234, 166, 0.98)";
-  ctx.font = "950 54px Arial, 'Microsoft YaHei', sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText(String(data.degen), 0, -34);
-  ctx.fillStyle = "rgba(162, 232, 240, 0.78)";
-  ctx.font = "800 14px Arial, 'Microsoft YaHei', sans-serif";
-  ctx.fillText("综合评分", 0, 28);
-  ctx.restore();
-  ctx.textAlign = "start";
-  const labels = data.metricLabels.length ? data.metricLabels : ["Degen 指数", "钻石手指数", "纸手指数", "深夜内耗", "抽象浓度", "自愈速率"];
-  labels.slice(0, 6).forEach((label, index) => {
-    const col = index % 2;
-    const row = Math.floor(index / 2);
-    drawMetricBar(ctx, label, data.dimensions[index] ?? 50, 526 + col * 156, y0 + 242 + row * 42, 128);
-  });
-
-  drawRoundedRect(ctx, 920, y0 + 24, 386, 310, 16, "rgba(2, 10, 15, 0.30)", "rgba(255, 224, 138, 0.18)");
-  ctx.fillStyle = "rgba(255, 232, 160, 0.98)";
-  ctx.font = "950 24px Arial, 'Microsoft YaHei', sans-serif";
-  ctx.fillText(data.rarity, 952, y0 + 48);
-  ctx.fillStyle = "rgba(238, 252, 255, 0.96)";
-  ctx.font = "900 18px Arial, 'Microsoft YaHei', sans-serif";
-  ctx.fillText(data.handle, 952, y0 + 84);
-  ctx.fillStyle = "rgba(109, 255, 238, 0.92)";
-  ctx.font = "800 15px Arial, 'Microsoft YaHei', sans-serif";
-  drawFittedText(ctx, data.personality, 952, y0 + 116, 300);
-  ctx.fillStyle = "rgba(198, 244, 248, 0.86)";
-  ctx.font = "700 14px Arial, 'Microsoft YaHei', sans-serif";
-  data.digest.slice(0, 2).forEach((line, index) => drawWrappedText(ctx, line, 952, y0 + 170 + index * 42, 310, 18, 2));
-  data.tags.slice(0, 3).forEach((tag, index) => {
-    drawRoundedRect(ctx, 952 + index * 96, y0 + 260, 84, 26, 13, "rgba(91, 246, 255, 0.10)", "rgba(91, 246, 255, 0.30)");
-    ctx.fillStyle = "rgba(214, 252, 255, 0.90)";
-    ctx.font = "800 12px Arial, 'Microsoft YaHei', sans-serif";
-    ctx.fillText(tag.slice(0, 6), 964 + index * 96, y0 + 267);
-  });
-
-  const widgetY = y0 + 372;
-  const widgetGap = 16;
-  const widgetLeft = Math.max(54, width * 0.045);
-  const widgetWeights = [1.24, 1.0, 1.1, 0.92, 1.0];
-  const widgetUnit = (width - widgetLeft * 2 - widgetGap * (widgetWeights.length - 1)) / widgetWeights.reduce((sum, item) => sum + item, 0);
-  let widgetCursor = widgetLeft;
-  const widgetLayouts = widgetWeights.map((weight) => {
-    const layout = { x: widgetCursor, width: widgetUnit * weight };
-    widgetCursor += layout.width + widgetGap;
-    return layout;
-  });
-  const widgetTitles = ["链上资产性格", "亏损黑匣子", "90 天钱包命运", "Alpha 雷达", "核心徽章"];
-  const widgetBodies = [
-    [data.wordCloud, ...(data.assetFacts || []).map((row) => `${row[0]} ${row[1]}`)],
-    data.lossLines,
-    data.fateStrip,
-    data.radar,
-    data.badges.map((badge) => `${badge.name} ${badge.code}`)
-  ];
-  widgetTitles.forEach((title, index) => {
-    const { x, width: widgetW } = widgetLayouts[index];
-    drawRoundedRect(ctx, x, widgetY, widgetW, 150, 14, "rgba(2, 10, 15, 0.24)", "rgba(91, 246, 255, 0.14)");
-    ctx.fillStyle = "rgba(238, 254, 255, 0.96)";
-    ctx.font = "900 16px Arial, 'Microsoft YaHei', sans-serif";
-    ctx.fillText(title, x + 18, widgetY + 18);
-    ctx.fillStyle = "rgba(164, 232, 239, 0.84)";
-    ctx.font = "700 11px Arial, 'Microsoft YaHei', sans-serif";
-    if (index === 0) {
-      drawWrappedText(ctx, data.wordCloud, x + 18, widgetY + 48, widgetW - 36, 15, 2);
-      ctx.fillStyle = "rgba(255, 232, 164, 0.92)";
-      ctx.font = "800 10.5px Arial, 'Microsoft YaHei', sans-serif";
-      (data.assetFacts || []).slice(0, 2).forEach((row, rowIndex) => {
-        const y = widgetY + 84 + rowIndex * 26;
-        drawRoundedRect(ctx, x + 18, y, widgetW - 36, 20, 8, "rgba(80, 248, 255, 0.06)", "rgba(80, 248, 255, 0.12)");
-        drawFittedText(ctx, `${row[0]}  ${row[1]}`, x + 28, y + 5, widgetW - 56);
-      });
-      return;
-    }
-    if (index === 2) {
-      widgetBodies[index].slice(0, 3).forEach((line, lineIndex) => {
-        const y = widgetY + 47 + lineIndex * 29;
-        drawRoundedRect(ctx, x + 18, y, widgetW - 36, 22, 9, "rgba(80, 248, 255, 0.07)", "rgba(80, 248, 255, 0.16)");
-        drawWrappedText(ctx, line, x + 28, y + 5, widgetW - 56, 13, 1);
-      });
-      return;
-    }
-    widgetBodies[index].slice(0, 3).forEach((line, lineIndex) => {
-      drawFittedText(ctx, line, x + 18, widgetY + 52 + lineIndex * 25, widgetW - 36);
-    });
-  });
-  ctx.fillStyle = "rgba(214, 245, 247, 0.78)";
-  ctx.font = "760 14px Arial, 'Microsoft YaHei', sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("钱包可以被吐槽，但你的人生不由一笔交易定义。照完钱包，也记得照顾好自己。", width / 2, y0 + 548);
-
-  const outputCanvas = document.createElement("canvas");
-  outputCanvas.width = Math.round(width * scale);
-  outputCanvas.height = Math.round(outputHeight * scale);
-  const outputContext = outputCanvas.getContext("2d");
-  outputContext.drawImage(fullCanvas, 0, Math.round(cropTop * scale), outputCanvas.width, outputCanvas.height, 0, 0, outputCanvas.width, outputCanvas.height);
-  return canvasToPngBlob(outputCanvas);
-}
-
 async function createDomReportScreenshotBlob(page, captureLayout = null) {
   const stage = page.closest(".homepage-stage");
   if (!stage) throw new Error("Report stage not found");
 
   const layout = captureLayout || reportCaptureLayout(stage);
-  const { width, height, markup } = await svgMarkupForReportCapture(stage, layout);
-  const svgBlob = new Blob([markup], { type: "image/svg+xml;charset=utf-8" });
-  const svgUrl = URL.createObjectURL(svgBlob);
+  if (typeof window.html2canvas !== "function") throw new Error("Report screenshot renderer is not loaded");
 
+  const restoreCaptureSanitizer = applyReportCaptureSanitizer();
+  let sourceCanvas;
   try {
-    const image = await imageFromObjectUrl(svgUrl);
-    const scale = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.round(width * scale);
-    canvas.height = Math.round(height * scale);
-    const context = canvas.getContext("2d");
-    context.fillStyle = "#020407";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    return await canvasToPngBlob(canvas);
+    sourceCanvas = await window.html2canvas(stage, {
+      allowTaint: false,
+      backgroundColor: "#020407",
+      imageTimeout: 15000,
+      ignoreElements: (element) => element.matches?.(".homepage-stage .topbar, .homepage-stage .reference-page:not(.ref-report-page)") || false,
+      logging: false,
+      onclone: (clonedDocument) => {
+        clonedDocument.body.classList.add("report-html2canvas-capture");
+        clonedDocument.querySelectorAll(".homepage-stage .reference-page:not(.ref-report-page)").forEach((node) => node.remove());
+        const style = clonedDocument.createElement("style");
+        style.textContent = REPORT_CAPTURE_SANITIZE_CSS;
+        clonedDocument.head.append(style);
+        stripUnsupportedCaptureColors(clonedDocument);
+      },
+      removeContainer: true,
+      scale: Math.min(2, Math.max(1, window.devicePixelRatio || 1)),
+      useCORS: true
+    });
   } finally {
-    URL.revokeObjectURL(svgUrl);
+    restoreCaptureSanitizer();
   }
+  const stageWidth = layout.stageWidth ?? layout.width;
+  const stageHeight = layout.stageHeight;
+  const sourceXScale = sourceCanvas.width / stageWidth;
+  const sourceYScale = sourceCanvas.height / stageHeight;
+  const cropX = Math.round((layout.cropX ?? 0) * sourceXScale);
+  const cropY = Math.round((layout.cropY ?? layout.cropTop ?? 0) * sourceYScale);
+  const cropWidth = Math.min(sourceCanvas.width - cropX, Math.round((layout.outputWidth ?? layout.width) * sourceXScale));
+  const cropHeight = Math.min(sourceCanvas.height - cropY, Math.round((layout.outputHeight ?? (stageHeight - (layout.cropTop ?? 0))) * sourceYScale));
+
+  if (cropWidth <= 0 || cropHeight <= 0) throw new Error("Report screenshot crop is empty");
+
+  const outputCanvas = document.createElement("canvas");
+  outputCanvas.width = cropWidth;
+  outputCanvas.height = cropHeight;
+  const context = outputCanvas.getContext("2d");
+  context.fillStyle = "#020407";
+  context.fillRect(0, 0, cropWidth, cropHeight);
+  context.drawImage(sourceCanvas, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+  return canvasToPngBlob(outputCanvas);
 }
 
 async function createReportScreenshotBlob(page) {
@@ -1094,12 +818,7 @@ async function createReportScreenshotBlob(page) {
   if (!stage) throw new Error("Report stage not found");
 
   const captureLayout = reportCaptureLayout(stage);
-  try {
-    return await createDomReportScreenshotBlob(page, captureLayout);
-  } catch (error) {
-    console.info("DegenDNA DOM screenshot fallback", error);
-    return createReportCanvasScreenshotBlob(page, captureLayout);
-  }
+  return createDomReportScreenshotBlob(page, captureLayout);
 }
 
 function downloadBlob(blob, fileName) {
@@ -4127,13 +3846,7 @@ document.querySelectorAll(".share-button").forEach((button) => {
       setStatus(reportShareStatus(clipboardResult));
     } catch (error) {
       console.warn("DegenDNA share screenshot capture failed", error);
-      try {
-        await navigator.clipboard?.writeText(shareText);
-      } catch {
-        // Clipboard access can be unavailable in local previews.
-      }
-      openXComposer(shareText);
-      setStatus(currentLang === "en" ? "Opening X compose. Screenshot capture was blocked by the browser." : "正在打开 X 发推页面；本次截图被浏览器拦截，已保留文案。", "error");
+      setStatus(currentLang === "en" ? "Screenshot failed. Please refresh the report and try again." : "截图失败，请刷新报告后重试。", "error");
     } finally {
       button.disabled = false;
       button.classList.remove("is-busy");
