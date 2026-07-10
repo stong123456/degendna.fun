@@ -20969,9 +20969,9 @@ body[data-page="rarity"] .ref-rarity-page .rank-row small {
   z-index: 3 !important;
 }
 
-/* Rarity Rank v123: use the regenerated full background; remove the patched row-cover layer. */
+/* Rarity Rank v124: keep the regenerated leaderboard body while restoring the shared top nav shell. */
 body[data-page="rarity"] .homepage-stage {
-  background: url("./assets/rarity-rank-cyber-shell-v123.png?v=20260710-rarity-bg-v123") center top / 100% 100% no-repeat #020407 !important;
+  background: url("./assets/rarity-rank-cyber-shell-v124.png?v=20260710-rarity-nav-v124") center top / 100% 100% no-repeat #020407 !important;
 }
 
 body[data-page="rarity"] .ref-rarity-page {
