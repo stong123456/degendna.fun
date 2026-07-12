@@ -14,6 +14,9 @@ const routeLinks = [...document.querySelectorAll("[data-route]")];
 const EVM_ADDRESS = /^0x[a-fA-F0-9]{40}$/;
 const LANG_KEY = "degendna-home-language";
 const LOCAL_LEADERBOARD_KEY = "degendna:wallet-leaderboard:v1";
+const COMMUNITY_REPORT_BASE = 10231;
+const COMMUNITY_VISIT_KEY = "degendna:community-visits:v1";
+const COMMUNITY_SESSION_KEY = "degendna:community-visit-session:v1";
 const PAGE_NAMES = ["home", "report", "report-detail", "wallet", "rarity", "psyche", "psyche-test", "about"];
 const STAGE_DESIGNS = {
   home: { width: 1586, height: 992 },
@@ -260,6 +263,20 @@ const I18N = {
 let currentLang = readStoredLang() === "en" ? "en" : "zh";
 let currentPage = pageFromHash();
 let stageScaleFrame = 0;
+let communityVisitCount = recordCommunityVisit();
+
+function recordCommunityVisit() {
+  try {
+    const visits = Number.parseInt(window.localStorage?.getItem(COMMUNITY_VISIT_KEY) || "0", 10) || 0;
+    if (window.sessionStorage?.getItem(COMMUNITY_SESSION_KEY) === "1") return visits;
+    const nextVisits = visits + 1;
+    window.localStorage?.setItem(COMMUNITY_VISIT_KEY, String(nextVisits));
+    window.sessionStorage?.setItem(COMMUNITY_SESSION_KEY, "1");
+    return nextVisits;
+  } catch {
+    return 0;
+  }
+}
 
 function readStoredLang() {
   try {
@@ -1576,6 +1593,13 @@ function setPlaceholder(element, value) {
 }
 
 function hydrateFinalPages() {
+  const communityCount = document.querySelector("[data-community-report-count]");
+  if (communityCount) {
+    const totalReports = COMMUNITY_REPORT_BASE + communityVisitCount;
+    const formatted = new Intl.NumberFormat(currentLang === "en" ? "en-US" : "zh-CN").format(totalReports);
+    setText(communityCount, currentLang === "en" ? `${formatted}+ Reports` : `${formatted}+ 份报告`);
+  }
+
   const wallet = document.querySelector(".ref-wallet-page");
   if (wallet) {
     setText(wallet.querySelector(".duel-wallet-a h2"), finalText("wallet", "aTitle"));
