@@ -21799,3 +21799,67 @@ body[data-page="report-detail"] .detail-score-orbit span {
   color: rgba(191, 232, 237, 0.78) !important;
   line-height: 1 !important;
 }
+
+/* Report Result v147: swap the action slots without losing the primary CTA hierarchy. */
+body[data-page="report"] .ref-report-page .share-card-meta .gold-action {
+  position: static !important;
+  inset: auto !important;
+  display: flex !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 27px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 5px 8px !important;
+  overflow: hidden !important;
+  color: rgba(255, 231, 159, 0.96) !important;
+  border: 1px solid rgba(255, 224, 138, 0.28) !important;
+  background: rgba(48, 32, 12, 0.42) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 224, 138, 0.08), 0 0 12px rgba(255, 216, 102, 0.10) !important;
+  font-size: clamp(7px, 0.56vw, 9px) !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+
+body[data-page="report"] .ref-report-page .share-card-meta .gold-action:hover,
+body[data-page="report"] .ref-report-page .share-card-meta .gold-action:focus-visible,
+body[data-page="report"] .ref-report-page .share-card-meta .gold-action.claimed {
+  color: #071512 !important;
+  background: #ffe8a0 !important;
+  box-shadow: 0 0 0 1px rgba(255, 249, 211, 0.72), 0 0 16px rgba(255, 222, 120, 0.26) !important;
+  outline: none !important;
+}
+
+body[data-page="report"] .ref-report-page .report-share-panel > .detail-report-link {
+  position: absolute !important;
+  inset: auto !important;
+  left: 13% !important;
+  top: 90.5% !important;
+  display: flex !important;
+  width: 74% !important;
+  height: 6.6% !important;
+  min-height: 0 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 10px !important;
+  color: #061419 !important;
+  border: 1px solid rgba(255, 244, 185, 0.96) !important;
+  background: linear-gradient(135deg, #ffe892 0%, #a9f9f4 100%) !important;
+  box-shadow: 0 0 0 1px rgba(77, 238, 244, 0.28), 0 0 22px rgba(88, 237, 244, 0.38) !important;
+  font-size: clamp(9px, 0.72vw, 12px) !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  text-shadow: none !important;
+  white-space: nowrap !important;
+}
+
+body[data-page="report"] .ref-report-page .report-share-panel > .detail-report-link:hover,
+body[data-page="report"] .ref-report-page .report-share-panel > .detail-report-link:focus-visible {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #14dce7 0%, #b76dff 100%) !important;
+  box-shadow: 0 0 0 1px rgba(244, 252, 255, 0.72), 0 0 28px rgba(95, 230, 255, 0.56) !important;
+  outline: none !important;
+}
