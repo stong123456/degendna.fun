@@ -10,7 +10,7 @@
     />
     <link rel="icon" type="image/png" href="./assets/degendna-logo-symbol-glass-transparent-crop-v1.png?v=20260710-favicon-v116" />
     <link rel="apple-touch-icon" href="./assets/degendna-logo-symbol-glass-transparent-crop-v1.png?v=20260710-favicon-v116" />
-    <link rel="stylesheet" href="./styles.css?v=20260710-direct-report-capture-v131" />
+    <link rel="stylesheet" href="./styles.css?v=20260710-report-detail-v142" />
   </head>
   <body data-page="home">
     <main class="terminal-shell" aria-label="链上照妖镜应用">
@@ -172,7 +172,7 @@
           <article>
             <span data-i18n="cap.engine">数据分析引擎</span>
             <b>Onchain Psyche AI</b>
-            <small>v2.2.17</small>
+            <small>v2.2.25</small>
           </article>
           <article>
             <span data-i18n="cap.privacy">隐私保护</span>
@@ -335,7 +335,7 @@
         </section>
 
         <section class="app-page reference-page ref-report-page" data-page-screen="report" data-rarity-tier="legendary" aria-label="照钱包报告页">
-          <div class="report-share-capture" aria-label="可截屏分享的钱包链上报告">
+          <div class="report-share-capture" aria-label="钱包链上报告内容">
             <article class="report-main-card">
               <div class="report-ribbon">链上精神科病例</div>
               <div class="patient-strip">
@@ -412,7 +412,7 @@
                 <div class="share-card-meta">
                   <i><em>报告类型</em><b>链上精神科病例</b></i>
                   <i><em>稀有等级</em><b data-report-rarity-card-mini>Legendary</b></i>
-                  <i><em>分享状态</em><b>可截图转发</b></i>
+                <i><em>分享状态</em><button type="button" class="detail-report-link" data-report-detail>打开完整报告</button></i>
                 </div>
                 <div class="share-card-tags">
                   <small>FOMO</small>
@@ -488,6 +488,89 @@
             </div>
 
             <footer class="report-care-banner">钱包可以被吐槽，但你的人生不由一笔交易定义。照完钱包，也记得照顾好自己。</footer>
+          </div>
+        </section>
+
+        <section class="app-page report-detail-page" data-page-screen="report-detail" aria-label="钱包详细分析报告">
+          <div class="report-detail-shell">
+            <header class="report-detail-header">
+              <div class="report-detail-actions">
+                <a class="report-detail-back" href="#report" data-route="report">← 返回报告总览</a>
+                <button type="button" class="detail-copy-link" data-detail-copy-link>复制分享链接</button>
+              </div>
+              <span class="detail-kicker">DETAILED ONCHAIN CASE FILE / FULL ANALYSIS</span>
+              <h1>链上人格详细报告</h1>
+              <p>把一张结果卡展开成一份完整会诊档案：这不是诊断，也不是投资建议，而是帮助你看见交易行为模式的可读化复盘。</p>
+              <div class="detail-subject-bar">
+                <div class="detail-subject">
+                  <span class="detail-avatar" data-detail-avatar aria-hidden="true">X</span>
+                  <div><strong data-detail-handle>@handle</strong><small data-detail-wallet>short wallet: 00000039...</small></div>
+                </div>
+                <div class="detail-meta"><span>报告编号</span><strong data-detail-case>DN-7C9-TEST-001</strong></div>
+                <div class="detail-meta"><span>稀有等级</span><strong data-detail-rarity>Legendary</strong></div>
+                <div class="detail-meta"><span>综合评分</span><strong data-detail-score>86 / 100</strong></div>
+              </div>
+            </header>
+
+            <section class="detail-overview-grid">
+              <article class="detail-panel detail-score-panel">
+                <div class="detail-panel-head"><span>01 / CORE READOUT</span><h2>核心会诊结论</h2></div>
+                <div class="detail-score-orbit"><strong data-detail-score-large>86</strong><span>综合评分</span></div>
+                <div class="detail-verdict"><span>当前人格判词</span><strong data-detail-personality>高位接盘艺术家</strong><p data-detail-verdict>你的判断力并没有消失，只是在市场声音变大时，方向盘容易被情绪接管。</p></div>
+              </article>
+              <article class="detail-panel detail-summary-panel">
+                <div class="detail-panel-head"><span>02 / EXECUTIVE SUMMARY</span><h2>这份报告先告诉你三件事</h2></div>
+                <ol class="detail-summary-list">
+                  <li><b>主要驱动</b><span data-detail-driver>叙事热度与即时反馈会明显影响你的决策速度。</span></li>
+                  <li><b>主要风险</b><span data-detail-risk>进入很快，退出规则需要提前写清楚。</span></li>
+                  <li><b>主要优势</b><span data-detail-strength>你对链上变化足够敏感，具备发现机会的雷达。</span></li>
+                </ol>
+              </article>
+            </section>
+
+            <section class="detail-section">
+              <div class="detail-section-head"><span>03 / SIX-DIMENSION PROFILE</span><h2>六维交易人格画像</h2><p>六个分数不是好坏排名，而是六束不同方向的行为信号。高分代表该维度在你的链上痕迹里更显著。</p></div>
+              <div class="detail-dimension-grid" data-detail-dimensions></div>
+            </section>
+
+            <section class="detail-section detail-analysis-grid">
+              <article class="detail-panel detail-wide-panel">
+                <div class="detail-panel-head"><span>04 / PERSONALITY ANALYSIS</span><h2>交易人格：<b data-detail-personality-title>高位接盘艺术家</b></h2></div>
+                <p data-detail-personality-copy>你不是单纯追涨，也不是没有计划。你的核心特征是对市场叙事、反馈速度和机会窗口非常敏感，因此会在别人还在讨论时快速行动。优势是反应快，代价是容易把“看见机会”误读成“必须马上行动”。</p>
+                <div class="detail-evidence-list" data-detail-evidence></div>
+              </article>
+              <article class="detail-panel">
+                <div class="detail-panel-head"><span>05 / HOLDING BEHAVIOR</span><h2>持仓过程中</h2></div>
+                <p data-detail-holding-copy>你的持仓行为会随着行情叙事改变节奏。真正需要建立的不是更强的意志力，而是一套不依赖当下情绪的仓位和退出规则。</p>
+                <ul class="detail-bullet-list" data-detail-holding-list></ul>
+              </article>
+            </section>
+
+            <section class="detail-section detail-analysis-grid">
+              <article class="detail-panel">
+                <div class="detail-panel-head"><span>06 / LOSS BLACK BOX</span><h2>亏损触发链</h2></div>
+                <div class="detail-timeline" data-detail-loss></div>
+              </article>
+              <article class="detail-panel">
+                <div class="detail-panel-head"><span>07 / ALPHA RADAR</span><h2>机会感与噪音</h2></div>
+                <p data-detail-alpha-copy>你的雷达并不迟钝，但雷达收到信号后，还需要一层验证机制，避免把热度直接当成确定性。</p>
+                <div class="detail-chip-list" data-detail-alpha></div>
+              </article>
+              <article class="detail-panel">
+                <div class="detail-panel-head"><span>08 / 90-DAY OUTLOOK</span><h2>未来 90 天钱包命运</h2></div>
+                <div class="detail-fate-list" data-detail-fate></div>
+              </article>
+            </section>
+
+            <section class="detail-section detail-prescription">
+              <div class="detail-section-head"><span>09 / PRACTICAL PRESCRIPTION</span><h2>给这个钱包的四条处方</h2><p>它们不是命令，而是当情绪开始加速时，帮你把决定延迟几分钟的外部护栏。</p></div>
+              <div class="detail-prescription-grid" data-detail-prescription></div>
+            </section>
+
+            <section class="detail-section detail-method-grid">
+              <article class="detail-panel"><div class="detail-panel-head"><span>10 / METHOD</span><h2>这份报告如何得出</h2></div><p>系统将公开链上交易、资产变化、交互节奏和可见的叙事偏好，映射到六个行为维度，再结合钱包地址生成稳定但不等同于现实人格的文字判词。</p><p>同一个钱包在不同市场阶段可能呈现不同状态，因此报告适合当作复盘入口，而不是永久标签。</p></article>
+              <article class="detail-panel detail-disclaimer"><div class="detail-panel-head"><span>11 / SAFETY NOTE</span><h2>请把结论放回生活里</h2></div><p>本页面仅用于娱乐、自我观察和交易复盘，不构成医疗诊断、心理评估、投资建议或财务建议。钱包可以被吐槽，但你的人生不由一笔交易定义。</p><a href="#report" data-route="report">回到结果页</a></article>
+            </section>
           </div>
         </section>
 
@@ -766,7 +849,6 @@
       </section>
     </main>
 
-    <script src="./vendor/html2canvas.min.js?v=20260710-direct-report-capture-v131"></script>
-    <script src="./app.js?v=20260710-direct-report-capture-v131" type="module"></script>
+    <script src="./app.js?v=20260710-report-detail-v142" type="module"></script>
   </body>
 </html>

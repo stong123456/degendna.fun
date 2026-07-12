@@ -14,7 +14,7 @@ const routeLinks = [...document.querySelectorAll("[data-route]")];
 const EVM_ADDRESS = /^0x[a-fA-F0-9]{40}$/;
 const LANG_KEY = "degendna-home-language";
 const LOCAL_LEADERBOARD_KEY = "degendna:wallet-leaderboard:v1";
-const PAGE_NAMES = ["home", "report", "wallet", "rarity", "psyche", "psyche-test", "about"];
+const PAGE_NAMES = ["home", "report", "report-detail", "wallet", "rarity", "psyche", "psyche-test", "about"];
 const STAGE_DESIGNS = {
   home: { width: 1586, height: 992 },
   app: { width: 1586, height: 992 }
@@ -278,8 +278,33 @@ function writeStoredLang(value) {
 }
 
 function pageFromHash() {
-  const page = window.location.hash.replace("#", "");
+  const page = window.location.hash.replace(/^#/, "").split("?", 1)[0];
   return PAGE_NAMES.includes(page) ? page : "home";
+}
+
+function reportDetailRoute() {
+  const rawHash = window.location.hash.replace(/^#/, "");
+  const [page, queryString = ""] = rawHash.split("?");
+  if (page !== "report-detail") return null;
+
+  const query = new URLSearchParams(queryString);
+  const address = query.get("address")?.trim() || "";
+  return {
+    address: EVM_ADDRESS.test(address) ? address : "",
+    handle: query.get("handle")?.trim() || ""
+  };
+}
+
+function reportDetailUrl() {
+  const query = new URLSearchParams();
+  const address = activeReportIdentity.rawWallet?.trim();
+  const handle = normalizeHandle(activeReportIdentity.handle, "");
+
+  if (EVM_ADDRESS.test(address || "")) query.set("address", address);
+  if (handle && handle !== "@handle") query.set("handle", handle);
+
+  const hash = query.toString() ? `#report-detail?${query.toString()}` : "#report-detail";
+  return `${window.location.origin}${window.location.pathname}${hash}`;
 }
 
 function stageDesignForPage(page = document.body.dataset.page || currentPage) {
@@ -534,335 +559,20 @@ function setText(element, value) {
   if (element && value !== undefined) element.textContent = value;
 }
 
-const REPORT_CAPTURE_NAV_FALLBACK_CROP = 112;
-const REPORT_CAPTURE_NAV_GAP = 8;
-const REPORT_CAPTURE_CARD_PADDING = 22;
-const REPORT_CAPTURE_CARD_SELECTORS = [
-  ".ref-report-page .report-main-card",
-  ".ref-report-page .report-core-panel",
-  ".ref-report-page .report-share-panel",
-  ".ref-report-page .report-grid",
-  ".ref-report-page .report-care-banner"
-];
-const REPORT_CAPTURE_SANITIZE_CSS = `
-  body.report-html2canvas-capture .homepage-stage .topbar {
-    visibility: hidden !important;
-    background: transparent !important;
-    background-image: none !important;
-    box-shadow: none !important;
-    filter: none !important;
-    text-shadow: none !important;
-  }
-
-  body.report-html2canvas-capture .homepage-stage .reference-page:not(.ref-report-page) {
-    display: none !important;
-    visibility: hidden !important;
-    background: transparent !important;
-    background-image: none !important;
-    box-shadow: none !important;
-    filter: none !important;
-    text-shadow: none !important;
-  }
-
-  body.report-html2canvas-capture .homepage-stage .topbar *,
-  body.report-html2canvas-capture .homepage-stage .topbar *::before,
-  body.report-html2canvas-capture .homepage-stage .topbar *::after,
-  body.report-html2canvas-capture .homepage-stage .reference-page:not(.ref-report-page) *,
-  body.report-html2canvas-capture .homepage-stage .reference-page:not(.ref-report-page) *::before,
-  body.report-html2canvas-capture .homepage-stage .reference-page:not(.ref-report-page) *::after {
-    background: transparent !important;
-    background-image: none !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
-    color: rgba(230, 250, 252, 0.9) !important;
-    filter: none !important;
-    text-shadow: none !important;
-  }
-
-  body.report-html2canvas-capture *,
-  body.report-html2canvas-capture *::before,
-  body.report-html2canvas-capture *::after {
-    animation: none !important;
-    transition: none !important;
-  }
-
-  body.report-html2canvas-capture[data-page="report"] .ref-report-page .badge-row,
-  body.report-html2canvas-capture[data-page="report"] .ref-report-page .badge-row * {
-    filter: none !important;
-  }
-
-  body.report-html2canvas-capture[data-page="report"] .ref-report-page .badge-row span {
-    --badge-accent: #ffe58f !important;
-    background:
-      radial-gradient(circle at 50% 8%, rgba(255, 229, 143, 0.18), transparent 44%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(8, 12, 22, 0.34)),
-      linear-gradient(135deg, rgba(255, 229, 143, 0.14), rgba(184, 92, 255, 0.08)) !important;
-    box-shadow:
-      inset 0 0 0 1px rgba(255, 229, 143, 0.38),
-      inset 0 0 18px rgba(255, 229, 143, 0.10),
-      0 0 12px rgba(255, 229, 143, 0.12) !important;
-  }
-
-  body.report-html2canvas-capture[data-page="report"] .ref-report-page .badge-row span::before {
-    background: linear-gradient(90deg, transparent, rgba(255, 245, 190, 0.82), transparent) !important;
-  }
-
-  body.report-html2canvas-capture[data-page="report"] .ref-report-page .badge-row span::after {
-    background: rgba(255, 229, 143, 0.82) !important;
-    box-shadow: 0 0 9px rgba(255, 224, 138, 0.36) !important;
-  }
-
-  body.report-html2canvas-capture[data-page="report"] .ref-report-page .badge-row i {
-    background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.92), transparent 34%),
-      radial-gradient(circle at 50% 24%, rgba(255, 255, 255, 0.80), transparent 28%),
-      linear-gradient(180deg, rgba(255, 244, 201, 0.94), rgba(214, 155, 67, 0.92)) !important;
-    box-shadow:
-      inset 0 0 0 1px rgba(255, 255, 255, 0.42),
-      inset 0 -6px 10px rgba(10, 6, 18, 0.24),
-      0 0 12px rgba(255, 224, 138, 0.24) !important;
-  }
-
-  body.report-html2canvas-capture[data-page="report"] .ref-report-page .badge-row strong,
-  body.report-html2canvas-capture[data-page="report"] .ref-report-page .badge-row em {
-    text-shadow: 0 0 8px rgba(255, 224, 138, 0.22) !important;
-  }
-`;
-
-function currentStageScaleForCapture(stage, design) {
-  const cssScale = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--app-stage-scale"));
-  if (Number.isFinite(cssScale) && cssScale > 0) return cssScale;
-
-  const rect = stage?.getBoundingClientRect();
-  const scaleFromRect = rect?.width ? rect.width / design.width : 1;
-  return Number.isFinite(scaleFromRect) && scaleFromRect > 0 ? scaleFromRect : 1;
-}
-
-function reportCaptureNavCrop(stage, design) {
-  const stageRect = stage?.getBoundingClientRect();
-  if (!stageRect) return REPORT_CAPTURE_NAV_FALLBACK_CROP;
-
-  const scale = currentStageScaleForCapture(stage, design);
-  const navNodes = [
-    stage.querySelector(".brand"),
-    stage.querySelector(".primary-nav"),
-    stage.querySelector(".top-actions")
-  ].filter(Boolean);
-
-  const navBottom = navNodes.reduce((bottom, node) => {
-    const rect = node.getBoundingClientRect();
-    if (!rect.width || !rect.height) return bottom;
-    return Math.max(bottom, rect.bottom);
-  }, stageRect.top);
-
-  const cropTop = Math.ceil((navBottom - stageRect.top) / scale + REPORT_CAPTURE_NAV_GAP);
-  return Math.max(0, Math.min(design.height - 1, cropTop || REPORT_CAPTURE_NAV_FALLBACK_CROP));
-}
-
-function reportCaptureLayout(stage) {
-  const design = stageDesignForPage("report");
-  const navCrop = stage ? reportCaptureNavCrop(stage, design) : REPORT_CAPTURE_NAV_FALLBACK_CROP;
-  const crop = stage ? reportCaptureContentCrop(stage, design, navCrop) : null;
-  const cropX = crop?.x ?? 0;
-  const cropY = crop?.y ?? navCrop;
-  const outputWidth = crop?.width ?? design.width;
-  const outputHeight = crop?.height ?? (design.height - navCrop);
-
-  return {
-    width: design.width,
-    stageWidth: design.width,
-    stageHeight: design.height,
-    cropTop: cropY,
-    cropX,
-    cropY,
-    outputWidth,
-    outputHeight
-  };
-}
-
-function reportCaptureContentCrop(stage, design, navCrop) {
-  const stageRect = stage?.getBoundingClientRect();
-  if (!stageRect?.width || !stageRect?.height) return null;
-
-  const scale = currentStageScaleForCapture(stage, design);
-  const bounds = REPORT_CAPTURE_CARD_SELECTORS
-    .flatMap((selector) => [...stage.querySelectorAll(selector)])
-    .map((node) => node.getBoundingClientRect())
-    .filter((rect) => rect.width > 0 && rect.height > 0)
-    .reduce((next, rect) => ({
-      left: Math.min(next.left, (rect.left - stageRect.left) / scale),
-      top: Math.min(next.top, (rect.top - stageRect.top) / scale),
-      right: Math.max(next.right, (rect.right - stageRect.left) / scale),
-      bottom: Math.max(next.bottom, (rect.bottom - stageRect.top) / scale)
-    }), { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity });
-
-  if (!Number.isFinite(bounds.left) || !Number.isFinite(bounds.top)) return null;
-
-  const pad = REPORT_CAPTURE_CARD_PADDING;
-  const x = Math.max(0, Math.floor(bounds.left - pad));
-  const y = Math.max(navCrop, Math.floor(bounds.top - pad));
-  const right = Math.min(design.width, Math.ceil(bounds.right + pad));
-  const bottom = Math.min(design.height, Math.ceil(bounds.bottom + pad));
-
-  return {
-    x,
-    y,
-    width: Math.max(1, right - x),
-    height: Math.max(1, bottom - y)
-  };
-}
-
-function applyReportCaptureSanitizer() {
-  const style = document.createElement("style");
-  style.dataset.reportCaptureSanitizer = "true";
-  style.textContent = REPORT_CAPTURE_SANITIZE_CSS;
-  document.head.append(style);
-  document.body.classList.add("report-html2canvas-capture");
-
-  return () => {
-    document.body.classList.remove("report-html2canvas-capture");
-    style.remove();
-  };
-}
-
-function hasUnsupportedCaptureColor(value) {
-  return typeof value === "string" && /(?:^|[^\w-])color(?:-mix)?\(/i.test(value);
-}
-
-function stripUnsupportedCaptureColors(clonedDocument) {
-  const view = clonedDocument?.defaultView;
-  if (!view) return;
-
-  clonedDocument.querySelectorAll(".homepage-stage *").forEach((node) => {
-    if (!(node instanceof view.HTMLElement) && !(node instanceof view.SVGElement)) return;
-    const computed = view.getComputedStyle(node);
-    if (hasUnsupportedCaptureColor(computed.backgroundImage)) {
-      node.style.setProperty("background-image", "none", "important");
-      node.style.setProperty("background-color", "rgba(4, 14, 22, 0.68)", "important");
+async function copySharePayload(text) {
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return "text";
+      } catch {
+        // Clipboard permissions should never block the X composer.
+      }
     }
-    if (hasUnsupportedCaptureColor(computed.boxShadow)) node.style.setProperty("box-shadow", "none", "important");
-    if (hasUnsupportedCaptureColor(computed.textShadow)) node.style.setProperty("text-shadow", "none", "important");
-    if (hasUnsupportedCaptureColor(computed.filter)) node.style.setProperty("filter", "none", "important");
-    if (hasUnsupportedCaptureColor(computed.color)) node.style.setProperty("color", "rgba(230, 250, 252, 0.92)", "important");
-    if (hasUnsupportedCaptureColor(computed.borderTopColor) || hasUnsupportedCaptureColor(computed.borderRightColor) || hasUnsupportedCaptureColor(computed.borderBottomColor) || hasUnsupportedCaptureColor(computed.borderLeftColor)) {
-      node.style.setProperty("border-color", "rgba(96, 234, 246, 0.28)", "important");
-    }
-    if (hasUnsupportedCaptureColor(computed.fill)) node.style.setProperty("fill", "rgba(90, 240, 248, 0.20)", "important");
-    if (hasUnsupportedCaptureColor(computed.stroke)) node.style.setProperty("stroke", "rgba(98, 236, 246, 0.52)", "important");
-  });
+    return "none";
 }
 
-function canvasToPngBlob(canvas) {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (blob) resolve(blob);
-      else reject(new Error("Report screenshot export failed"));
-    }, "image/png", 0.94);
-  });
-}
-
-async function createDomReportScreenshotBlob(page, captureLayout = null) {
-  const stage = page.closest(".homepage-stage");
-  if (!stage) throw new Error("Report stage not found");
-
-  const layout = captureLayout || reportCaptureLayout(stage);
-  if (typeof window.html2canvas !== "function") throw new Error("Report screenshot renderer is not loaded");
-
-  const restoreCaptureSanitizer = applyReportCaptureSanitizer();
-  let sourceCanvas;
-  try {
-    sourceCanvas = await window.html2canvas(stage, {
-      allowTaint: false,
-      backgroundColor: "#020407",
-      imageTimeout: 15000,
-      ignoreElements: (element) => element.matches?.(".homepage-stage .topbar, .homepage-stage .reference-page:not(.ref-report-page)") || false,
-      logging: false,
-      onclone: (clonedDocument) => {
-        clonedDocument.body.classList.add("report-html2canvas-capture");
-        clonedDocument.querySelectorAll(".homepage-stage .reference-page:not(.ref-report-page)").forEach((node) => node.remove());
-        const style = clonedDocument.createElement("style");
-        style.textContent = REPORT_CAPTURE_SANITIZE_CSS;
-        clonedDocument.head.append(style);
-        stripUnsupportedCaptureColors(clonedDocument);
-      },
-      removeContainer: true,
-      scale: Math.min(2, Math.max(1, window.devicePixelRatio || 1)),
-      useCORS: true
-    });
-  } finally {
-    restoreCaptureSanitizer();
-  }
-  const stageWidth = layout.stageWidth ?? layout.width;
-  const stageHeight = layout.stageHeight;
-  const sourceXScale = sourceCanvas.width / stageWidth;
-  const sourceYScale = sourceCanvas.height / stageHeight;
-  const cropX = Math.round((layout.cropX ?? 0) * sourceXScale);
-  const cropY = Math.round((layout.cropY ?? layout.cropTop ?? 0) * sourceYScale);
-  const cropWidth = Math.min(sourceCanvas.width - cropX, Math.round((layout.outputWidth ?? layout.width) * sourceXScale));
-  const cropHeight = Math.min(sourceCanvas.height - cropY, Math.round((layout.outputHeight ?? (stageHeight - (layout.cropTop ?? 0))) * sourceYScale));
-
-  if (cropWidth <= 0 || cropHeight <= 0) throw new Error("Report screenshot crop is empty");
-
-  const outputCanvas = document.createElement("canvas");
-  outputCanvas.width = cropWidth;
-  outputCanvas.height = cropHeight;
-  const context = outputCanvas.getContext("2d");
-  context.fillStyle = "#020407";
-  context.fillRect(0, 0, cropWidth, cropHeight);
-  context.drawImage(sourceCanvas, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
-  return canvasToPngBlob(outputCanvas);
-}
-
-async function createReportScreenshotBlob(page) {
-  const stage = page?.closest(".homepage-stage");
-  if (!stage) throw new Error("Report stage not found");
-
-  const captureLayout = reportCaptureLayout(stage);
-  return createDomReportScreenshotBlob(page, captureLayout);
-}
-
-function downloadBlob(blob, fileName) {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = fileName;
-  link.rel = "noopener";
-  document.body.append(link);
-  link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
-  link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 8000);
-}
-
-async function copySharePayload(text, imageBlob) {
-  if (navigator.clipboard?.write && window.ClipboardItem && imageBlob) {
-    try {
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          "text/plain": new Blob([text], { type: "text/plain" }),
-          "image/png": imageBlob
-        })
-      ]);
-      return "image";
-    } catch {
-      // Fall through to text-only clipboard.
-    }
-  }
-
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return "text";
-  }
-
-  return "none";
-}
-
-function openXComposer(text, popup) {
+function openXComposer(text) {
   const url = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
-  if (popup && !popup.closed) {
-    popup.opener = null;
-    popup.location.replace(url);
-    return true;
-  }
   const opened = window.open(url, "_blank", "noopener,noreferrer");
   if (opened) return true;
   window.location.href = url;
@@ -871,17 +581,13 @@ function openXComposer(text, popup) {
 
 function reportShareStatus(result) {
   if (currentLang === "en") {
-    return result === "image"
-      ? "Report screenshot copied and downloaded. Paste it into X with Ctrl+V."
-      : "Report screenshot downloaded. Opening X compose.";
+    return result === "text"
+      ? "Share copy copied. Opening X compose."
+      : "Opening X compose with the report copy.";
   }
-  return result === "image"
-    ? "报告截图已复制并下载，X 打开后按 Ctrl+V 可把图片贴进推文。"
-    : "报告截图已下载，正在打开 X 发推页面。";
-}
-
-function waitForDownloadDispatch() {
-  return new Promise((resolve) => window.setTimeout(resolve, 420));
+  return result === "text"
+    ? "晒文案已复制，正在打开 X 发推页面。"
+    : "正在打开 X 发推页面，并带入报告文案。";
 }
 
 function withTimeout(promise, timeoutMs, fallback) {
@@ -905,6 +611,8 @@ let activeReportScores = { degen: 86, diamond: 31 };
 let activeReportIdentity = { handle: "@handle", wallet: "00000039...", rawWallet: "" };
 let activeReportDimensions = [86, 31, 69, 78, 92, 44];
 let activeReportNarrative = null;
+let activeReportApiData = null;
+let detailRouteLoadKey = "";
 let activeLeaderboardEntries = [];
 let activeRankPage = 0;
 const RANK_PAGE_SIZE = 7;
@@ -997,7 +705,7 @@ const WALLET_REPORT_COPY_BANK = {
       ["本金", "风控", "耐心"]
     ],
     shareDigest: [
-      "这份病历适合截图，但更适合睡醒后再复盘。",
+      "这份病历适合保存下来，睡醒后再复盘。",
       "结果只做娱乐化人格摘要，不定义真实人生。",
       "钱包可以被吐槽，风险需要被认真管理。",
       "先照见模式，再决定下一次怎么点按钮。"
@@ -1067,7 +775,7 @@ const WALLET_REPORT_COPY_BANK = {
       ["Alpha", "Noise", "Cooldown"]
     ],
     shareDigest: [
-      "This case is screenshot-friendly, but better reviewed after sleep.",
+      "Save this case and review it after sleep.",
       "Entertainment persona summary only; it does not define real life.",
       "The wallet can be roasted. Risk still deserves respect.",
       "See the pattern first, then decide how to click next time."
@@ -1207,8 +915,7 @@ function applyReportNarrative(report, narrative = activeReportNarrative) {
     item.textContent = narrative.radar?.[index] || "";
     if (bar) item.prepend(bar);
   });
-  const input = report.querySelector(".share-widget input");
-  if (input) input.value = narrative.tweet;
+  renderDetailedReport();
 }
 
 function selectReportBadges(dimensions = activeReportDimensions, tier = reportRarityFromScore(activeReportScores.degen)) {
@@ -1251,6 +958,7 @@ function updateReportScores(degenScore, diamondScore, options = {}) {
   if (!report) return;
 
   const api = normalizeReportApiData(options.apiReport);
+  if (options.apiReport) activeReportApiData = options.apiReport;
   const degen = clampReportScore(api?.scores.degen ?? degenScore);
   const diamond = clampReportScore(api?.scores.diamond ?? diamondScore);
   const paper = clampReportScore(100 - Math.round((degen + diamond) / 2));
@@ -1301,6 +1009,7 @@ function updateReportScores(degenScore, diamondScore, options = {}) {
   applyReportNarrative(report, activeReportNarrative);
   renderReportDimensionCurves(report, activeReportDimensions);
   renderReportBadges(report, activeReportDimensions, tier);
+  renderDetailedReport();
 }
 
 function reportCurveSvg(value, index) {
@@ -1367,6 +1076,129 @@ function renderReportDimensionCurves(report, dimensions = activeReportDimensions
   });
 }
 
+const REPORT_DETAIL_DIMENSIONS = [
+  { key: "degen", zh: "Degen 指数", en: "Degen Index", color: "#ff7d68" },
+  { key: "diamond", zh: "钻石手指数", en: "Diamond Hand", color: "#7ff7ff" },
+  { key: "paper", zh: "纸手指数", en: "Paperhand", color: "#ffe08a" },
+  { key: "night", zh: "深夜内耗", en: "Night Friction", color: "#bd72ff" },
+  { key: "abstract", zh: "抽象浓度", en: "Abstract Density", color: "#f2a65a" },
+  { key: "recovery", zh: "自愈速率", en: "Recovery Rate", color: "#71f0b2" }
+];
+
+function escapeDetailHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function reportDetailBand(score) {
+  if (score >= 80) return currentLang === "en" ? "dominant signal" : "显著信号";
+  if (score >= 60) return currentLang === "en" ? "active signal" : "活跃信号";
+  if (score >= 40) return currentLang === "en" ? "watch signal" : "观察信号";
+  return currentLang === "en" ? "quiet signal" : "低频信号";
+}
+
+function reportDetailDimensionCopy(index, score) {
+  const zh = [
+    score >= 75 ? "行动反应快，容易把市场热度转化成即时仓位。" : "行动冲动相对可控，更适合先看数据再落单。",
+    score >= 70 ? "能忍受波动，持仓信念通常比短期噪音更稳定。" : "遇到回撤时容易提前离场，需要预先写好退出条件。",
+    score >= 70 ? "对浮亏和错过都很敏感，情绪容易影响仓位大小。" : "纸手反应不算强，但仍要区分纪律性退出与恐慌退出。",
+    score >= 70 ? "夜间复盘和反复推演明显，休息不足会放大判断偏差。" : "深夜内耗较低，决策节奏相对不容易被睡眠打乱。",
+    score >= 70 ? "擅长捕捉新叙事，也更容易把故事的感染力当成确定性。" : "叙事敏感度适中，验证机制能帮助你过滤大部分噪音。",
+    score >= 70 ? "有把亏损经验转化成规则的能力，恢复节奏较快。" : "修复需要外部结构，复盘和仓位上限会比意志力更可靠。"
+  ];
+  const en = [
+    score >= 75 ? "Fast reactions can turn market heat into an immediate position." : "Impulse is relatively contained; observe data before acting.",
+    score >= 70 ? "Drawdowns are tolerated better than short-term noise suggests." : "Pullbacks may trigger early exits; pre-write the exit rule.",
+    score >= 70 ? "Losses and missed chances can both influence position size." : "Paperhand pressure is moderate; separate discipline from panic.",
+    score >= 70 ? "Late-night rumination is visible and fatigue may amplify bias." : "Night friction is contained and the rhythm is easier to protect.",
+    score >= 70 ? "New narratives are easy to detect, but stories can feel like certainty." : "Narrative sensitivity is balanced; verification can filter noise.",
+    score >= 70 ? "Experience can become a rule quickly once the review loop is active." : "Recovery benefits from external structure more than willpower."
+  ];
+  return currentLang === "en" ? en[index] : zh[index];
+}
+
+function reportDetailCaseId() {
+  const seed = activeReportIdentity.rawWallet || activeReportIdentity.wallet || "degendna";
+  return `DN-${stableHash(seed, "case").toString(16).slice(0, 6).toUpperCase()}`;
+}
+
+function renderDetailedReport() {
+  const page = document.querySelector(".report-detail-page");
+  if (!page) return;
+
+  const narrative = activeReportNarrative || buildWalletNarrative({ rawWallet: activeReportIdentity.rawWallet });
+  const scores = activeReportDimensions.map((value) => clampReportScore(value));
+  const tier = reportRarityFromScore(activeReportScores.degen);
+  const personality = narrative.personality || finalText("report", "personalityValue");
+  const api = normalizeReportApiData(activeReportApiData) || narrative.api || {};
+  const highDegen = scores[0] >= 70;
+  const highDiamond = scores[1] >= 70;
+  const highNight = scores[3] >= 70;
+  const highAbstract = scores[4] >= 70;
+
+  setText(page.querySelector("[data-detail-handle]"), activeReportIdentity.handle);
+  setText(page.querySelector("[data-detail-wallet]"), `short wallet: ${activeReportIdentity.wallet}`);
+  setText(page.querySelector("[data-detail-case]"), reportDetailCaseId());
+  setText(page.querySelector("[data-detail-rarity]"), tier.label);
+  setText(page.querySelector("[data-detail-score]"), `${activeReportScores.degen} / 100`);
+  setText(page.querySelector("[data-detail-score-large]"), String(activeReportScores.degen));
+  setText(page.querySelector("[data-detail-personality]"), personality);
+  setText(page.querySelector("[data-detail-personality-title]"), personality);
+  setText(page.querySelector("[data-detail-verdict]"), narrative.sentence || finalText("report", "sentenceValue"));
+  setText(page.querySelector("[data-detail-driver]"), api.assetPersonality || narrative.wordCloud);
+  setText(page.querySelector("[data-detail-risk]"), narrative.cause);
+  setText(page.querySelector("[data-detail-strength]"), highDiamond ? "你的持仓耐受力是重要缓冲，适合把它转化成固定的交易纪律。" : "你的机会感很敏锐，适合用验证流程把速度变成优势。 ");
+  setText(page.querySelector("[data-detail-personality-copy]"), highDegen
+    ? `你属于“${personality}”：对机会窗口、叙事变化和即时反馈都很敏感。这个特征让你比很多人更早看到变化，也让你更容易把“现在就行动”误认为“现在不行动就会失去一切”。${narrative.wordCloud}`
+    : `你属于“${personality}”：你的交易反应不是单纯追逐速度，而是会先观察，再在确认感出现后集中行动。真正需要保护的是确认感过强之后的仓位边界。${narrative.wordCloud}`);
+  setText(page.querySelector("[data-detail-holding-copy]"), api.holdingBehavior || narrative.assetFacts?.[1]?.[1] || "持仓节奏会随着市场叙事和波动强度改变。");
+  setText(page.querySelector("[data-detail-alpha-copy]"), highAbstract
+    ? "你的 Alpha 雷达对新叙事非常灵敏，但灵敏度越高，越需要两步验证：先确认流动性，再确认自己是否只是被故事吸引。"
+    : "你的机会感更适合放在可验证的信号上。把热度、流动性和自己的退出条件分开记录，能明显减少误判。");
+
+  const evidence = [
+    ["人格核心", personality],
+    ["损失触发", narrative.cause],
+    ["一句话判词", narrative.sentence]
+  ];
+  page.querySelector("[data-detail-evidence]").innerHTML = evidence.map(([label, value]) => `<div><span>${escapeDetailHtml(label)}</span><strong>${escapeDetailHtml(value)}</strong></div>`).join("");
+
+  page.querySelector("[data-detail-dimensions]").innerHTML = REPORT_DETAIL_DIMENSIONS.map((dimension, index) => {
+    const score = scores[index];
+    return `<article class="detail-dimension" style="--detail-accent:${dimension.color}">
+      <div class="detail-dimension-top"><span>${escapeDetailHtml(currentLang === "en" ? dimension.en : dimension.zh)}</span><strong>${score}</strong></div>
+      <i><em style="width:${score}%"></em></i>
+      <small>${escapeDetailHtml(reportDetailBand(score))}</small>
+      <p>${escapeDetailHtml(reportDetailDimensionCopy(index, score))}</p>
+    </article>`;
+  }).join("");
+
+  const holdingItems = [
+    highDegen ? "进入速度快于退出规则的形成速度" : "确认感形成后才会明显加速",
+    highDiamond ? "能够承受波动，但要警惕把坚持变成拒绝复盘" : "需要提前写好回撤后的处理动作",
+    highNight ? "深夜和疲劳状态可能放大交易叙事" : "日间决策更容易保持清晰"
+  ];
+  page.querySelector("[data-detail-holding-list]").innerHTML = holdingItems.map((item) => `<li>${escapeDetailHtml(item)}</li>`).join("");
+
+  const lossItems = (narrative.lossLines || []).slice(0, 3);
+  page.querySelector("[data-detail-loss]").innerHTML = lossItems.map((item, index) => `<div><b>0${index + 1}</b><span>${escapeDetailHtml(item)}</span><small>${escapeDetailHtml(index === 0 ? narrative.cause : "将这个触发点写进下一次复盘，而不是等情绪过去后凭印象回忆")}</small></div>`).join("");
+
+  page.querySelector("[data-detail-alpha]").innerHTML = (narrative.radar || []).slice(0, 3).map((item) => `<span>${escapeDetailHtml(item)}</span>`).join("");
+  page.querySelector("[data-detail-fate]").innerHTML = (narrative.fateStrip || []).slice(0, 3).map((item, index) => `<div><b>0${index + 1}</b><span>${escapeDetailHtml(item)}</span><small>${escapeDetailHtml(index === 0 ? "先降低情绪噪音" : index === 1 ? "再恢复固定规则" : "最后才扩大行动范围")}</small></div>`).join("");
+
+  const prescriptions = [
+    highDegen ? "任何新仓位先延迟 10 分钟，期间只允许写入场理由。" : "把每次入场理由压缩成一句可验证的话。",
+    highDiamond ? "为持仓设置复盘触发点，避免“能扛”替代了“该不该扛”。" : "入场前同时写出止损、退出和重新评估条件。",
+    highNight ? "睡前不新增仓位，把夜间想法放进观察清单。" : "把重要决定放到精力最稳定的时段完成。",
+    "每周只复盘行为，不给自己贴人格标签；记录做对了什么，比责备更有用。"
+  ];
+  page.querySelector("[data-detail-prescription]").innerHTML = prescriptions.map((item, index) => `<article><b>0${index + 1}</b><p>${escapeDetailHtml(item)}</p></article>`).join("");
+}
+
 function shortWallet(value) {
   const clean = String(value || "").trim();
   if (!clean) return activeReportIdentity.wallet;
@@ -1424,8 +1256,7 @@ function updateReportIdentity(options = {}) {
   setText(report.querySelector(".share-card-preview span"), handle);
   applyReportAvatar(report, handle);
 
-  const input = report.querySelector(".share-widget input");
-  if (input) input.value = activeReportNarrative?.tweet || finalText("report", "tweet");
+  renderDetailedReport();
 }
 
 function readLocalLeaderboard() {
@@ -1853,15 +1684,42 @@ function hydrateFinalPages() {
     });
     renderReportBadges(report, activeReportDimensions, reportRarityFromScore(activeReportScores.degen));
     setText(report.querySelector(".share-button"), reportCopy.share);
-    const label = report.querySelector(".share-widget label");
-    if (label) {
-      const input = label.querySelector("input");
-      label.firstChild.textContent = reportCopy.copyLabel;
-      if (input) input.value = reportCopy.tweet;
-    }
+    setText(report.querySelector("[data-report-detail]"), currentLang === "en" ? "Open full report" : "打开完整报告");
     setText(report.querySelector(".gold-action"), reportCopy.nft);
     applyReportNarrative(report, activeReportNarrative);
   }
+
+  renderDetailedReport();
+}
+
+function hydrateReportDetailFromRoute() {
+  const route = reportDetailRoute();
+  if (!route?.address) return;
+
+  const sameWallet = activeReportIdentity.rawWallet?.toLowerCase() === route.address.toLowerCase();
+  const handle = normalizeHandle(route.handle, sameWallet ? activeReportIdentity.handle : "@handle");
+
+  if (!sameWallet) {
+    activeReportApiData = null;
+    updateReportIdentity({ wallet: route.address, handle });
+    updateReportScores(scoreFromText(route.address), 100 - (scoreFromText(route.address) % 48), { rawWallet: route.address });
+  }
+
+  const routeKey = `${route.address.toLowerCase()}:${currentLang}`;
+  const loadedAddress = String(activeReportApiData?.address || "").toLowerCase();
+  if (loadedAddress === route.address.toLowerCase() || detailRouteLoadKey === routeKey) return;
+
+  detailRouteLoadKey = routeKey;
+  fetchJsonPayload(`/api/analyze?address=${encodeURIComponent(route.address)}&lang=${encodeURIComponent(currentLang)}`)
+    .then((report) => {
+      updateReportScores(report.scores?.degen ?? activeReportScores.degen, report.scores?.diamond ?? activeReportScores.diamond, {
+        rawWallet: route.address,
+        apiReport: report
+      });
+    })
+    .catch(() => {
+      // The deterministic local narrative remains available when the shared report is offline.
+    });
 }
 
 function setStatus(message, tone = "info") {
@@ -1935,9 +1793,10 @@ function applyPage(page, options = {}) {
   const isDegenPersonaPage = nextPage === "psyche-test" && activeMentalState?.mode === "degen-persona";
   document.body.classList.toggle("degen-persona-quiz", isDegenPersonaPage);
   document.body.classList.toggle("degen-persona-result-mode", Boolean(isDegenPersonaPage && activeMentalState?.completed));
+  document.body.classList.toggle("report-detail-mode", nextPage === "report-detail");
   updateViewportStageScale(nextPage);
 
-  const activeNavPage = isDegenPersonaPage ? "__degenPersona" : nextPage === "psyche-test" ? "psyche" : nextPage;
+  const activeNavPage = nextPage === "report-detail" ? "__reportDetail" : isDegenPersonaPage ? "__degenPersona" : nextPage === "psyche-test" ? "psyche" : nextPage;
   navButtons.forEach((button) => {
     const isActive = button.dataset.pageTarget === activeNavPage;
     button.classList.toggle("active", isActive);
@@ -1966,6 +1825,11 @@ function applyPage(page, options = {}) {
     } else {
       syncRarityReadout(document.querySelector(".ref-rarity-page"));
     }
+  }
+
+  if (nextPage === "report-detail") {
+    hydrateReportDetailFromRoute();
+    renderDetailedReport();
   }
 
   clearStatus();
@@ -3824,29 +3688,40 @@ document.querySelectorAll("[data-psyche-meter]").forEach((meter) => {
   meter.style.width = meter.closest(".ref-psyche-page") ? "26%" : "51%";
 });
 
+document.querySelectorAll("[data-report-detail]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const url = reportDetailUrl();
+    const opened = window.open(url, "_blank", "noopener,noreferrer");
+    if (!opened) window.location.href = url;
+  });
+});
+
+document.querySelectorAll("[data-detail-copy-link]").forEach((button) => {
+  button.addEventListener("click", async () => {
+    const result = await copySharePayload(reportDetailUrl());
+    setStatus(
+      currentLang === "en"
+        ? result === "text" ? "Detailed report link copied." : "Copy the detailed report URL from the address bar."
+        : result === "text" ? "详细报告链接已复制。" : "请从浏览器地址栏复制详细报告链接。"
+    );
+  });
+});
+
 document.querySelectorAll(".share-button").forEach((button) => {
   button.addEventListener("click", async () => {
-    const page = button.closest(".ref-report-page");
-    const input = page?.querySelector(".share-widget input");
     const copy = finalText("report", "tweet");
-    if (input && !input.value.trim()) input.value = copy;
-    const shareText = input?.value?.trim() || copy;
+    const shareText = copy;
 
     button.disabled = true;
     button.classList.add("is-busy");
 
     try {
-      const screenshotBlob = page ? await createReportScreenshotBlob(page) : null;
-      if (screenshotBlob) {
-        downloadBlob(screenshotBlob, "degendna-report-share.png");
-        await waitForDownloadDispatch();
-      }
-      const clipboardResult = await withTimeout(copySharePayload(shareText, screenshotBlob), 1800, "none");
+      const clipboardResult = await withTimeout(copySharePayload(shareText, null), 1800, "none");
       openXComposer(shareText);
       setStatus(reportShareStatus(clipboardResult));
     } catch (error) {
-      console.warn("DegenDNA share screenshot capture failed", error);
-      setStatus(currentLang === "en" ? "Screenshot failed. Please refresh the report and try again." : "截图失败，请刷新报告后重试。", "error");
+      console.warn("DegenDNA share copy failed", error);
+      setStatus(currentLang === "en" ? "The share copy could not be prepared." : "晒文案生成失败，请重试。", "error");
     } finally {
       button.disabled = false;
       button.classList.remove("is-busy");
