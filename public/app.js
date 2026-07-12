@@ -895,6 +895,13 @@ function compactReportText(value, limit = 18) {
   return `${clean.slice(0, Math.max(1, limit - 3))}...`;
 }
 
+function completeReportSentence(value, fallback = "") {
+  const clean = String(value || "").replace(/\s+/g, " ").trim();
+  if (!clean) return fallback;
+  const match = clean.match(/^.*?[。.!！?？]/u);
+  return (match?.[0] || `${clean}。`).trim();
+}
+
 function applyReportNarrative(report, narrative = activeReportNarrative) {
   if (!report || !narrative) return;
   const compact = (value, limit) => compactReportText(value, currentLang === "en" ? limit + 8 : limit);
@@ -908,15 +915,15 @@ function applyReportNarrative(report, narrative = activeReportNarrative) {
     setText(tag, compact(narrative.tags[index] || narrative.tags[0] || "", 8));
   });
   report.querySelectorAll(".share-card-digest p").forEach((line, index) => {
-    setText(line, compact(narrative.shareDigest[index] || "", index === 0 ? 14 : 18));
+    setText(line, completeReportSentence(narrative.shareDigest[index] || ""));
   });
-  setText(report.querySelector(".word-cloud"), compact(narrative.wordCloud, 18));
+  setText(report.querySelector(".word-cloud"), completeReportSentence(narrative.wordCloud));
   report.querySelectorAll(".asset-widget .widget-facts div").forEach((row, index) => {
     setText(row.querySelector("dt"), narrative.assetFacts?.[index]?.[0]);
-    setText(row.querySelector("dd"), compact(narrative.assetFacts?.[index]?.[1] || "", 8));
+    setText(row.querySelector("dd"), completeReportSentence(narrative.assetFacts?.[index]?.[1] || ""));
   });
   report.querySelectorAll(".black-widget .widget-lines li").forEach((item, index) => setText(item, narrative.lossLines?.[index]));
-  report.querySelectorAll(".luck-widget .fate-strip span").forEach((item, index) => setText(item, compact(narrative.fateStrip?.[index] || "", 7)));
+  report.querySelectorAll(".luck-widget .fate-strip span").forEach((item, index) => setText(item, completeReportSentence(narrative.fateStrip?.[index] || "")));
   report.querySelectorAll(".radar-widget li").forEach((item, index) => {
     const bar = item.querySelector("span");
     item.textContent = narrative.radar?.[index] || "";

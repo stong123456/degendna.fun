@@ -21654,3 +21654,148 @@ body[data-page="report"] .ref-report-page .widget-facts dd,
 body[data-page="report"] .ref-report-page .fate-strip span {
   color: rgba(255, 235, 170, 0.96) !important;
 }
+
+/* Report Result v145: show a complete short sentence instead of truncating with ellipsis. */
+body[data-page="report"] .ref-report-page .share-card-digest p,
+body[data-page="report"] .ref-report-page .word-cloud,
+body[data-page="report"] .ref-report-page .widget-facts dd,
+body[data-page="report"] .ref-report-page .fate-strip span {
+  overflow: hidden !important;
+  overflow-wrap: anywhere !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+}
+
+body[data-page="report"] .ref-report-page .share-card-digest p {
+  min-height: 2.25em !important;
+  line-height: 1.18 !important;
+}
+
+body[data-page="report"] .ref-report-page .word-cloud {
+  min-height: 2.25em !important;
+  line-height: 1.18 !important;
+}
+
+body[data-page="report"] .ref-report-page .widget-facts dd {
+  min-height: 2.1em !important;
+  line-height: 1.12 !important;
+}
+
+body[data-page="report"] .ref-report-page .fate-strip span {
+  display: flex !important;
+  min-height: 2.2em !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1.12 !important;
+}
+
+/* Detailed report v146: stronger action hierarchy and a true centered score readout. */
+body[data-page="report"] .ref-report-page .share-card-meta i:has(.detail-report-link) {
+  grid-template-columns: 36% minmax(0, 1fr) !important;
+  align-items: center !important;
+  padding: 5px 7px !important;
+  border-color: rgba(255, 224, 138, 0.36) !important;
+  background: linear-gradient(90deg, rgba(255, 224, 138, 0.15), rgba(80, 248, 255, 0.10)) !important;
+}
+
+body[data-page="report"] .ref-report-page .share-card-meta i:has(.detail-report-link) em {
+  color: rgba(255, 230, 151, 0.92) !important;
+}
+
+body[data-page="report"] .ref-report-page .detail-report-link {
+  display: flex !important;
+  width: 100% !important;
+  min-height: 27px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 5px 8px !important;
+  overflow: visible !important;
+  color: #061419 !important;
+  border: 1px solid rgba(255, 244, 185, 0.86) !important;
+  background: linear-gradient(135deg, #ffe892 0%, #a9f9f4 100%) !important;
+  box-shadow: 0 0 0 1px rgba(77, 238, 244, 0.22), 0 0 16px rgba(88, 237, 244, 0.32) !important;
+  font-size: clamp(8px, 0.64vw, 11px) !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  text-shadow: none !important;
+  white-space: nowrap !important;
+}
+
+body[data-page="report"] .ref-report-page .detail-report-link::after {
+  content: "  >";
+  color: rgba(6, 20, 25, 0.72);
+}
+
+body[data-page="report"] .ref-report-page .detail-report-link:hover,
+body[data-page="report"] .ref-report-page .detail-report-link:focus-visible {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #14dce7 0%, #b76dff 100%) !important;
+  box-shadow: 0 0 0 1px rgba(244, 252, 255, 0.62), 0 0 22px rgba(95, 230, 255, 0.52) !important;
+  outline: none !important;
+}
+
+body[data-page="report-detail"] .report-detail-header {
+  border-top: 2px solid rgba(85, 239, 248, 0.76) !important;
+  box-shadow: inset 0 12px 0 rgba(68, 224, 239, 0.035), inset 0 0 0 1px rgba(166, 246, 252, 0.07), 0 22px 44px rgba(0, 0, 0, 0.28) !important;
+}
+
+body[data-page="report-detail"] .detail-panel,
+body[data-page="report-detail"] .detail-section {
+  box-shadow: inset 0 0 0 1px rgba(166, 246, 252, 0.055), 0 18px 38px rgba(0, 0, 0, 0.26) !important;
+}
+
+body[data-page="report-detail"] .detail-section-head > span,
+body[data-page="report-detail"] .detail-panel-head > span {
+  color: rgba(102, 241, 248, 0.86) !important;
+  letter-spacing: 0.18em !important;
+}
+
+body[data-page="report-detail"] .detail-section-head h2,
+body[data-page="report-detail"] .detail-panel-head h2 {
+  text-shadow: 0 0 18px rgba(104, 239, 247, 0.13) !important;
+}
+
+body[data-page="report-detail"] .detail-score-orbit {
+  display: grid !important;
+  grid-template: 1fr / 1fr !important;
+  place-items: center !important;
+  isolation: isolate !important;
+  background: conic-gradient(from -28deg, #52f5ff 0 62%, #b66bff 62% 83%, #ffe48d 83% 100%) !important;
+  box-shadow: 0 0 0 5px rgba(67, 218, 236, 0.08), 0 0 34px rgba(69, 239, 255, 0.25) !important;
+}
+
+body[data-page="report-detail"] .detail-score-orbit::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 5px !important;
+  z-index: -1 !important;
+  border: 1px solid rgba(224, 252, 255, 0.28) !important;
+  border-radius: 50% !important;
+}
+
+body[data-page="report-detail"] .detail-score-orbit::after {
+  inset: 13px !important;
+  background: #06131c !important;
+  box-shadow: inset 0 0 28px rgba(57, 230, 245, 0.22), 0 0 0 1px rgba(178, 244, 250, 0.12) !important;
+}
+
+body[data-page="report-detail"] .detail-score-orbit strong,
+body[data-page="report-detail"] .detail-score-orbit span {
+  grid-area: 1 / 1 !important;
+  margin: 0 !important;
+}
+
+body[data-page="report-detail"] .detail-score-orbit strong {
+  align-self: center !important;
+  transform: translateY(-4px) !important;
+  line-height: 1 !important;
+  text-shadow: 0 0 20px rgba(237, 255, 255, 0.34) !important;
+}
+
+body[data-page="report-detail"] .detail-score-orbit span {
+  align-self: end !important;
+  margin-bottom: 31px !important;
+  color: rgba(191, 232, 237, 0.78) !important;
+  line-height: 1 !important;
+}

@@ -30,6 +30,6 @@ state: report result page and the new report-detail route.
 ## Comparison History
 
 - Initial pass: existing report result layout retained; the detail route and shareable URL behavior were added.
-- Current pass: detail report was simplified to a solid, content-first reading surface with the official symbol asset and a clickable degendna.fun return link; browser visual comparison remains blocked by browser security policy.
+- Current pass: detail report remains a solid, content-first reading surface with a stronger full-report CTA and corrected centered score orbit; browser visual comparison remains blocked by browser security policy.
 
 final result: blocked
