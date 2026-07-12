@@ -1,6 +1,6 @@
 # Product Design QA
 
-source visual truth path: `public/assets/report-result-cyber-shell-v3.png` plus the existing wallet report screen in `public/index.html`.
+source visual truth path: the existing wallet report screen in `public/index.html` plus `public/assets/degendna-logo-symbol-glass-transparent-crop-v1.png`.
 implementation screenshot path: not captured.
 viewport: not captured.
 state: report result page and the new report-detail route.
@@ -30,6 +30,6 @@ state: report result page and the new report-detail route.
 ## Comparison History
 
 - Initial pass: existing report result layout retained; the detail route and shareable URL behavior were added.
-- Current pass: static syntax and diff checks pass; browser visual comparison remains blocked by browser security policy.
+- Current pass: detail report was simplified to a solid, content-first reading surface with the official symbol asset and a clickable degendna.fun return link; browser visual comparison remains blocked by browser security policy.
 
 final result: blocked

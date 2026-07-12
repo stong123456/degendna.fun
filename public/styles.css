@@ -21495,3 +21495,162 @@ body[data-page="report-detail"] .detail-copy-link:focus-visible {
     flex-direction: column;
   }
 }
+
+/* Detailed report v143: clean, shareable reading surface without the report screenshot background. */
+html:has(body[data-page="report-detail"]),
+body[data-page="report-detail"] {
+  background: #03070b !important;
+}
+
+body[data-page="report-detail"] .terminal-shell,
+body[data-page="report-detail"] .homepage-stage {
+  background: #03070b !important;
+}
+
+body[data-page="report-detail"] .homepage-stage::before,
+body[data-page="report-detail"] .homepage-stage::after {
+  display: none !important;
+}
+
+body[data-page="report-detail"] .topbar {
+  background: #050d13 !important;
+  border-bottom-color: rgba(103, 225, 239, 0.28) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34) !important;
+  backdrop-filter: none !important;
+}
+
+body[data-page="report-detail"] .report-detail-header,
+body[data-page="report-detail"] .detail-panel,
+body[data-page="report-detail"] .detail-section {
+  background: #08131b !important;
+  border-color: rgba(103, 225, 239, 0.24) !important;
+  box-shadow: inset 0 0 0 1px rgba(166, 246, 252, 0.035), 0 18px 36px rgba(0, 0, 0, 0.24) !important;
+}
+
+body[data-page="report-detail"] .report-detail-header::before,
+body[data-page="report-detail"] .detail-panel::before,
+body[data-page="report-detail"] .detail-section::before {
+  display: none !important;
+}
+
+body[data-page="report-detail"] .detail-subject,
+body[data-page="report-detail"] .detail-meta,
+body[data-page="report-detail"] .detail-dimension,
+body[data-page="report-detail"] .detail-evidence-list article,
+body[data-page="report-detail"] .detail-fate-list article,
+body[data-page="report-detail"] .detail-prescription-grid article {
+  background: #0b1a23 !important;
+}
+
+body[data-page="report-detail"] .detail-prescription {
+  background: #0d141b !important;
+  border-color: rgba(255, 224, 138, 0.27) !important;
+}
+
+body[data-page="report-detail"] .detail-brand-lockup {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(103, 225, 239, 0.18);
+}
+
+body[data-page="report-detail"] .detail-brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  color: #efffff;
+  text-decoration: none;
+}
+
+body[data-page="report-detail"] .detail-brand-link img {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  object-fit: cover;
+  border: 1px solid rgba(81, 234, 249, 0.34);
+  border-radius: 14px;
+  background: #030b12;
+  box-shadow: 0 0 20px rgba(74, 229, 246, 0.14);
+}
+
+body[data-page="report-detail"] .detail-brand-link span {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+body[data-page="report-detail"] .detail-brand-link strong {
+  color: #f2ffff;
+  font-size: 17px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+body[data-page="report-detail"] .detail-brand-link small {
+  color: rgba(104, 239, 247, 0.72);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+}
+
+body[data-page="report-detail"] .detail-site-link {
+  flex: 0 0 auto;
+  padding: 9px 13px;
+  color: #ffe08a;
+  border: 1px solid rgba(255, 224, 138, 0.38);
+  background: #17150e;
+  font-size: 12px;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+body[data-page="report-detail"] .detail-site-link:hover,
+body[data-page="report-detail"] .detail-site-link:focus-visible {
+  color: #071218;
+  background: #ffe08a;
+  outline: none;
+}
+
+@media (max-width: 560px) {
+  body[data-page="report-detail"] .detail-brand-lockup {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  body[data-page="report-detail"] .detail-site-link {
+    width: fit-content;
+  }
+}
+
+/* Report Result v144: keep compact labels readable inside fixed-size result cards. */
+body[data-page="report"] .ref-report-page .share-card-preview p,
+body[data-page="report"] .ref-report-page .share-card-digest p,
+body[data-page="report"] .ref-report-page .word-cloud,
+body[data-page="report"] .ref-report-page .widget-facts dd,
+body[data-page="report"] .ref-report-page .fate-strip span {
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body[data-page="report"] .ref-report-page .share-card-preview p,
+body[data-page="report"] .ref-report-page .share-card-digest p {
+  color: rgba(240, 252, 255, 0.92) !important;
+}
+
+body[data-page="report"] .ref-report-page .word-cloud {
+  color: rgba(235, 252, 255, 0.96) !important;
+}
+
+body[data-page="report"] .ref-report-page .widget-facts dd,
+body[data-page="report"] .ref-report-page .fate-strip span {
+  color: rgba(255, 235, 170, 0.96) !important;
+}

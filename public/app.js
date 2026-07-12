@@ -889,27 +889,34 @@ function buildWalletNarrative(options = {}) {
   };
 }
 
+function compactReportText(value, limit = 18) {
+  const clean = String(value || "").replace(/\s+/g, " ").trim();
+  if (!clean || clean.length <= limit) return clean;
+  return `${clean.slice(0, Math.max(1, limit - 3))}...`;
+}
+
 function applyReportNarrative(report, narrative = activeReportNarrative) {
   if (!report || !narrative) return;
+  const compact = (value, limit) => compactReportText(value, currentLang === "en" ? limit + 8 : limit);
   const dossierBlocks = report.querySelectorAll(".report-dossier > div");
   setText(dossierBlocks[0]?.querySelector("b"), narrative.personality);
   const dossierRows = report.querySelectorAll(".report-dossier p");
   setText(dossierRows[3]?.querySelector("strong"), narrative.cause);
   setText(dossierRows[4]?.querySelector("strong"), narrative.sentence);
-  setText(report.querySelector(".share-card-preview p"), narrative.personality);
+  setText(report.querySelector(".share-card-preview p"), compact(narrative.personality, 12));
   report.querySelectorAll(".share-card-tags small").forEach((tag, index) => {
-    setText(tag, narrative.tags[index] || narrative.tags[0] || "");
+    setText(tag, compact(narrative.tags[index] || narrative.tags[0] || "", 8));
   });
   report.querySelectorAll(".share-card-digest p").forEach((line, index) => {
-    setText(line, narrative.shareDigest[index] || "");
+    setText(line, compact(narrative.shareDigest[index] || "", index === 0 ? 14 : 18));
   });
-  setText(report.querySelector(".word-cloud"), narrative.wordCloud);
+  setText(report.querySelector(".word-cloud"), compact(narrative.wordCloud, 18));
   report.querySelectorAll(".asset-widget .widget-facts div").forEach((row, index) => {
     setText(row.querySelector("dt"), narrative.assetFacts?.[index]?.[0]);
-    setText(row.querySelector("dd"), narrative.assetFacts?.[index]?.[1]);
+    setText(row.querySelector("dd"), compact(narrative.assetFacts?.[index]?.[1] || "", 8));
   });
   report.querySelectorAll(".black-widget .widget-lines li").forEach((item, index) => setText(item, narrative.lossLines?.[index]));
-  report.querySelectorAll(".luck-widget .fate-strip span").forEach((item, index) => setText(item, narrative.fateStrip?.[index]));
+  report.querySelectorAll(".luck-widget .fate-strip span").forEach((item, index) => setText(item, compact(narrative.fateStrip?.[index] || "", 7)));
   report.querySelectorAll(".radar-widget li").forEach((item, index) => {
     const bar = item.querySelector("span");
     item.textContent = narrative.radar?.[index] || "";
