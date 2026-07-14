@@ -1,11 +1,12 @@
 {
   "name": "onchain-mirror",
-  "version": "2.2.35",
+  "version": "2.2.36",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "node server.mjs",
     "start": "NODE_ENV=production node server.mjs",
+    "build:xiaojing": "npm --prefix apps/xiaojing-ai run build",
     "compile:contracts": "node scripts/compile-contract.cjs",
     "deploy:sepolia": "node scripts/deploy-sepolia.cjs"
   },

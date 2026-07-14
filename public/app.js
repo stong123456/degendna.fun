@@ -8,6 +8,7 @@ const menuButton = document.querySelector(".menu-button");
 const topMoreMenu = document.querySelector("[data-top-more-menu]");
 const navButtons = [...document.querySelectorAll("[data-page-target]")];
 const degenNavButtons = [...document.querySelectorAll("[data-degen-persona-nav]")];
+const xiaojingNavButtons = [...document.querySelectorAll("[data-xiaojing-nav]")];
 const menuPageButtons = [...document.querySelectorAll("[data-menu-page-target]")];
 const routeLinks = [...document.querySelectorAll("[data-route]")];
 
@@ -29,6 +30,7 @@ const I18N = {
     "nav.home": "首页",
     "nav.wallet": "钱包PK",
     "nav.degenPersona": "交易人格自查",
+    "nav.xiaojing": "小镜 AI",
     "nav.rank": "稀有度榜",
     "nav.test": "心理自测中心",
     "nav.about": "关于",
@@ -136,7 +138,7 @@ const I18N = {
     "about.step3Text": "生成可分享的赛博医疗报告。",
     "status.invalid": "请输入有效的 EVM 钱包地址。",
     "status.success": "扫描任务已接收：读取公开链上数据，不连接钱包，不需要签名。",
-    "status.menu": "扩展入口已展开，可进入钱包 PK。",
+    "status.menu": "扩展入口已展开，可进入钱包 PK 与稀有度榜。",
     "status.pk": "会诊完成：两侧钱包已生成链上人格对比。",
     "status.rarity": "排行榜样本已切换。",
     "status.psyche": "心理波动指数已更新。"
@@ -146,6 +148,7 @@ const I18N = {
     "nav.home": "Home",
     "nav.wallet": "Wallet PK",
     "nav.degenPersona": "Trading Persona",
+    "nav.xiaojing": "Xiaojing AI",
     "nav.rank": "Rarity Rank",
     "nav.test": "Psyche Test Center",
     "nav.about": "About",
@@ -253,7 +256,7 @@ const I18N = {
     "about.step3Text": "Generate a shareable cyber-medical report.",
     "status.invalid": "Please enter a valid EVM wallet address.",
     "status.success": "Scan received: reading public onchain data only. No wallet connection or signature needed.",
-    "status.menu": "Expanded menu opened. Wallet PK is available here.",
+    "status.menu": "Expanded menu opened. Wallet PK and Rarity Rank are available here.",
     "status.pk": "Consult complete: wallet comparison generated.",
     "status.rarity": "Leaderboard sample switched.",
     "status.psyche": "Psyche volatility index updated."
@@ -1920,6 +1923,15 @@ navButtons.forEach((button) => {
 
 degenNavButtons.forEach((button) => {
   button.addEventListener("click", startDegenPersonaFromNav);
+});
+
+xiaojingNavButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const url = new URL("/xiaojing/", window.location.origin);
+    url.searchParams.set("source", "degendna");
+    url.searchParams.set("lang", currentLang);
+    window.location.assign(url);
+  });
 });
 
 menuPageButtons.forEach((button) => {

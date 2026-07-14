@@ -5,6 +5,7 @@ import { readFile, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { handleXiaojingApi } from "./xiaojing-api.mjs";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const publicDir = resolve(__dirname, "public");
@@ -28,7 +29,7 @@ const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL || "https://ethereum-sepolia
 const SEPOLIA_MINTER_PRIVATE_KEY = process.env.SEPOLIA_MINTER_PRIVATE_KEY || "";
 const SEPOLIA_NFT_CONTRACT_ADDRESS = process.env.SEPOLIA_NFT_CONTRACT_ADDRESS || "";
 
-const REPORT_VERSION = "20260710-release-v149";
+const REPORT_VERSION = "20260715-xiaojing-v150";
 const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;
 const ANALYZE_CACHE_TTL_MS = 6 * HOUR_MS;
@@ -4255,7 +4256,8 @@ async function handleApi(req, res, pathname, searchParams) {
       integrations: {
         xApi: Boolean(X_BEARER_TOKEN),
         supabase: hasSupabaseLeaderboard(),
-        nftClaims: NFT_CLAIM_ENABLED && hasSupabase() && Boolean(SEPOLIA_NFT_CONTRACT_ADDRESS)
+        nftClaims: NFT_CLAIM_ENABLED && hasSupabase() && Boolean(SEPOLIA_NFT_CONTRACT_ADDRESS),
+        xiaojingAi: true
       },
       chains: [...BLOCKSCOUT_CHAINS.map((chain) => chain.name), BNB_CHAIN.name]
     });
@@ -4406,7 +4408,13 @@ const MIME = {
 };
 
 async function serveStatic(req, res, pathname) {
-  const safePath = pathname === "/" ? "/index.html" : pathname;
+  const safePath = pathname === "/"
+    ? "/index.html"
+    : pathname === "/xiaojing"
+      ? "/xiaojing/index.html"
+      : pathname.endsWith("/")
+        ? `${pathname}index.html`
+        : pathname;
   const target = resolve(join(publicDir, safePath));
   if (!target.startsWith(publicDir)) {
     res.writeHead(403);
@@ -4439,6 +4447,10 @@ async function serveStatic(req, res, pathname) {
 
 const server = createServer(async (req, res) => {
   const url = new URL(req.url || "/", `http://${req.headers.host || "127.0.0.1"}`);
+  if (url.pathname.startsWith("/xiaojing/api/")) {
+    await handleXiaojingApi(req, res, url.pathname);
+    return;
+  }
   if (url.pathname.startsWith("/api/")) {
     await handleApi(req, res, url.pathname, url.searchParams);
     return;

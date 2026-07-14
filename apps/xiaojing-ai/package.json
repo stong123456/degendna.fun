@@ -1,0 +1,21 @@
+{
+  "name": "xiaojing-ai",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node dev.mjs",
+    "build": "vite build --outDir ../../public/xiaojing --emptyOutDir",
+    "preview": "node server.mjs",
+    "check": "node --check server.mjs && vite build"
+  },
+  "dependencies": {
+    "lucide-react": "0.577.0",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "6.0.3",
+    "vite": "8.1.0"
+  }
+}

@@ -6,11 +6,11 @@
     <title>链上照妖镜 - DEGEN DNA REPORT</title>
     <meta
       name="description"
-      content="输入 EVM 钱包地址，生成链上人格报告、钱包 PK、稀有度榜与心理自测。"
+      content="输入 EVM 钱包地址，生成链上人格报告，并使用小镜 AI、交易人格自查、稀有度榜与心理自测。"
     />
     <link rel="icon" type="image/png" href="./assets/degendna-logo-symbol-glass-transparent-crop-v1.png?v=20260710-favicon-v116" />
     <link rel="apple-touch-icon" href="./assets/degendna-logo-symbol-glass-transparent-crop-v1.png?v=20260710-favicon-v116" />
-    <link rel="stylesheet" href="./styles.css?v=20260710-report-detail-v149" />
+    <link rel="stylesheet" href="./styles.css?v=20260715-xiaojing-v150" />
   </head>
   <body data-page="home">
     <main class="terminal-shell" aria-label="链上照妖镜应用">
@@ -29,7 +29,7 @@
           <nav class="primary-nav" aria-label="首页导航">
             <button class="active" type="button" data-page-target="home" data-i18n="nav.home">首页</button>
             <button type="button" data-degen-persona-nav data-i18n="nav.degenPersona">交易人格自查</button>
-            <button type="button" data-page-target="rarity" data-i18n="nav.rank">稀有度榜</button>
+            <button type="button" data-xiaojing-nav data-i18n="nav.xiaojing">小镜 AI</button>
             <button type="button" data-page-target="psyche" data-i18n="nav.test">心理自测中心</button>
             <button type="button" data-page-target="about" data-i18n="nav.about">关于</button>
           </nav>
@@ -53,6 +53,7 @@
             </button>
             <div class="top-more-menu" id="top-more-menu" data-top-more-menu hidden>
               <button type="button" data-menu-page-target="wallet" data-i18n="nav.wallet">钱包PK</button>
+              <button type="button" data-menu-page-target="rarity" data-i18n="nav.rank">稀有度榜</button>
               <a href="https://x.com/Stone141319" target="_blank" rel="noopener noreferrer">X @Stone141319</a>
               <a href="https://app.lhdao.top/?ref=cmkamdijn000cc94wijye0uz7" target="_blank" rel="noopener noreferrer">加入灯塔</a>
               <a href="https://t.me/Stone141319" target="_blank" rel="noopener noreferrer">TG 频道</a>
@@ -172,7 +173,7 @@
           <article>
             <span data-i18n="cap.engine">数据分析引擎</span>
             <b>Onchain Psyche AI</b>
-            <small>v2.2.25</small>
+            <small>v2.2.36</small>
           </article>
           <article>
             <span data-i18n="cap.privacy">隐私保护</span>
@@ -873,6 +874,6 @@
       </section>
     </main>
 
-    <script src="./app.js?v=20260710-report-detail-v149" type="module"></script>
+    <script src="./app.js?v=20260715-xiaojing-v150" type="module"></script>
   </body>
 </html>

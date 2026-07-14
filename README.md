@@ -17,6 +17,13 @@ Open:
 http://127.0.0.1:8787
 ```
 
+小镜 AI 已作为同域应用接入 `/xiaojing/`。可维护源码位于 `apps/xiaojing-ai`；更新其静态构建时运行：
+
+```bash
+npm install --prefix apps/xiaojing-ai
+npm run build:xiaojing
+```
+
 ## API
 
 ```text
@@ -26,6 +33,8 @@ GET /api/leaderboard
 POST /api/leaderboard
 GET /api/x-profile?username=@Stone141319
 GET /api/health
+GET /xiaojing/api/health
+POST /xiaojing/api/chat
 ```
 
 ## Supabase Leaderboard
