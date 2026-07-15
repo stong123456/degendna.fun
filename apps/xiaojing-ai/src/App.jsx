@@ -15,10 +15,12 @@ import {
   Flame,
   Hand,
   HeartPulse,
+  House,
   LifeBuoy,
   LockKeyhole,
   Menu,
   MessageCircle,
+  MessagesSquare,
   Moon,
   RotateCcw,
   Save,
@@ -50,6 +52,14 @@ import {
   readProviderSettings,
   writeProviderSettings
 } from "./providers.js";
+import ClinicHome from "./ClinicHome.jsx";
+import WorkflowRunner from "./WorkflowRunner.jsx";
+import {
+  deriveStatusCard,
+  readWorkflowResults,
+  saveWorkflowResults,
+  WORKFLOWS
+} from "./workflows.js";
 
 const APP_BASE_URL = new URL(import.meta.env.BASE_URL, window.location.href);
 const IS_DEGENDNA_EMBEDDED = window.location.pathname.startsWith("/xiaojing");
@@ -60,9 +70,8 @@ function appUrl(path) {
 }
 
 const MODE_ICONS = {
-  snapshot: Activity,
-  brake: Hand,
-  review: ClipboardCheck,
+  home: House,
+  companion: MessagesSquare,
   persona: BrainCircuit,
   records: LockKeyhole
 };
@@ -477,6 +486,7 @@ function PersonaWorkspace({ onDiscuss }) {
   const [value, setValue] = useState(PERSONA_SAMPLE);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
 
   function analyze() {
     try {
@@ -512,8 +522,22 @@ function PersonaWorkspace({ onDiscuss }) {
               <h2>{result.title}</h2>
               <code>{result.code}</code>
               <p>{result.summary}</p>
-              <div><b>下一步</b><p>{result.action}</p></div>
+              <div className="persona-guidance">
+                <p><b>最容易上头</b>{result.trigger}</p>
+                <p><b>最容易亏钱</b>{result.lossState}</p>
+                <p><b>适合的冷静流程</b>{result.cooling}</p>
+                <p><b>交易前提醒</b>{result.preTrade}</p>
+                <p><b>交易后复盘</b>{result.postTrade}</p>
+              </div>
               <button type="button" onClick={() => onDiscuss(`我想复盘“${result.title}”这个结果。${result.summary}`)}>和小镜继续聊 <ChevronRight size={16} /></button>
+              <button type="button" onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(result.shareText);
+                  setCopied(true);
+                } catch {
+                  setCopied(false);
+                }
+              }}><Save size={15} /> {copied ? "分享文案已复制" : "复制人格分享文案"}</button>
             </>
           ) : (
             <div className="empty-state"><BrainCircuit size={36} /><p>导入结果后，这里会生成不贴标签、不做诊断的行为解释。</p></div>
@@ -525,7 +549,8 @@ function PersonaWorkspace({ onDiscuss }) {
   );
 }
 
-function RecordsWorkspace({ records, onClear, onResume }) {
+function RecordsWorkspace({ records, workflowResults, onClear, onResume, onViewResult }) {
+  const total = records.length + workflowResults.length;
   return (
     <main className="tool-workspace records-workspace">
       <header>
@@ -534,10 +559,18 @@ function RecordsWorkspace({ records, onClear, onResume }) {
         <p>只有你主动保存的复盘才会出现在这里。</p>
       </header>
       <div className="records-toolbar">
-        <span>{records.length} 条本机记录</span>
-        <button type="button" onClick={onClear} disabled={!records.length}><Trash2 size={15} /> 清除全部</button>
+        <span>{total} 条本机记录</span>
+        <button type="button" onClick={onClear} disabled={!total}><Trash2 size={15} /> 清除全部</button>
       </div>
       <section className="record-list">
+        {workflowResults.map((result) => (
+          <article key={result.id} className="workflow-record">
+            <header><span>{result.title}</span><time>{timeLabel(result.createdAt)}</time></header>
+            <p><b>{result.scoreLabel}</b>{result.score}/100</p>
+            <p><b>小镜整理</b>{result.verdict}</p>
+            <button type="button" onClick={() => onViewResult(result)}>查看结果卡 <ChevronRight size={15} /></button>
+          </article>
+        ))}
         {records.length ? records.map((record) => (
           <article key={record.id}>
             <header><span>{record.mode}</span><time>{timeLabel(record.timestamp)}</time></header>
@@ -545,9 +578,9 @@ function RecordsWorkspace({ records, onClear, onResume }) {
             <p><b>小镜整理</b>{record.assistant}</p>
             <button type="button" onClick={() => onResume(record)}>继续复盘 <ChevronRight size={15} /></button>
           </article>
-        )) : (
+        )) : !workflowResults.length ? (
           <div className="empty-state"><LockKeyhole size={38} /><p>还没有保存记录。你可以在任意一段小镜回复下点击“保存这段复盘”。</p></div>
-        )}
+        ) : null}
       </section>
     </main>
   );
@@ -582,6 +615,7 @@ function SafetyWorkspace({ onReturn }) {
                 <li><b>联系紧急帮助</b><span>立即拨打当地紧急服务或前往最近的急诊。</span></li>
                 <li><b>联系可信任的人</b><span>直接告诉对方：“我现在不安全，需要你陪着我。”</span></li>
                 <li><b>远离危险条件</b><span>离开可能造成伤害的物品或地点，不要独处。</span></li>
+                <li><b>保持连接</b><span>在现实支持到达前，和可信任的人保持通话或待在一起。</span></li>
               </>
             ) : (
               <>
@@ -593,6 +627,7 @@ function SafetyWorkspace({ onReturn }) {
           </ol>
           <div className="safety-actions">
             <a href="https://findahelpline.com" target="_blank" rel="noreferrer">查找所在地区危机热线 <ExternalLink size={15} /></a>
+            <a href="https://988lifeline.org" target="_blank" rel="noreferrer">美国：拨打或短信 988 <ExternalLink size={15} /></a>
             <button type="button" onClick={onReturn}>确认安全后返回对话</button>
           </div>
           <p>如果你无法自己完成这些步骤，请把这个页面直接给身边的人看。</p>
@@ -622,7 +657,9 @@ function PrivacyDialog({ open, onClose }) {
 }
 
 export default function App() {
-  const [activeMode, setActiveMode] = useState("snapshot");
+  const [activeMode, setActiveMode] = useState("home");
+  const [workflowId, setWorkflowId] = useState(null);
+  const [visibleResult, setVisibleResult] = useState(null);
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -633,6 +670,7 @@ export default function App() {
   const [providerSettings, setProviderSettings] = useState(readProviderSettings);
   const [observation, setObservation] = useState({ urge: 4, body: "待观察", action: "说清此刻" });
   const [records, setRecords] = useState(readRecords);
+  const [workflowResults, setWorkflowResults] = useState(readWorkflowResults);
   const [pauseRemaining, setPauseRemaining] = useState(0);
 
   useEffect(() => {
@@ -643,7 +681,8 @@ export default function App() {
     return () => window.clearInterval(timer);
   }, [pauseRemaining]);
 
-  const isToolMode = ["persona", "records", "safety"].includes(activeMode);
+  const isToolMode = ["home", "workflow", "persona", "records", "safety"].includes(activeMode);
+  const statusCard = useMemo(() => deriveStatusCard(workflowResults), [workflowResults]);
 
   const providerReady = useMemo(() => Boolean(
     providerSettings.apiKey && providerSettings.baseUrl && providerSettings.model
@@ -722,11 +761,63 @@ export default function App() {
 
   function switchMode(mode) {
     setActiveMode(mode);
+    setWorkflowId(null);
+    setVisibleResult(null);
     setMobileMenuOpen(false);
-    if (mode === "brake") {
-      setObservation({ urge: 7, body: "待校准", action: "完成三句检查" });
-    } else if (mode === "review") {
-      setObservation({ urge: 5, body: "回看中", action: "复盘三个事实" });
+  }
+
+  function startWorkflow(id) {
+    if (!WORKFLOWS[id]) return;
+    setWorkflowId(id);
+    setVisibleResult(null);
+    setActiveMode("workflow");
+    setMobileMenuOpen(false);
+    setObservation({ urge: id === "fomo" || id === "loss" ? 8 : 5, body: "流程进行中", action: "一次回答一个问题" });
+  }
+
+  function handleScenario(scenario) {
+    if (scenario.action === "persona") {
+      window.location.href = IS_DEGENDNA_EMBEDDED ? "/#psyche" : "https://degendna.fun/#psyche";
+      return;
+    }
+    if (scenario.action === "safety") {
+      switchMode("safety");
+      return;
+    }
+    startWorkflow(scenario.workflow);
+  }
+
+  function handleTool(tool) {
+    if (tool.id === "latest" && (tool.result || workflowResults[0])) {
+      const result = tool.result || workflowResults[0];
+      setVisibleResult(result);
+      setWorkflowId(result.workflowId);
+      setActiveMode("workflow");
+      return;
+    }
+    if (tool.external === "persona") {
+      window.location.href = IS_DEGENDNA_EMBEDDED ? "/#psyche" : "https://degendna.fun/#psyche";
+      return;
+    }
+    if (tool.external === "mental") {
+      window.location.href = IS_DEGENDNA_EMBEDDED ? "/#mental" : "https://degendna.fun/#mental";
+      return;
+    }
+    startWorkflow(tool.id);
+  }
+
+  function completeWorkflow(result) {
+    const next = [result, ...workflowResults].slice(0, 50);
+    setWorkflowResults(next);
+    setObservation({
+      urge: Math.max(1, Math.min(10, Math.round(result.score / 10))),
+      body: result.score >= 70 ? "负荷偏高" : "已完成扫描",
+      action: result.action
+    });
+    try {
+      saveWorkflowResults(next);
+    } catch {
+      setStatus("当前浏览器不允许保存本地结果，但本次结果仍可查看。");
     }
   }
 
@@ -760,8 +851,10 @@ export default function App() {
 
   function clearRecords() {
     setRecords([]);
+    setWorkflowResults([]);
     try {
       localStorage.removeItem(RECORDS_KEY);
+      saveWorkflowResults([]);
     } catch {
       setStatus("当前浏览器不允许清除本地记录。");
     }
@@ -773,7 +866,7 @@ export default function App() {
       { id: crypto.randomUUID(), role: "user", content: record.user, timestamp: Date.now() },
       { id: crypto.randomUUID(), role: "assistant", content: record.assistant, timestamp: Date.now() }
     ]);
-    setActiveMode("review");
+    setActiveMode("companion");
   }
 
   function resetSession() {
@@ -782,12 +875,21 @@ export default function App() {
     setStatus("");
     setPauseRemaining(0);
     setObservation({ urge: 4, body: "待观察", action: "说清此刻" });
-    setActiveMode("snapshot");
+    setWorkflowId(null);
+    setVisibleResult(null);
+    setActiveMode("home");
   }
 
   function discussPersona(text) {
-    setActiveMode("snapshot");
-    window.setTimeout(() => sendMessage(text, "snapshot"), 0);
+    setActiveMode("companion");
+    window.setTimeout(() => sendMessage(text, "companion"), 0);
+  }
+
+  function discussResult(result) {
+    setActiveMode("companion");
+    setWorkflowId(null);
+    setVisibleResult(null);
+    window.setTimeout(() => sendMessage(`我刚完成“${result.title}”。结果是：${result.verdict} 建议动作：${result.action} 请帮我继续整理，但不要给投资建议。`, "companion"), 0);
   }
 
   return (
@@ -815,7 +917,7 @@ export default function App() {
         </div>
       </header>
 
-      <div className="app-body">
+      <div className={`app-body ${activeMode === "companion" ? "" : "without-observation"}`}>
         <nav className={`side-nav ${mobileMenuOpen ? "is-open" : ""}`} aria-label="主要功能">
           <div>
             {MODES.map((mode) => {
@@ -839,10 +941,36 @@ export default function App() {
         </nav>
 
         <section className={`main-stage ${isToolMode ? "tool-mode" : ""}`}>
+          {activeMode === "home" ? (
+            <ClinicHome
+              statusCard={statusCard}
+              latestResult={workflowResults[0]}
+              onScenario={handleScenario}
+              onTool={handleTool}
+            />
+          ) : null}
+          {activeMode === "workflow" && workflowId ? (
+            <WorkflowRunner
+              key={`${workflowId}-${visibleResult?.id || "new"}`}
+              workflowId={workflowId}
+              existingResult={visibleResult}
+              onComplete={completeWorkflow}
+              onBack={() => switchMode("home")}
+              onDiscuss={discussResult}
+            />
+          ) : null}
           {activeMode === "persona" ? <PersonaWorkspace onDiscuss={discussPersona} /> : null}
-          {activeMode === "records" ? <RecordsWorkspace records={records} onClear={clearRecords} onResume={resumeRecord} /> : null}
-          {activeMode === "safety" ? <SafetyWorkspace onReturn={() => switchMode("snapshot")} /> : null}
-          {!isToolMode ? (
+          {activeMode === "records" ? (
+            <RecordsWorkspace
+              records={records}
+              workflowResults={workflowResults}
+              onClear={clearRecords}
+              onResume={resumeRecord}
+              onViewResult={(result) => handleTool({ id: "latest", result })}
+            />
+          ) : null}
+          {activeMode === "safety" ? <SafetyWorkspace onReturn={() => switchMode("companion")} /> : null}
+          {activeMode === "companion" ? (
             <ChatWorkspace
               activeMode={activeMode}
               messages={messages}
@@ -859,12 +987,14 @@ export default function App() {
           ) : null}
         </section>
 
-        <ObservationRail
-          observation={observation}
-          onOpenSettings={() => setSettingsOpen(true)}
-          providerSettings={providerSettings}
-          pauseRemaining={pauseRemaining}
-        />
+        {activeMode === "companion" ? (
+          <ObservationRail
+            observation={observation}
+            onOpenSettings={() => setSettingsOpen(true)}
+            providerSettings={providerSettings}
+            pauseRemaining={pauseRemaining}
+          />
+        ) : null}
       </div>
 
       <nav className="bottom-nav" aria-label="移动端主要功能">

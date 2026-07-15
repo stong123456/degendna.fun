@@ -1,7 +1,6 @@
 export const MODES = [
-  { id: "snapshot", label: "情绪快照", description: "先说清此刻发生了什么" },
-  { id: "brake", label: "冲动刹车", description: "下单前把冲动和计划分开" },
-  { id: "review", label: "交易复盘", description: "复盘过程，不审判结果" },
+  { id: "home", label: "情绪急诊台", description: "从当前状态进入固定流程" },
+  { id: "companion", label: "和小镜聊聊", description: "开放对话与结果追问" },
   { id: "persona", label: "人格解读", description: "读懂交易习惯，不给你贴死标签" },
   { id: "records", label: "私密记录", description: "只保存在当前设备" }
 ];
@@ -56,7 +55,7 @@ export function buildSystemPrompt(mode = "snapshot") {
 共情一句 -> 帮用户整理 -> 一个小行动或一个问题。`;
 }
 
-export function localCompanionReply(text, mode = "snapshot") {
+export function localCompanionReply(text, mode = "companion") {
   const value = String(text || "").trim();
   const urge = urgencyFromText(value);
 
@@ -78,20 +77,6 @@ export function localCompanionReply(text, mode = "snapshot") {
     return {
       text: "身体已经在催你收盘，行情却还在占用你的注意力。先把提醒静音 20 分钟，手机放到够不到的地方；今晚的任务不是抓住波动，是把睡眠还给自己。",
       observation: { urge: Math.max(urge, 6), body: "疲惫", action: "静音并离屏 20 分钟" }
-    };
-  }
-
-  if (mode === "review") {
-    return {
-      text: "先不评价赚亏。请只写三个事实：你为什么进场、什么信号本该让你离场、实际动作和计划差在哪里。写完后，我们再找下一次最值得保留的一条规则。",
-      observation: { urge, body: "回看中", action: "写下三个事实" }
-    };
-  }
-
-  if (mode === "brake") {
-    return {
-      text: "我先替你按住那只想点确认的手。把这笔交易的最大可承受损失、退出条件和“不做也没关系”的理由各写一句；写不出来，就先不下单。",
-      observation: { urge: Math.max(urge, 7), body: "待校准", action: "完成三句检查" }
     };
   }
 
@@ -129,13 +114,32 @@ export function personaInterpretation(payload) {
     .map((item) => item.name || item.key)
     .filter(Boolean);
 
+  const title = type;
+  const trigger = /FOMO|冲锋|追高|短跑/i.test(type)
+    ? "行情突然加速、群聊同时变热时"
+    : /回撤|纸手|避难|恐惧/i.test(type)
+      ? "浮亏扩大、价格快速回撤时"
+      : /深夜|熬夜/i.test(type)
+        ? "疲惫、睡眠不足却还在看盘时"
+        : "计划被突发波动打断时";
+  const lossState = /FOMO|冲锋|追高|短跑/i.test(type)
+    ? "最容易在没有完整退出条件时追入"
+    : /纸手|恐惧|避难/i.test(type)
+      ? "最容易为了立即解除焦虑而提前退出"
+      : "最容易在情绪负荷升高时偏离原计划";
+
   return {
-    title: type,
+    title,
     code,
     summary: strongest.length
       ? `你当前最突出的反应维度是${strongest.join("和")}。这表示压力上来时，你更容易调用这套反应，不代表你永远如此。`
       : "这份结果更适合用来发现交易中的自动反应，而不是给自己贴一个固定标签。",
-    action: "选一个最近最常失控的场景，为它写一条可执行的暂停规则。"
+    trigger,
+    lossState,
+    cooling: /FOMO|冲锋|追高|短跑/i.test(type) ? "FOMO 冷静器" : "交易复盘卡",
+    preTrade: "入场前先写退出条件；写不出来，就先不点确认。",
+    postTrade: "复盘原计划、实际动作和一个最小改进，不用盈亏评价自己。",
+    action: "选一个最近最常失控的场景，为它写一条可执行的暂停规则。",
+    shareText: `我的 Degen 交易人格是“${title}”。人格不是命运，至少今天先让计划替我点确认。degendna.fun`
   };
 }
-
