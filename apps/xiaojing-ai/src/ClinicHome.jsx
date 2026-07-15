@@ -2,6 +2,7 @@ import {
   Activity,
   AlertTriangle,
   BrainCircuit,
+  BookOpenCheck,
   ChartNoAxesCombined,
   ChevronRight,
   ClipboardCheck,
@@ -34,6 +35,7 @@ const SCENARIO_ICONS = {
 };
 
 const TOOL_ITEMS = [
+  { id: "discipline", title: "小镜纪律协议", note: "交易前检查与行为证据", icon: BookOpenCheck, action: "discipline" },
   { id: "fomo", title: "3 分钟冷静器", note: "把冲动和计划拆开", icon: Clock3 },
   { id: "review", title: "交易复盘卡", note: "复盘过程，不审判结果", icon: ClipboardCheck },
   { id: "snapshot", title: "今日情绪快照", note: "60 秒记录交易负荷", icon: HeartPulse },
@@ -41,7 +43,7 @@ const TOOL_ITEMS = [
   { id: "mental", title: "心理自测中心", note: "私密、不绑定钱包、不上榜", icon: ShieldCheck, external: "mental" }
 ];
 
-export default function ClinicHome({ statusCard, latestResult, onScenario, onTool }) {
+export default function ClinicHome({ statusCard, latestResult, disciplineStats, onScenario, onTool, onOpenDiscipline }) {
   return (
     <main className="clinic-home">
       <section className="clinic-intro">
@@ -52,6 +54,9 @@ export default function ClinicHome({ statusCard, latestResult, onScenario, onToo
           <div className="intro-actions">
             <button type="button" className="clinic-primary" onClick={() => onScenario(SCENARIOS[0])}>
               <Hand size={19} /> 开始 3 分钟冷静检查 <ChevronRight size={18} />
+            </button>
+            <button type="button" className="discipline-entry" onClick={onOpenDiscipline}>
+              <BookOpenCheck size={17} /> 我的纪律协议
             </button>
             <span><EyeOff size={15} /> 默认只保存在当前设备</span>
           </div>
@@ -66,6 +71,7 @@ export default function ClinicHome({ statusCard, latestResult, onScenario, onToo
             <div><dt>交易人格</dt><dd>{statusCard.persona}</dd></div>
             <div><dt>最近触发点</dt><dd>{statusCard.trigger}</dd></div>
             <div><dt>建议动作</dt><dd>{statusCard.action}</dd></div>
+            <div><dt>纪律轨迹</dt><dd>{disciplineStats.total ? `${disciplineStats.total} 次检查 · ${disciplineStats.adherence}% 执行率` : "等待第一次交易前检查"}</dd></div>
             <div><dt>上次复盘</dt><dd>{statusCard.updatedAt}</dd></div>
           </dl>
           {latestResult ? (

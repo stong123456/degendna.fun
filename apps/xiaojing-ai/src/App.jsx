@@ -3,6 +3,7 @@ import {
   Activity,
   AlertTriangle,
   BrainCircuit,
+  BookOpenCheck,
   Check,
   CheckCircle2,
   ChevronDown,
@@ -53,7 +54,16 @@ import {
   writeProviderSettings
 } from "./providers.js";
 import ClinicHome from "./ClinicHome.jsx";
+import DisciplineWorkspace from "./DisciplineWorkspace.jsx";
 import WorkflowRunner from "./WorkflowRunner.jsx";
+import {
+  completeDisciplineCheck,
+  deriveDisciplineStats,
+  readDisciplineChecks,
+  readDisciplineRules,
+  saveDisciplineChecks,
+  saveDisciplineRules
+} from "./discipline.js";
 import {
   deriveStatusCard,
   readWorkflowResults,
@@ -71,6 +81,7 @@ function appUrl(path) {
 
 const MODE_ICONS = {
   home: House,
+  discipline: BookOpenCheck,
   companion: MessagesSquare,
   persona: BrainCircuit,
   records: LockKeyhole
@@ -662,8 +673,8 @@ function PersonaWorkspace({ onDiscuss }) {
   );
 }
 
-function RecordsWorkspace({ records, workflowResults, onClear, onResume, onViewResult }) {
-  const total = records.length + workflowResults.length;
+function RecordsWorkspace({ records, workflowResults, disciplineChecks, onClear, onResume, onViewResult, onOpenDiscipline }) {
+  const total = records.length + workflowResults.length + disciplineChecks.length;
   return (
     <main className="tool-workspace records-workspace">
       <header>
@@ -676,6 +687,14 @@ function RecordsWorkspace({ records, workflowResults, onClear, onResume, onViewR
         <button type="button" onClick={onClear} disabled={!total}><Trash2 size={15} /> 清除全部</button>
       </div>
       <section className="record-list">
+        {disciplineChecks.map((check) => (
+          <article key={check.id} className="discipline-record">
+            <header><span>纪律协议 · {check.trigger}</span><time>{timeLabel(check.completedAt || check.createdAt)}</time></header>
+            <p><b>冲动变化</b>{check.urgeBefore}/10 → {check.urgeAfter}/10</p>
+            <p><b>执行结果</b>{check.followed ? "执行了自己的协议" : "本次偏离了协议"} · {check.outcome}</p>
+            <button type="button" onClick={onOpenDiscipline}>查看行为账本 <ChevronRight size={15} /></button>
+          </article>
+        ))}
         {workflowResults.map((result) => (
           <article key={result.id} className="workflow-record">
             <header><span>{result.title}</span><time>{timeLabel(result.createdAt)}</time></header>
@@ -784,6 +803,8 @@ export default function App() {
   const [observation, setObservation] = useState({ urge: 4, body: "待观察", action: "说清此刻" });
   const [records, setRecords] = useState(readRecords);
   const [workflowResults, setWorkflowResults] = useState(readWorkflowResults);
+  const [disciplineRules, setDisciplineRules] = useState(readDisciplineRules);
+  const [disciplineChecks, setDisciplineChecks] = useState(readDisciplineChecks);
   const [latestPersona] = useState(readLatestDegenPersona);
   const [pauseRemaining, setPauseRemaining] = useState(0);
 
@@ -795,10 +816,14 @@ export default function App() {
     return () => window.clearInterval(timer);
   }, [pauseRemaining]);
 
-  const isToolMode = ["home", "workflow", "persona", "records", "safety"].includes(activeMode);
+  const isToolMode = ["home", "workflow", "discipline", "persona", "records", "safety"].includes(activeMode);
   const statusCard = useMemo(
     () => deriveStatusCard(workflowResults, latestPersona?.type || "尚未接入"),
     [workflowResults, latestPersona]
+  );
+  const disciplineStats = useMemo(
+    () => deriveDisciplineStats(disciplineChecks, disciplineRules),
+    [disciplineChecks, disciplineRules]
   );
 
   const providerReady = useMemo(() => Boolean(
@@ -905,6 +930,10 @@ export default function App() {
   }
 
   function handleTool(tool) {
+    if (tool.id === "discipline" || tool.action === "discipline") {
+      switchMode("discipline");
+      return;
+    }
     if (tool.id === "latest" && (tool.result || workflowResults[0])) {
       const result = tool.result || workflowResults[0];
       setVisibleResult(result);
@@ -935,6 +964,41 @@ export default function App() {
       saveWorkflowResults(next);
     } catch {
       setStatus("当前浏览器不允许保存本地结果，但本次结果仍可查看。");
+    }
+  }
+
+  function updateDisciplineRules(nextRules) {
+    setDisciplineRules(nextRules);
+    try {
+      saveDisciplineRules(nextRules);
+    } catch {
+      setStatus("当前浏览器不允许保存纪律协议。");
+    }
+  }
+
+  function completeDiscipline(evaluation, outcome) {
+    const completed = completeDisciplineCheck(evaluation, outcome);
+    const next = [completed, ...disciplineChecks].slice(0, 100);
+    setDisciplineChecks(next);
+    setObservation({
+      urge: completed.urgeAfter,
+      body: completed.followed ? "已执行协议" : "本次有偏离",
+      action: completed.outcome
+    });
+    try {
+      saveDisciplineChecks(next);
+    } catch {
+      setStatus("当前浏览器不允许保存行为证据，但本次结果仍可查看。");
+    }
+  }
+
+  function deleteDisciplineCheck(id) {
+    const next = disciplineChecks.filter((check) => check.id !== id);
+    setDisciplineChecks(next);
+    try {
+      saveDisciplineChecks(next);
+    } catch {
+      setStatus("当前浏览器不允许删除这条行为证据。");
     }
   }
 
@@ -969,9 +1033,11 @@ export default function App() {
   function clearRecords() {
     setRecords([]);
     setWorkflowResults([]);
+    setDisciplineChecks([]);
     try {
       localStorage.removeItem(RECORDS_KEY);
       saveWorkflowResults([]);
+      saveDisciplineChecks([]);
     } catch {
       setStatus("当前浏览器不允许清除本地记录。");
     }
@@ -1062,8 +1128,10 @@ export default function App() {
             <ClinicHome
               statusCard={statusCard}
               latestResult={workflowResults[0]}
+              disciplineStats={disciplineStats}
               onScenario={handleScenario}
               onTool={handleTool}
+              onOpenDiscipline={() => switchMode("discipline")}
             />
           ) : null}
           {activeMode === "workflow" && workflowId ? (
@@ -1076,14 +1144,27 @@ export default function App() {
               onDiscuss={discussResult}
             />
           ) : null}
+          {activeMode === "discipline" ? (
+            <DisciplineWorkspace
+              rules={disciplineRules}
+              checks={disciplineChecks}
+              latestResult={workflowResults[0]}
+              onRulesChange={updateDisciplineRules}
+              onCheckComplete={completeDiscipline}
+              onDeleteCheck={deleteDisciplineCheck}
+              onBack={() => switchMode("home")}
+            />
+          ) : null}
           {activeMode === "persona" ? <PersonaWorkspace onDiscuss={discussPersona} /> : null}
           {activeMode === "records" ? (
             <RecordsWorkspace
               records={records}
               workflowResults={workflowResults}
+              disciplineChecks={disciplineChecks}
               onClear={clearRecords}
               onResume={resumeRecord}
               onViewResult={(result) => handleTool({ id: "latest", result })}
+              onOpenDiscipline={() => switchMode("discipline")}
             />
           ) : null}
           {activeMode === "safety" ? <SafetyWorkspace onReturn={() => switchMode("companion")} /> : null}
