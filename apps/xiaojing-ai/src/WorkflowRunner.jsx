@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   ArrowLeft,
   Check,
@@ -94,17 +94,13 @@ export default function WorkflowRunner({ workflowId, existingResult, onComplete,
   const [answers, setAnswers] = useState({});
   const [draft, setDraft] = useState("");
   const [result, setResult] = useState(existingResult || null);
+  const [advancing, setAdvancing] = useState(false);
 
   const question = workflow?.questions[step];
   const progress = workflow ? Math.round(((step + 1) / workflow.questions.length) * 100) : 0;
   const currentAnswer = question ? answers[question.id] : null;
   const isText = question?.type === "text";
   const ready = isText ? draft.trim().length > 0 : Boolean(currentAnswer);
-
-  const summary = useMemo(() => Object.entries(answers).map(([id, value]) => ({
-    label: workflow?.questions.find((item) => item.id === id)?.label,
-    value: answerLabel(value)
-  })), [answers, workflow]);
 
   if (result) {
     return (
@@ -117,6 +113,7 @@ export default function WorkflowRunner({ workflowId, existingResult, onComplete,
           setAnswers({});
           setDraft("");
           setResult(null);
+          setAdvancing(false);
         }}
       />
     );
@@ -124,23 +121,37 @@ export default function WorkflowRunner({ workflowId, existingResult, onComplete,
 
   if (!workflow || !question) return null;
 
-  function choose(option) {
-    setAnswers((current) => ({ ...current, [question.id]: option }));
-  }
-
-  function next() {
-    if (!ready) return;
-    const nextAnswers = isText ? { ...answers, [question.id]: draft.trim() } : answers;
+  function completeStep(nextAnswers) {
     if (step < workflow.questions.length - 1) {
       setAnswers(nextAnswers);
       setStep((current) => current + 1);
       setDraft("");
+      setAdvancing(false);
       return;
     }
     const nextResult = calculateWorkflowResult(workflow.id, nextAnswers);
+    const summary = Object.entries(nextAnswers).map(([id, value]) => ({
+      label: workflow.questions.find((item) => item.id === id)?.label,
+      value: answerLabel(value)
+    }));
     setAnswers(nextAnswers);
     setResult(nextResult);
+    setAdvancing(false);
     onComplete(nextResult, summary);
+  }
+
+  function choose(option) {
+    if (advancing) return;
+    const nextAnswers = { ...answers, [question.id]: option };
+    setAdvancing(true);
+    setAnswers(nextAnswers);
+    window.setTimeout(() => completeStep(nextAnswers), 140);
+  }
+
+  function next() {
+    if (!isText || !ready || advancing) return;
+    setAdvancing(true);
+    completeStep({ ...answers, [question.id]: draft.trim() });
   }
 
   function previous() {
@@ -192,7 +203,7 @@ export default function WorkflowRunner({ workflowId, existingResult, onComplete,
             {question.options.map((option) => {
               const active = answerLabel(currentAnswer) === answerLabel(option);
               return (
-                <button type="button" className={active ? "active" : ""} key={answerLabel(option)} onClick={() => choose(option)}>
+                <button type="button" className={active ? "active" : ""} key={answerLabel(option)} onClick={() => choose(option)} disabled={advancing}>
                   <i>{active ? <Check size={15} /> : null}</i>
                   <span>{answerLabel(option)}</span>
                 </button>
@@ -205,9 +216,11 @@ export default function WorkflowRunner({ workflowId, existingResult, onComplete,
       <footer className="workflow-controls">
         <button type="button" onClick={previous}><ChevronLeft size={17} /> {step === 0 ? "退出" : "上一题"}</button>
         <p>如实回答比“答得正确”更有用。</p>
-        <button type="button" className="clinic-primary" disabled={!ready} onClick={next}>
-          {step === workflow.questions.length - 1 ? "生成复盘卡" : "下一题"} <ChevronRight size={17} />
-        </button>
+        {isText ? (
+          <button type="button" className="clinic-primary" disabled={!ready || advancing} onClick={next}>
+            {step === workflow.questions.length - 1 ? "生成复盘卡" : "下一题"} <ChevronRight size={17} />
+          </button>
+        ) : <span className="workflow-control-spacer" aria-hidden="true" />}
       </footer>
     </main>
   );

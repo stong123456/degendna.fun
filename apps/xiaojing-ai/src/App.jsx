@@ -98,6 +98,48 @@ const PERSONA_SAMPLE = JSON.stringify({
   }
 }, null, 2);
 
+const DEGEN_PERSONA_RECORDS_KEY = "degendna:mental-records:v1";
+const PERSONA_DIMENSION_NAMES = [
+  "机会敏感度",
+  "决策果断性",
+  "资金管理力",
+  "风险承受力",
+  "耐心与纪律",
+  "情绪稳定性"
+];
+
+function normalizePersonaPayload(payload = {}) {
+  const sourceDimensions = payload.dimensions || {};
+  const dimensions = Object.fromEntries(PERSONA_DIMENSION_NAMES.map((name) => {
+    const matched = Array.isArray(sourceDimensions)
+      ? sourceDimensions.find((item) => item.name === name || item.key === name)
+      : null;
+    const value = matched?.score ?? matched?.strength ?? sourceDimensions[name] ?? 0;
+    return [name, Math.max(-100, Math.min(100, Number(value) || 0))];
+  }));
+  return {
+    type: payload.type?.name || payload.type || payload.name || "均衡复盘型",
+    code: payload.code || "未提供代码",
+    dimensions
+  };
+}
+
+function readLatestDegenPersona() {
+  try {
+    const records = JSON.parse(localStorage.getItem(DEGEN_PERSONA_RECORDS_KEY) || "[]");
+    const record = records.find((item) => item.mode === "Degen 交易人格自查");
+    if (!record) return null;
+    const legacyCode = record.summaries?.find((item) => item.title === "交易人格代码")?.display;
+    return normalizePersonaPayload(record.persona || {
+      type: record.headline,
+      code: legacyCode,
+      dimensions: {}
+    });
+  } catch {
+    return null;
+  }
+}
+
 function readRecords() {
   try {
     return JSON.parse(localStorage.getItem(RECORDS_KEY) || "[]");
@@ -483,18 +525,51 @@ function ChatWorkspace({
 }
 
 function PersonaWorkspace({ onDiscuss }) {
+  const [form, setForm] = useState(() => normalizePersonaPayload(JSON.parse(PERSONA_SAMPLE)));
   const [value, setValue] = useState(PERSONA_SAMPLE);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [sourceStatus, setSourceStatus] = useState("正在查找最近一次交易人格结果…");
 
-  function analyze() {
+  useEffect(() => {
+    loadLatestPersona(true);
+  }, []);
+
+  function updateForm(next) {
+    setForm(next);
+    setCopied(false);
+  }
+
+  function loadLatestPersona(silent = false) {
+    const latest = readLatestDegenPersona();
+    if (!latest) {
+      setSourceStatus("当前设备还没有可读取的交易人格结果");
+      if (!silent) setError("先完成一次 DegenDNA 交易人格自查，回来后即可一键读取。");
+      return;
+    }
+    updateForm(latest);
+    setValue(JSON.stringify(latest, null, 2));
+    setResult(personaInterpretation(latest));
+    setSourceStatus("已读取当前设备最近一次交易人格结果");
+    setError("");
+  }
+
+  function analyzeForm() {
+    setResult(personaInterpretation(form));
+    setValue(JSON.stringify(form, null, 2));
+    setError("");
+  }
+
+  function analyzeJson() {
     try {
-      const payload = JSON.parse(value);
+      const payload = normalizePersonaPayload(JSON.parse(value));
+      updateForm(payload);
       setResult(personaInterpretation(payload));
+      setSourceStatus("已从高级 JSON 导入更新结果");
       setError("");
     } catch {
-      setError("JSON 格式无法读取。可以先使用示例，再替换人格代码和六维结果。");
+      setError("JSON 格式无法读取，请检查括号、引号和数字格式。");
     }
   }
 
@@ -507,13 +582,51 @@ function PersonaWorkspace({ onDiscuss }) {
       </header>
       <div className="persona-layout">
         <section className="import-panel">
-          <label htmlFor="persona-json">粘贴 DegenDNA 人格结果 JSON</label>
-          <textarea id="persona-json" value={value} onChange={(event) => setValue(event.target.value)} />
-          {error ? <p className="form-error">{error}</p> : null}
-          <div>
-            <button type="button" className="primary-outline" onClick={analyze}>生成温和解读</button>
-            <a href="https://degendna.fun/#psyche" target="_blank" rel="noreferrer">前往交易人格自查 <ExternalLink size={14} /></a>
+          <div className="persona-source-card">
+            <span><Activity size={17} /> {sourceStatus}</span>
+            <div>
+              <button type="button" onClick={() => loadLatestPersona(false)}><RotateCcw size={15} /> 读取最近结果</button>
+              <a href={IS_DEGENDNA_EMBEDDED ? "/#psyche" : "https://degendna.fun/#psyche"}>重新测 48 题 <ExternalLink size={14} /></a>
+            </div>
           </div>
+
+          <div className="persona-basic-fields">
+            <label>人格名称
+              <input value={form.type} onChange={(event) => updateForm({ ...form, type: event.target.value })} />
+            </label>
+            <label>人格代码
+              <input value={form.code} onChange={(event) => updateForm({ ...form, code: event.target.value })} />
+            </label>
+          </div>
+
+          <div className="persona-dimension-editor">
+            {PERSONA_DIMENSION_NAMES.map((name) => (
+              <label key={name}>
+                <span>{name}<output>{form.dimensions[name]}</output></span>
+                <input
+                  type="range"
+                  min="-100"
+                  max="100"
+                  step="1"
+                  value={form.dimensions[name]}
+                  onChange={(event) => updateForm({
+                    ...form,
+                    dimensions: { ...form.dimensions, [name]: Number(event.target.value) }
+                  })}
+                />
+              </label>
+            ))}
+          </div>
+
+          {error ? <p className="form-error">{error}</p> : null}
+          <button type="button" className="primary-outline persona-analyze" onClick={analyzeForm}>更新人格解读</button>
+
+          <details className="persona-advanced-import">
+            <summary><SlidersHorizontal size={14} /> 高级 JSON 导入</summary>
+            <label htmlFor="persona-json">人格结果 JSON</label>
+            <textarea id="persona-json" value={value} onChange={(event) => setValue(event.target.value)} />
+            <button type="button" onClick={analyzeJson}>导入 JSON</button>
+          </details>
         </section>
         <section className="persona-result" aria-live="polite">
           {result ? (
@@ -540,7 +653,7 @@ function PersonaWorkspace({ onDiscuss }) {
               }}><Save size={15} /> {copied ? "分享文案已复制" : "复制人格分享文案"}</button>
             </>
           ) : (
-            <div className="empty-state"><BrainCircuit size={36} /><p>导入结果后，这里会生成不贴标签、不做诊断的行为解释。</p></div>
+            <div className="empty-state"><BrainCircuit size={36} /><p>读取最近结果或调整六维分数后，这里会生成不贴标签、不做诊断的行为解释。</p></div>
           )}
         </section>
       </div>
@@ -671,6 +784,7 @@ export default function App() {
   const [observation, setObservation] = useState({ urge: 4, body: "待观察", action: "说清此刻" });
   const [records, setRecords] = useState(readRecords);
   const [workflowResults, setWorkflowResults] = useState(readWorkflowResults);
+  const [latestPersona] = useState(readLatestDegenPersona);
   const [pauseRemaining, setPauseRemaining] = useState(0);
 
   useEffect(() => {
@@ -682,7 +796,10 @@ export default function App() {
   }, [pauseRemaining]);
 
   const isToolMode = ["home", "workflow", "persona", "records", "safety"].includes(activeMode);
-  const statusCard = useMemo(() => deriveStatusCard(workflowResults), [workflowResults]);
+  const statusCard = useMemo(
+    () => deriveStatusCard(workflowResults, latestPersona?.type || "尚未接入"),
+    [workflowResults, latestPersona]
+  );
 
   const providerReady = useMemo(() => Boolean(
     providerSettings.apiKey && providerSettings.baseUrl && providerSettings.model

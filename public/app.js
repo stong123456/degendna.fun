@@ -3095,6 +3095,11 @@ function saveMentalRecord(state, summaries) {
       mode: "Degen 交易人格自查",
       headline: persona.type.name,
       risk: false,
+      persona: {
+        type: persona.type.name,
+        code: persona.code,
+        dimensions: Object.fromEntries(persona.dimensions.map((dimension) => [dimension.name, dimension.score]))
+      },
       summaries: [{
         title: "交易人格代码",
         display: persona.code,
