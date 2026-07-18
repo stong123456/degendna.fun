@@ -1635,6 +1635,10 @@ button:disabled {
 
   .main-stage {
     height: calc(100dvh - 140px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-color: rgba(80, 231, 243, 0.38) transparent;
+    scrollbar-width: thin;
   }
 
   .side-nav {

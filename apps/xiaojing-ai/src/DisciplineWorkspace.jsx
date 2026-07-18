@@ -11,6 +11,7 @@ import {
   History,
   Pause,
   Plus,
+  Radar,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
@@ -24,6 +25,7 @@ import {
   readActiveCooldown,
   saveActiveCooldown
 } from "./discipline.js";
+import TriggerMapPanel from "./TriggerMapPanel.jsx";
 
 const INITIAL_FORM = {
   trigger: DISCIPLINE_TRIGGERS[0],
@@ -54,7 +56,7 @@ function StatCard({ label, value, note }) {
   return <article><span>{label}</span><strong>{value}</strong><small>{note}</small></article>;
 }
 
-export default function DisciplineWorkspace({ rules, checks, onRulesChange, onCheckComplete, onDeleteCheck, onBack, latestResult }) {
+export default function DisciplineWorkspace({ rules, checks, workflowResults, onRulesChange, onCheckComplete, onDeleteCheck, onBack, latestResult }) {
   const workspaceRef = useRef(null);
   const [tab, setTab] = useState("check");
   const [form, setForm] = useState(() => ({
@@ -170,6 +172,7 @@ export default function DisciplineWorkspace({ rules, checks, onRulesChange, onCh
 
       <nav className="discipline-tabs" aria-label="纪律协议功能">
         <button type="button" className={tab === "check" ? "active" : ""} onClick={() => setTab("check")}><SlidersHorizontal size={17} /> 交易前检查</button>
+        <button type="button" className={tab === "map" ? "active" : ""} onClick={() => setTab("map")}><Radar size={17} /> 触发地图</button>
         <button type="button" className={tab === "rules" ? "active" : ""} onClick={() => setTab("rules")}><BookOpenCheck size={17} /> 我的协议</button>
         <button type="button" className={tab === "ledger" ? "active" : ""} onClick={() => setTab("ledger")}><History size={17} /> 行为证据账本</button>
       </nav>
@@ -229,6 +232,15 @@ export default function DisciplineWorkspace({ rules, checks, onRulesChange, onCh
             </div>
           )}
         </section>
+      ) : null}
+
+      {tab === "map" ? (
+        <TriggerMapPanel
+          checks={checks}
+          workflowResults={workflowResults}
+          rules={rules}
+          onStartCheck={() => setTab("check")}
+        />
       ) : null}
 
       {tab === "rules" ? (

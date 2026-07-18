@@ -35,7 +35,7 @@ const SCENARIO_ICONS = {
 };
 
 const TOOL_ITEMS = [
-  { id: "discipline", title: "小镜纪律协议", note: "交易前检查与行为证据", icon: BookOpenCheck, action: "discipline" },
+  { id: "discipline", title: "小镜纪律协议", note: "交易前检查、触发地图与行为证据", icon: BookOpenCheck, action: "discipline" },
   { id: "fomo", title: "3 分钟冷静器", note: "把冲动和计划拆开", icon: Clock3 },
   { id: "review", title: "交易复盘卡", note: "复盘过程，不审判结果", icon: ClipboardCheck },
   { id: "snapshot", title: "今日情绪快照", note: "60 秒记录交易负荷", icon: HeartPulse },

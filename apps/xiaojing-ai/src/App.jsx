@@ -1148,6 +1148,7 @@ export default function App() {
             <DisciplineWorkspace
               rules={disciplineRules}
               checks={disciplineChecks}
+              workflowResults={workflowResults}
               latestResult={workflowResults[0]}
               onRulesChange={updateDisciplineRules}
               onCheckComplete={completeDiscipline}
