@@ -302,6 +302,16 @@ function pageFromHash() {
   return PAGE_NAMES.includes(page) ? page : "home";
 }
 
+function mentalRouteFromHash() {
+  const rawHash = window.location.hash.replace(/^#/, "");
+  const [page, queryString = ""] = rawHash.split("?");
+  if (page !== "psyche-test") return null;
+  const query = new URLSearchParams(queryString);
+  return {
+    mode: query.get("mode") === "degen-persona" ? "degen-persona" : ""
+  };
+}
+
 function reportDetailRoute() {
   const rawHash = window.location.hash.replace(/^#/, "");
   const [page, queryString = ""] = rawHash.split("?");
@@ -3577,6 +3587,11 @@ function initMentalHealthCenter(app) {
   activeMentalApp = app;
   activeMentalState = state;
 
+  const routedSession = mentalRouteFromHash();
+  if (routedSession?.mode === "degen-persona") {
+    startMentalSession(app, state, { mode: "degen-persona", singleModule: null });
+  }
+
   app.addEventListener("click", (event) => {
     if (event.target.closest("[data-degen-persona-entry]")) {
       startMentalSession(app, state, { mode: "degen-persona", singleModule: null });
@@ -3641,7 +3656,7 @@ function initMentalHealthCenter(app) {
     }
   });
 
-  renderMentalHealth(app, state);
+  if (state.mode !== "degen-persona" || !state.started) renderMentalHealth(app, state);
 }
 
 document.querySelectorAll("[data-mental-quiz-page]").forEach((page) => {

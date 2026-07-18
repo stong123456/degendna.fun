@@ -77,6 +77,8 @@ import {
 const APP_BASE_URL = new URL(import.meta.env.BASE_URL, window.location.href);
 const IS_DEGENDNA_EMBEDDED = window.location.pathname.startsWith("/xiaojing");
 const DEGEN_DNA_URL = IS_DEGENDNA_EMBEDDED ? "/" : "https://degendna.fun";
+const DEGEN_PERSONA_URL = IS_DEGENDNA_EMBEDDED ? "/#psyche-test?mode=degen-persona" : "https://degendna.fun/#psyche-test?mode=degen-persona";
+const MENTAL_CENTER_URL = IS_DEGENDNA_EMBEDDED ? "/#psyche" : "https://degendna.fun/#psyche";
 
 function appUrl(path) {
   return new URL(String(path).replace(/^\/+/, ""), APP_BASE_URL).toString();
@@ -600,7 +602,7 @@ function PersonaWorkspace({ onDiscuss }) {
             <span><Activity size={17} /> {sourceStatus}</span>
             <div>
               <button type="button" onClick={() => loadLatestPersona(false)}><RotateCcw size={15} /> 读取最近结果</button>
-              <a href={IS_DEGENDNA_EMBEDDED ? "/#psyche" : "https://degendna.fun/#psyche"}>重新测 48 题 <ExternalLink size={14} /></a>
+              <a href={DEGEN_PERSONA_URL}>重新测 48 题 <ExternalLink size={14} /></a>
             </div>
           </div>
 
@@ -960,7 +962,7 @@ export default function App() {
 
   function handleScenario(scenario) {
     if (scenario.action === "persona") {
-      window.location.href = IS_DEGENDNA_EMBEDDED ? "/#psyche" : "https://degendna.fun/#psyche";
+      window.location.href = DEGEN_PERSONA_URL;
       return;
     }
     if (scenario.action === "safety") {
@@ -988,11 +990,11 @@ export default function App() {
       return;
     }
     if (tool.external === "persona") {
-      window.location.href = IS_DEGENDNA_EMBEDDED ? "/#psyche" : "https://degendna.fun/#psyche";
+      window.location.href = DEGEN_PERSONA_URL;
       return;
     }
     if (tool.external === "mental") {
-      window.location.href = IS_DEGENDNA_EMBEDDED ? "/#mental" : "https://degendna.fun/#mental";
+      window.location.href = MENTAL_CENTER_URL;
       return;
     }
     startWorkflow(tool.id);
