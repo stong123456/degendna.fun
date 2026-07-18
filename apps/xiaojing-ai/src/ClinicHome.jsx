@@ -13,6 +13,7 @@ import {
   HeartPulse,
   History,
   LifeBuoy,
+  MessageCircle,
   Moon,
   Radar,
   ShieldCheck,
@@ -31,6 +32,7 @@ const SCENARIO_ICONS = {
   review: ClipboardCheck,
   persona: BrainCircuit,
   rest: Moon,
+  talk: MessageCircle,
   safety: LifeBuoy
 };
 
@@ -38,22 +40,23 @@ const TOOL_ITEMS = [
   { id: "discipline", title: "小镜纪律协议", note: "交易前检查、触发地图与行为证据", icon: BookOpenCheck, action: "discipline" },
   { id: "fomo", title: "3 分钟冷静器", note: "把冲动和计划拆开", icon: Clock3 },
   { id: "review", title: "交易复盘卡", note: "复盘过程，不审判结果", icon: ClipboardCheck },
-  { id: "snapshot", title: "今日情绪快照", note: "60 秒记录交易负荷", icon: HeartPulse },
+  { id: "snapshot", title: "今日状态快照", note: "60 秒记录决策负荷", icon: HeartPulse },
   { id: "persona", title: "交易人格自查", note: "进入 DegenDNA 48 题版本", icon: Radar, external: "persona" },
   { id: "mental", title: "心理自测中心", note: "私密、不绑定钱包、不上榜", icon: ShieldCheck, external: "mental" }
 ];
 
-export default function ClinicHome({ statusCard, latestResult, disciplineStats, onScenario, onTool, onOpenDiscipline }) {
+export default function ClinicHome({ statusCard, latestResult, disciplineStats, toneMode, onScenario, onTool, onOpenDiscipline }) {
+  const isDegen = toneMode === "degen";
   return (
     <main className="clinic-home">
       <section className="clinic-intro">
         <div className="intro-copy">
-          <span className="section-kicker"><Sparkles size={14} /> DEGEN EMOTION TRIAGE</span>
-          <h1>下单前，先让小镜<br />给你的情绪挂个号。</h1>
-          <p>不是行情判断。把 FOMO、回撤和冲动从交易计划里拆出来，再决定下一步。</p>
+          <span className="section-kicker"><Sparkles size={14} /> {isDegen ? "DEGEN DECISION CHECK" : "DECISION CALIBRATION"}</span>
+          <h1>{isDegen ? <>K 线在加速，<br />你不用跟着失速。</> : <>下一次点确认前，<br />先校准现在的状态。</>}</h1>
+          <p>{isDegen ? "小镜不喊单，只负责看看现在是谁在点确认。把计划和冲动拆开，再决定下一步。" : "不判断行情，也不判断你。把事实、计划和冲动拆开，再决定下一步。"}</p>
           <div className="intro-actions">
             <button type="button" className="clinic-primary" onClick={() => onScenario(SCENARIOS[0])}>
-              <Hand size={19} /> 开始 3 分钟冷静检查 <ChevronRight size={18} />
+              <Hand size={19} /> {isDegen ? "照一下再点确认" : "开始状态校准"} <ChevronRight size={18} />
             </button>
             <button type="button" className="discipline-entry" onClick={onOpenDiscipline}>
               <BookOpenCheck size={17} /> 我的纪律协议
@@ -64,14 +67,14 @@ export default function ClinicHome({ statusCard, latestResult, disciplineStats, 
 
         <aside className="status-card">
           <header>
-            <div><span>MY STATUS</span><h2>我的状态卡</h2></div>
+            <div><span>MY DECISION STATE</span><h2>我的决策状态</h2></div>
             <i className={statusCard.emotion === "负荷偏高" ? "high" : ""}>{statusCard.emotion}</i>
           </header>
           <dl>
             <div><dt>交易人格</dt><dd>{statusCard.persona}</dd></div>
             <div><dt>最近触发点</dt><dd>{statusCard.trigger}</dd></div>
             <div><dt>建议动作</dt><dd>{statusCard.action}</dd></div>
-            <div><dt>纪律轨迹</dt><dd>{disciplineStats.total ? `${disciplineStats.total} 次检查 · ${disciplineStats.adherence}% 执行率` : "等待第一次交易前检查"}</dd></div>
+            <div><dt>计划轨迹</dt><dd>{disciplineStats.total ? `${disciplineStats.total} 次检查 · ${disciplineStats.adherence}% 计划兑现` : "等待第一次交易前检查"}</dd></div>
             <div><dt>上次复盘</dt><dd>{statusCard.updatedAt}</dd></div>
           </dl>
           {latestResult ? (
@@ -86,8 +89,8 @@ export default function ClinicHome({ statusCard, latestResult, disciplineStats, 
 
       <section className="scenario-section">
         <header className="section-heading">
-          <div><span>01 / CURRENT STATE</span><h2>你现在是哪种状态？</h2></div>
-          <p>选最接近的一项。小镜每次只问一个问题。</p>
+          <div><span>01 / WHAT HAPPENED</span><h2>现在发生了什么？</h2></div>
+          <p>选最接近的情境，不需要先给自己贴标签。</p>
         </header>
         <div className="scenario-grid">
           {SCENARIOS.map((scenario) => {
@@ -110,8 +113,8 @@ export default function ClinicHome({ statusCard, latestResult, disciplineStats, 
 
       <section className="toolbox-section">
         <header className="section-heading compact">
-          <div><span>02 / QUICK TOOLS</span><h2>复盘工具箱</h2></div>
-          <p>固定 SOP 比漫无目的地聊更快。</p>
+          <div><span>02 / QUICK TOOLS</span><h2>整理与复盘工具</h2></div>
+          <p>需要时才深入，不要求你先承认自己有问题。</p>
         </header>
         <div className="tool-strip">
           {TOOL_ITEMS.map((tool) => {

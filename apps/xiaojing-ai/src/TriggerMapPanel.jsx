@@ -47,7 +47,7 @@ export default function TriggerMapPanel({ checks, workflowResults, rules, onStar
         </div>
         <div className="trigger-summary-metrics">
           <SummaryMetric label="观察样本" value={map.total} note={`${map.completedChecks} 次纪律检查`} />
-          <SummaryMetric label="协议执行率" value={`${map.adherence}%`} note="只统计纪律检查" />
+          <SummaryMetric label="计划兑现率" value={`${map.adherence}%`} note="只统计纪律检查" />
           <SummaryMetric label="平均冲动下降" value={map.averageReduction} note="0-10 强度档位" />
           <SummaryMetric label="高发时段" value={map.topTime?.count ? map.topTime.label : "待观察"} note={map.topTime?.count ? map.topTime.detail : "暂无时间规律"} />
         </div>
@@ -69,7 +69,7 @@ export default function TriggerMapPanel({ checks, workflowResults, rules, onStar
           </section>
 
           <section className="trigger-time-map">
-            <header><div><span>02 / TIME WINDOW</span><h3>易失控时段</h3></div><Clock3 size={18} /></header>
+            <header><div><span>02 / TIME WINDOW</span><h3>高负荷时段</h3></div><Clock3 size={18} /></header>
             <div>
               {map.timeStats.map((item) => (
                 <article key={item.id} className={item.count === map.topTime?.count && item.count ? "peak" : ""}>

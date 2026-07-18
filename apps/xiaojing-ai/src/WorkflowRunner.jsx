@@ -1,7 +1,9 @@
 import { useState } from "react";
 import {
+  Activity,
   ArrowLeft,
   Check,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Clock3,
@@ -40,7 +42,7 @@ function ResultCard({ result, onRestart, onBack, onDiscuss }) {
   return (
     <main className="workflow-shell result-view">
       <header className="workflow-topline">
-        <button type="button" onClick={onBack}><ArrowLeft size={17} /> 返回急诊台</button>
+        <button type="button" onClick={onBack}><ArrowLeft size={17} /> 返回校准台</button>
         <span><Check size={14} /> 已完成并保存在当前设备</span>
       </header>
 
@@ -51,10 +53,21 @@ function ResultCard({ result, onRestart, onBack, onDiscuss }) {
           <span>{result.scoreLabel}</span>
         </div>
         <div className="result-copy">
-          <span><Sparkles size={14} /> SESSION COMPLETE</span>
+          <span><Sparkles size={14} /> CALIBRATION COMPLETE</span>
           <h1>{result.title}</h1>
           <p>{result.verdict}</p>
         </div>
+      </section>
+
+      <section className="result-reading">
+        <article className="result-strength">
+          <CheckCircle2 size={21} />
+          <div><span>你已经做对的事</span><p>{result.strength || "你愿意停下来观察并留下记录，这已经在增加下一次决定的可控性。"}</p></div>
+        </article>
+        <article className="result-interference">
+          <Activity size={21} />
+          <div><span>当前最明显的决策干扰</span><p>{result.interference || result.verdict}</p></div>
+        </article>
       </section>
 
       <section className="result-metrics">
@@ -88,7 +101,7 @@ function ResultCard({ result, onRestart, onBack, onDiscuss }) {
   );
 }
 
-export default function WorkflowRunner({ workflowId, existingResult, onComplete, onBack, onDiscuss }) {
+export default function WorkflowRunner({ workflowId, existingResult, toneMode, onComplete, onBack, onDiscuss }) {
   const workflow = WORKFLOWS[workflowId];
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -129,7 +142,7 @@ export default function WorkflowRunner({ workflowId, existingResult, onComplete,
       setAdvancing(false);
       return;
     }
-    const nextResult = calculateWorkflowResult(workflow.id, nextAnswers);
+    const nextResult = calculateWorkflowResult(workflow.id, nextAnswers, toneMode);
     const summary = Object.entries(nextAnswers).map(([id, value]) => ({
       label: workflow.questions.find((item) => item.id === id)?.label,
       value: answerLabel(value)
@@ -168,7 +181,7 @@ export default function WorkflowRunner({ workflowId, existingResult, onComplete,
   return (
     <main className="workflow-shell">
       <header className="workflow-topline">
-        <button type="button" onClick={onBack}><ArrowLeft size={17} /> 返回急诊台</button>
+        <button type="button" onClick={onBack}><ArrowLeft size={17} /> 返回校准台</button>
         <span><LockKeyhole size={14} /> 不绑定钱包 · 当前设备保存</span>
       </header>
 
@@ -190,6 +203,10 @@ export default function WorkflowRunner({ workflowId, existingResult, onComplete,
       <section className="question-card">
         <span>QUESTION {String(step + 1).padStart(2, "0")}</span>
         <h2>{question.label}</h2>
+        <details className="question-rationale">
+          <summary>为什么问这个</summary>
+          <p>{question.why || workflow.why}</p>
+        </details>
         {isText ? (
           <textarea
             value={draft}
@@ -215,7 +232,7 @@ export default function WorkflowRunner({ workflowId, existingResult, onComplete,
 
       <footer className="workflow-controls">
         <button type="button" onClick={previous}><ChevronLeft size={17} /> {step === 0 ? "退出" : "上一题"}</button>
-        <p>如实回答比“答得正确”更有用。</p>
+        <p>没有正确答案，只记录此刻能确认的事实。</p>
         {isText ? (
           <button type="button" className="clinic-primary" disabled={!ready || advancing} onClick={next}>
             {step === workflow.questions.length - 1 ? "生成复盘卡" : "下一题"} <ChevronRight size={17} />

@@ -4,23 +4,23 @@ export const STATUS_STORAGE_KEY = "xiaojing:daily-status:v2";
 const scale = (labels) => labels.map((label, index) => ({ label, value: index + 1 }));
 
 export const SCENARIOS = [
-  { id: "fomo", label: "我现在 FOMO 了", note: "行情突然拉升，怕错过", tone: "cyan", workflow: "fomo" },
-  { id: "loss", label: "我刚亏了一笔", note: "先区分计划内亏损和情绪失控", tone: "red", workflow: "loss" },
-  { id: "sold", label: "我又卖飞了", note: "把结果遗憾和决策质量分开", tone: "purple", workflow: "sold" },
-  { id: "rush", label: "我想冲进去", note: "下单前做一次计划完整度检查", tone: "gold", workflow: "fomo" },
-  { id: "revenge", label: "我想翻本", note: "先拦住报复性交易冲动", tone: "red", workflow: "loss" },
-  { id: "review", label: "我想复盘一笔交易", note: "只复盘过程，不审判盈亏", tone: "blue", workflow: "review" },
-  { id: "persona", label: "我想测交易人格", note: "连接 DegenDNA 48 题自查", tone: "purple", action: "persona" },
-  { id: "rest", label: "我今天不太想看盘", note: "做一张不含敏感分数的情绪快照", tone: "green", workflow: "snapshot" },
+  { id: "fomo", label: "行情突然拉升，我怕错过", note: "先看这次决定有没有完整计划", tone: "cyan", workflow: "fomo" },
+  { id: "loss", label: "刚亏了一笔，我想马上赚回来", note: "把亏损和下一次决定分开", tone: "red", workflow: "loss" },
+  { id: "sold", label: "卖出以后，我一直反复看图", note: "区分结果遗憾与决策质量", tone: "purple", workflow: "sold" },
+  { id: "rush", label: "计划写好了，我又想临时改变", note: "检查是新信息还是短时冲动", tone: "gold", workflow: "fomo" },
+  { id: "review", label: "我想整理刚才那一单", note: "只复盘过程，不用盈亏审判自己", tone: "blue", workflow: "review" },
+  { id: "rest", label: "明知道该休息，却停不下来看盘", note: "用 60 秒看清今天的决策负荷", tone: "green", workflow: "snapshot" },
+  { id: "talk", label: "我现在有点乱，只想说说", note: "先把事实和脑中的故事分开", tone: "cyan", action: "companion" },
   { id: "safety", label: "我需要安全支持", note: "停止交易话题，优先连接现实帮助", tone: "red", action: "safety" }
 ];
 
 export const WORKFLOWS = {
   fomo: {
     id: "fomo",
-    eyebrow: "PRE-TRADE COOLING",
-    title: "FOMO 冷静器",
-    description: "不判断行情，只检查这笔冲动有没有完整计划。",
+    eyebrow: "PRE-TRADE CALIBRATION",
+    title: "交易前状态校准",
+    description: "不判断行情方向，只确认这次决定是否仍由完整计划推动。",
+    why: "这些问题用来区分短时错过感与可执行计划，不评价你，也不预测行情。",
     duration: "约 3 分钟",
     questions: [
       { id: "intent", label: "你现在最想做什么？", type: "text", placeholder: "例如：追进刚刚拉升的币，或者加大仓位" },
@@ -33,9 +33,10 @@ export const WORKFLOWS = {
   },
   loss: {
     id: "loss",
-    eyebrow: "LOSS TRIAGE",
-    title: "亏损急诊",
-    description: "把这笔亏损从自我评价里拆出来，先确认有没有报复性交易倾向。",
+    eyebrow: "LOSS RESET",
+    title: "亏损后校准",
+    description: "把这笔亏损从自我评价里拆出来，看看下一次决定是否被翻本冲动推动。",
+    why: "这些问题用来区分计划内亏损、执行偏离和立即翻本冲动，不评价交易能力。",
     duration: "约 2 分钟",
     questions: [
       { id: "planned", label: "这笔交易是否有提前计划？", options: scale(["完全没有", "只有模糊想法", "有部分计划", "计划较完整", "完整且有记录"]) },
@@ -50,6 +51,7 @@ export const WORKFLOWS = {
     eyebrow: "OUTCOME DETOX",
     title: "卖飞复盘",
     description: "卖出后的上涨不自动证明原决策错误。我们只检查当时的信息和计划。",
+    why: "这些问题用来把事后结果与当时可获得的信息分开，减少用最高点倒推自己做错了。",
     duration: "约 2 分钟",
     questions: [
       { id: "reason", label: "当时卖出的理由是什么？", type: "text", placeholder: "例如：达到目标、风险变化、恐慌、临时需要资金" },
@@ -64,6 +66,7 @@ export const WORKFLOWS = {
     eyebrow: "TRADE DEBRIEF",
     title: "交易复盘卡",
     description: "把一笔交易拆成计划、执行、情绪和下一条规则。",
+    why: "这些问题只帮助比较原计划与实际动作，不用盈亏给你或这次决定定性。",
     duration: "约 5 分钟",
     questions: [
       { id: "asset", label: "交易标的是什么？", type: "text", placeholder: "只写代号即可，不需要连接钱包" },
@@ -80,9 +83,10 @@ export const WORKFLOWS = {
   },
   snapshot: {
     id: "snapshot",
-    eyebrow: "DAILY EMOTION SCAN",
-    title: "今日情绪快照",
-    description: "60 秒记录今天的交易状态，不做心理诊断。",
+    eyebrow: "DAILY DECISION SNAPSHOT",
+    title: "今日交易状态快照",
+    description: "60 秒记录今天影响决定的外部刺激与身体负荷，不做心理诊断。",
+    why: "这些问题帮助你观察看盘、社交刺激、睡眠和冲动如何影响决定，结果只与你自己的近期状态比较。",
     duration: "约 1 分钟",
     questions: [
       { id: "screen", label: "今天看盘频率如何？", options: scale(["几乎没看", "偶尔", "正常", "频繁", "停不下来"]) },
@@ -115,7 +119,11 @@ function isMissingPlan(value) {
   return !value || /没有|不清楚|还没|不知道|说不清/.test(value);
 }
 
-export function calculateWorkflowResult(workflowId, answers) {
+function toneText(mode, clearText, degenText) {
+  return mode === "degen" ? degenText : clearText;
+}
+
+export function calculateWorkflowResult(workflowId, answers, toneMode = "clear") {
   const now = Date.now();
   if (workflowId === "fomo") {
     const tolerance = numeric(answers.lossTolerance);
@@ -124,8 +132,16 @@ export function calculateWorkflowResult(workflowId, answers) {
     const fomoScore = toScore(92 - planScore * 0.45 + (text(answers.trigger).includes("拉升") ? 9 : 3));
     return {
       id: crypto.randomUUID(), workflowId, createdAt: now, shareable: true,
-      title: "FOMO 冷静卡", score: fomoScore, scoreLabel: "FOMO 指数",
-      verdict: fomoScore >= 70 ? "现在更像是错过感在推着你走。" : "冲动存在，但计划仍有一部分在场。",
+      title: "交易前校准结果", score: fomoScore, scoreLabel: "当前决策负荷",
+      verdict: fomoScore >= 70
+        ? toneText(toneMode, "错过感正在压缩你的考虑时间，先把决定从价格速度里拿回来。", "K 线在加速，但你的确认键不必跟着加速。")
+        : toneText(toneMode, "你注意到了冲动，同时仍保留了一部分计划依据。", "FOMO 已经敲门，但计划还没有交出控制权。"),
+      strength: planScore >= 70
+        ? "你已经能说清可承受边界或退出条件，这会让决定更可验证。"
+        : "你愿意在点确认前停下来检查，这本身就是把决定拿回来的动作。",
+      interference: fomoScore >= 70
+        ? "价格加速与错过感正在缩短你的思考时间。"
+        : "当前主要干扰是对短时机会的注意力放大。",
       metrics: [
         { label: "当前触发点", value: text(answers.trigger) },
         { label: "计划完整度", value: `${planScore}%` },
@@ -149,8 +165,16 @@ export function calculateWorkflowResult(workflowId, answers) {
     const interference = toScore(impact * 15 + (5 - followed) * 8 + (revenge ? 18 : 0));
     return {
       id: crypto.randomUUID(), workflowId, createdAt: now, shareable: false,
-      title: "亏损急诊记录", score: interference, scoreLabel: "情绪干扰",
-      verdict: planned >= 4 && followed >= 4 ? "这更接近计划内亏损，不需要用下一单证明自己。" : "这笔亏损里夹着执行偏离，值得复盘，但不值得立刻翻本。",
+      title: "亏损后校准结果", score: interference, scoreLabel: "当前干扰强度",
+      verdict: planned >= 4 && followed >= 4
+        ? toneText(toneMode, "这更接近计划内亏损，不需要用下一次决定证明自己。", "这是计划内的代价，不需要让下一单来替你翻案。")
+        : toneText(toneMode, "这笔亏损里夹着执行偏离，适合先整理过程，不适合立刻追回。", "真正该修的是执行偏离，不是马上开一单把面子赚回来。"),
+      strength: planned >= 4
+        ? "你在交易前已经形成了计划，可以把注意力放在执行证据而不是自我评价上。"
+        : "你愿意把原计划与实际动作分开看，这比立刻寻找下一次机会更有价值。",
+      interference: revenge
+        ? "立即翻本的念头正在把上一笔结果带进下一次决定。"
+        : "当前主要干扰来自亏损后的注意力占用与执行落差。",
       metrics: [
         { label: "亏损类型", value: planned >= 4 && followed >= 4 ? "计划内亏损" : "执行偏离型亏损" },
         { label: "报复交易倾向", value: revenge ? "偏高" : "当前不高" },
@@ -168,8 +192,16 @@ export function calculateWorkflowResult(workflowId, answers) {
     const regret = toScore((6 - planned) * 12 + (6 - reentry) * 8 + (chase ? 20 : 4));
     return {
       id: crypto.randomUUID(), workflowId, createdAt: now, shareable: true,
-      title: "卖飞复盘卡", score: regret, scoreLabel: "结果遗憾",
-      verdict: planned >= 4 ? "结果让人不爽，但当时的决策未必有错。" : "真正值得修的是退出规则，不是追回已经发生的涨幅。",
+      title: "卖出后复盘结果", score: regret, scoreLabel: "结果牵引强度",
+      verdict: planned >= 4
+        ? toneText(toneMode, "后续上涨让人遗憾，但当时按计划做出的决定仍然有依据。", "后面的涨幅很刺眼，但它没有穿越回来改写你当时的信息。")
+        : toneText(toneMode, "最值得完善的是退出规则，不是追回已经发生的涨幅。", "该补的是退出规则，不是追着已经开走的 K 线跑。"),
+      strength: planned >= 4
+        ? "你当时的卖出动作基本尊重了原计划，这是可以保留的决策能力。"
+        : "你已经开始回看当时的依据，而不是只盯着事后最高点。",
+      interference: chase
+        ? "事后涨幅正在推动你重新进入，但新的入场条件还不够完整。"
+        : "当前主要干扰是用事后结果重新评价当时的自己。",
       metrics: [
         { label: "原决策质量", value: planned >= 4 ? "符合计划" : "需要补强" },
         { label: "追涨冲动", value: chase ? "明显" : "可控" },
@@ -187,11 +219,19 @@ export function calculateWorkflowResult(workflowId, answers) {
     const emotionScore = toScore((social - 1) * 18 + (/害怕|不甘|兴奋/.test(text(answers.emotion)) ? 24 : 8));
     return {
       id: crypto.randomUUID(), workflowId, createdAt: now, shareable: true,
-      title: "交易复盘卡", score: execution, scoreLabel: "执行评分",
-      verdict: execution >= 75 ? "这笔交易的执行基本尊重了计划。" : "结果先放一边，执行偏离才是最值得修的部分。",
+      title: "交易复盘结果", score: execution, scoreLabel: "计划兑现度",
+      verdict: execution >= 75
+        ? toneText(toneMode, "这笔交易的执行基本尊重了原计划。", "这次不是靠嘴硬，执行证据确实站在计划这边。")
+        : toneText(toneMode, "先把盈亏放在一边，计划与动作之间的落差最值得修。", "盈亏先靠边，真正有用的是抓住计划和手指之间的偏差。"),
+      strength: execution >= 60
+        ? "你已经留下了计划与执行记录，可以用证据继续优化，而不是依赖记忆。"
+        : "你愿意复盘一笔真实交易，并只选一件事改进，这让下一次更容易执行。",
+      interference: emotionScore >= 60
+        ? "社交刺激或强烈情绪对执行过程产生了明显干扰。"
+        : "当前更需要关注的是规则是否足够具体，而不是情绪本身。",
       metrics: [
         { label: "交易", value: `${text(answers.asset) || "未命名标的"} · ${text(answers.direction)}` },
-        { label: "情绪干扰", value: `${emotionScore}%` },
+        { label: "情境干扰", value: `${emotionScore}%` },
         { label: "计划完整度", value: `${execution}%` },
         { label: "下次只改一件事", value: text(answers.change) || "把退出条件写在入场之前" }
       ],
@@ -213,8 +253,14 @@ export function calculateWorkflowResult(workflowId, answers) {
   ].sort((a, b) => b[1] - a[1]);
   return {
     id: crypto.randomUUID(), workflowId: "snapshot", createdAt: now, shareable: true,
-    title: "今日 Degen 情绪快照", score: pressure, scoreLabel: "交易情绪负荷",
-    verdict: pressure >= 70 ? "今天的交易情绪负荷偏高，减少刺激比增加判断更重要。" : "今天的状态仍可观察，继续把节奏留在自己手里。",
+    title: "今日交易状态快照", score: pressure, scoreLabel: "今日决策负荷",
+    verdict: pressure >= 70
+      ? toneText(toneMode, "今天影响决定的刺激偏多，减少输入比增加判断更重要。", "今天的信息流有点超频，先降噪，再谈下一步。")
+      : toneText(toneMode, "今天的状态仍可观察，继续把决定节奏留在自己手里。", "今天还能稳住节奏，别临时给计划加戏。"),
+    strength: pressure < 70
+      ? "你已经开始主动观察影响决定的因素，而不是等到冲动发生后才回看。"
+      : "即使今天负荷较高，你仍停下来完成了记录，这为暂停新决定提供了依据。",
+    interference: `当前最明显的影响来自${triggerPairs[0][0]}，它只描述今天的状态，不代表固定人格。`,
     metrics: [
       { label: "主要触发点", value: triggerPairs[0][0] },
       { label: "今日动作", value: pressure >= 70 ? "减少看盘并暂停新决定" : "保持原计划，不临时加码" },
@@ -242,11 +288,11 @@ export function deriveStatusCard(results, persona = "尚未接入") {
   const latest = results[0];
   if (!latest) {
     return {
-      emotion: "待扫描",
+      emotion: "待校准",
       persona,
-      trigger: "还没有今天的记录",
-      action: "选择一个当前状态",
-      updatedAt: "尚未复盘"
+      trigger: "还没有今天的行为记录",
+      action: "选择一个正在发生的交易情境",
+      updatedAt: "尚未校准"
     };
   }
   return {

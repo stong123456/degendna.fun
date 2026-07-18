@@ -152,7 +152,7 @@ export default function DisciplineWorkspace({ rules, checks, workflowResults, on
   return (
     <main className="discipline-workspace" ref={workspaceRef}>
       <header className="discipline-topline">
-        <button type="button" onClick={onBack}><ArrowLeft size={17} /> 返回急诊台</button>
+        <button type="button" onClick={onBack}><ArrowLeft size={17} /> 返回校准台</button>
         <span><ShieldCheck size={14} /> 本机私密 · 不连接钱包 · 不提供投资建议</span>
       </header>
 
@@ -160,11 +160,11 @@ export default function DisciplineWorkspace({ rules, checks, workflowResults, on
         <div>
           <span><Sparkles size={14} /> PERSONAL DISCIPLINE PROTOCOL</span>
           <h1>小镜纪律协议</h1>
-          <p>不判断交易对错。先把最容易失控的时刻，交给你清醒时写下的规则。</p>
+          <p>不判断交易对错。先把最容易偏离计划的时刻，交给你清醒时写下的规则。</p>
         </div>
         <div className="discipline-stats">
           <StatCard label="已完成检查" value={stats.total} note="行为证据" />
-          <StatCard label="协议执行率" value={`${stats.adherence}%`} note="按自己规则行动" />
+          <StatCard label="计划兑现率" value={`${stats.adherence}%`} note="按自己写下的规则行动" />
           <StatCard label="平均冲动下降" value={stats.averageReduction} note="0-10 强度变化" />
           <StatCard label="常见触发点" value={stats.topTrigger} note={`${stats.activeRules} 条协议启用`} />
         </div>
@@ -246,7 +246,7 @@ export default function DisciplineWorkspace({ rules, checks, workflowResults, on
       {tab === "rules" ? (
         <section className="discipline-panel rules-panel">
           <div className="rules-list">
-            <header><div><span>IF / THEN PROTOCOLS</span><h2>清醒时写规则，上头时只执行</h2></div><b>{stats.activeRules} / {rules.length} 启用</b></header>
+            <header><div><span>IF / THEN PROTOCOLS</span><h2>状态稳定时写规则，高负荷时只执行</h2></div><b>{stats.activeRules} / {rules.length} 启用</b></header>
             {rules.map((rule) => <article key={rule.id} className={rule.enabled ? "active" : ""}>
               <button type="button" className="rule-toggle" aria-label={rule.enabled ? "停用协议" : "启用协议"} onClick={() => toggleRule(rule.id)}><i>{rule.enabled ? <Check size={14} /> : null}</i></button>
               <div><span>如果 · {rule.trigger}</span><b>{rule.condition}</b><p>那么 · {rule.action}</p></div>

@@ -36,11 +36,14 @@ import {
 import {
   MODES,
   QUICK_STATES,
+  TONE_MODES,
   buildSystemPrompt,
   crisisMessage,
   detectCrisis,
   localCompanionReply,
   personaInterpretation,
+  readToneMode,
+  saveToneMode,
   scenarioSeed,
   urgencyFromText
 } from "./companion.js";
@@ -91,7 +94,7 @@ const INITIAL_MESSAGES = [
   {
     id: "welcome",
     role: "assistant",
-    content: "我在。先不分析行情，先看看此刻的你。",
+    content: "我在。先不分析行情，也不判断你。我们只整理此刻正在影响决定的东西。",
     timestamp: Date.now()
   }
 ];
@@ -647,8 +650,8 @@ function PersonaWorkspace({ onDiscuss }) {
               <code>{result.code}</code>
               <p>{result.summary}</p>
               <div className="persona-guidance">
-                <p><b>最容易上头</b>{result.trigger}</p>
-                <p><b>最容易亏钱</b>{result.lossState}</p>
+                <p><b>高负荷触发</b>{result.trigger}</p>
+                <p><b>计划易偏离处</b>{result.lossState}</p>
                 <p><b>适合的冷静流程</b>{result.cooling}</p>
                 <p><b>交易前提醒</b>{result.preTrade}</p>
                 <p><b>交易后复盘</b>{result.postTrade}</p>
@@ -769,12 +772,17 @@ function SafetyWorkspace({ onReturn }) {
   );
 }
 
-function PrivacyDialog({ open, onClose }) {
+function PrivacyDialog({ open, onClose, dataSummary, onClearData }) {
+  const [confirming, setConfirming] = useState(false);
   if (!open) return null;
+  const closeDialog = () => {
+    setConfirming(false);
+    onClose();
+  };
   return (
-    <div className="modal-layer" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+    <div className="modal-layer" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeDialog(); }}>
       <section className="privacy-dialog" role="dialog" aria-modal="true" aria-labelledby="privacy-title">
-        <header><h2 id="privacy-title">隐私与边界</h2><IconButton label="关闭" onClick={onClose}><X size={20} /></IconButton></header>
+        <header><h2 id="privacy-title">隐私与数据控制</h2><IconButton label="关闭" onClick={closeDialog}><X size={20} /></IconButton></header>
         <ul>
           <li>对话默认只存在当前会话；只有主动保存的复盘会写入本机浏览器。</li>
           <li>API Key 默认保存在会话存储；只有开启“记住在此设备”才写入本机。</li>
@@ -782,7 +790,29 @@ function PrivacyDialog({ open, onClose }) {
           <li>心理自测和危机信息不生成分享卡、不进入排行榜、不绑定钱包。</li>
           <li>小镜 AI 不做心理诊断，不替代专业帮助，也不提供投资建议。</li>
         </ul>
-        <button type="button" className="primary-outline" onClick={onClose}>我知道了</button>
+        <section className="privacy-data-control">
+          <div>
+            <span>当前设备保存</span>
+            <strong>{dataSummary.total} 条记录</strong>
+            <small>{dataSummary.records} 条对话 · {dataSummary.workflows} 份校准结果 · {dataSummary.discipline} 条行为证据</small>
+          </div>
+          <button
+            type="button"
+            className={confirming ? "confirming" : ""}
+            disabled={!dataSummary.total}
+            onClick={() => {
+              if (!confirming) {
+                setConfirming(true);
+                return;
+              }
+              onClearData();
+              setConfirming(false);
+            }}
+          >
+            <Trash2 size={15} /> {confirming ? "再次点击，确认清除" : "清除本机记录"}
+          </button>
+        </section>
+        <button type="button" className="primary-outline" onClick={closeDialog}>完成</button>
       </section>
     </div>
   );
@@ -790,6 +820,7 @@ function PrivacyDialog({ open, onClose }) {
 
 export default function App() {
   const [activeMode, setActiveMode] = useState("home");
+  const [toneMode, setToneMode] = useState(readToneMode);
   const [workflowId, setWorkflowId] = useState(null);
   const [visibleResult, setVisibleResult] = useState(null);
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
@@ -863,7 +894,7 @@ export default function App() {
     }
 
     setSending(true);
-    const local = localCompanionReply(text, explicitMode);
+    const local = localCompanionReply(text, explicitMode, toneMode);
     try {
       let reply = local.text;
       if (providerReady) {
@@ -872,7 +903,7 @@ export default function App() {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             provider: providerSettings,
-            systemPrompt: buildSystemPrompt(explicitMode),
+            systemPrompt: buildSystemPrompt(explicitMode, toneMode),
             messages: nextMessages.slice(-12).map(({ role, content }) => ({ role, content }))
           })
         });
@@ -908,6 +939,16 @@ export default function App() {
     setMobileMenuOpen(false);
   }
 
+  function changeToneMode(mode) {
+    const nextMode = mode === "degen" ? "degen" : "clear";
+    setToneMode(nextMode);
+    try {
+      saveToneMode(nextMode);
+    } catch {
+      setStatus("语气偏好将在本次会话中生效，但当前浏览器不允许保存。");
+    }
+  }
+
   function startWorkflow(id) {
     if (!WORKFLOWS[id]) return;
     setWorkflowId(id);
@@ -924,6 +965,11 @@ export default function App() {
     }
     if (scenario.action === "safety") {
       switchMode("safety");
+      return;
+    }
+    if (scenario.action === "companion") {
+      switchMode("companion");
+      window.setTimeout(() => sendMessage(scenarioSeed(scenario.id), "companion"), 0);
       return;
     }
     startWorkflow(scenario.workflow);
@@ -957,7 +1003,7 @@ export default function App() {
     setWorkflowResults(next);
     setObservation({
       urge: Math.max(1, Math.min(10, Math.round(result.score / 10))),
-      body: result.score >= 70 ? "负荷偏高" : "已完成扫描",
+      body: result.score >= 70 ? "负荷偏高" : "已完成校准",
       action: result.action
     });
     try {
@@ -1081,7 +1127,7 @@ export default function App() {
       <header className="topbar">
         <div className="brand-lockup">
           <img src={appUrl("degendna-logo.png")} alt="DegenDNA" />
-          <div><strong>小镜 AI</strong><span>链上陪诊员</span></div>
+          <div><strong>小镜 AI</strong><span>交易状态陪伴 AI</span></div>
           <i />
           <small>{IS_DEGENDNA_EMBEDDED ? "DegenDNA 集成" : "独立模式"}</small>
         </div>
@@ -1093,6 +1139,18 @@ export default function App() {
           >
             {IS_DEGENDNA_EMBEDDED ? "返回 DegenDNA" : "DegenDNA"} <ExternalLink size={14} />
           </a>
+          <div className="tone-mode-switch" role="group" aria-label="小镜语气模式">
+            {TONE_MODES.map((tone) => (
+              <button
+                type="button"
+                key={tone.id}
+                className={toneMode === tone.id ? "active" : ""}
+                aria-pressed={toneMode === tone.id}
+                title={tone.description}
+                onClick={() => changeToneMode(tone.id)}
+              >{tone.label}</button>
+            ))}
+          </div>
           <button type="button" onClick={() => setSettingsOpen(true)}><Settings2 size={16} /> 模型设置</button>
           <button type="button" onClick={() => setPrivacyOpen(true)}><ShieldCheck size={16} /> 隐私说明</button>
           <button type="button" onClick={resetSession}><RotateCcw size={16} /> 退出本次对话</button>
@@ -1129,6 +1187,7 @@ export default function App() {
               statusCard={statusCard}
               latestResult={workflowResults[0]}
               disciplineStats={disciplineStats}
+              toneMode={toneMode}
               onScenario={handleScenario}
               onTool={handleTool}
               onOpenDiscipline={() => switchMode("discipline")}
@@ -1139,6 +1198,7 @@ export default function App() {
               key={`${workflowId}-${visibleResult?.id || "new"}`}
               workflowId={workflowId}
               existingResult={visibleResult}
+              toneMode={toneMode}
               onComplete={completeWorkflow}
               onBack={() => switchMode("home")}
               onDiscuss={discussResult}
@@ -1210,7 +1270,17 @@ export default function App() {
         setSettings={setProviderSettings}
         onSaved={() => setSettingsOpen(false)}
       />
-      <PrivacyDialog open={privacyOpen} onClose={() => setPrivacyOpen(false)} />
+      <PrivacyDialog
+        open={privacyOpen}
+        onClose={() => setPrivacyOpen(false)}
+        onClearData={clearRecords}
+        dataSummary={{
+          records: records.length,
+          workflows: workflowResults.length,
+          discipline: disciplineChecks.length,
+          total: records.length + workflowResults.length + disciplineChecks.length
+        }}
+      />
     </div>
   );
 }
