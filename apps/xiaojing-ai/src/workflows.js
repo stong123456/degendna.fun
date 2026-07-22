@@ -112,7 +112,7 @@ function toScore(value) {
 }
 
 function text(answer) {
-  return String(answer?.label ?? answer ?? "").trim();
+  return String(answer?.raw ?? answer?.label ?? answer ?? "").trim();
 }
 
 function isMissingPlan(value) {

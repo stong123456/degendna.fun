@@ -1,3 +1,13 @@
+import {
+  MENTAL_EN,
+  localizeMentalMode,
+  localizeMentalModule,
+  localizeMentalQuestion,
+  localizePersonaDimension,
+  localizePersonaType,
+  mentalLocale
+} from "./mental-i18n.js?v=20260722-bilingual-v158";
+
 const form = document.querySelector("#scan-form");
 const addressInput = document.querySelector("#wallet-address");
 const xHandleInput = document.querySelector("#x-handle");
@@ -1830,6 +1840,8 @@ function applyLanguage() {
   }
 
   updatePsycheDiagnosis();
+  hydrateMentalStaticCopy();
+  if (activeMentalApp && activeMentalState) renderMentalHealth(activeMentalApp, activeMentalState);
   hydrateFinalPages();
   updateReportIdentity(activeReportIdentity);
   updateReportScores(activeReportScores.degen, activeReportScores.diamond);
@@ -2036,6 +2048,105 @@ const MENTAL_DRAFT_KEY = "degendna:mental-draft:v1";
 let activeMentalApp = null;
 let activeMentalState = null;
 let mentalAutoAdvanceTimer = null;
+
+function mc(zh, en) {
+  return mentalLocale(currentLang, zh, en);
+}
+
+function localizedMentalModule(key) {
+  return localizeMentalModule(currentLang, key, MENTAL_MODULES[key]);
+}
+
+function localizedMentalMode(key) {
+  return localizeMentalMode(currentLang, key, MENTAL_MODE_COPY[key]);
+}
+
+function localizedPersona(persona) {
+  const type = localizePersonaType(currentLang, persona.type);
+  const dimensions = persona.dimensions.map((dimension) => {
+    const localized = localizePersonaDimension(currentLang, dimension.key, dimension);
+    return {
+      ...localized,
+      direction: dimension.score >= 0 ? localized.right : localized.left
+    };
+  });
+  const strongestKeys = new Set(persona.strongest.map((item) => item.key));
+  return {
+    ...persona,
+    type,
+    dimensions,
+    strongest: dimensions.filter((item) => strongestKeys.has(item.key)).sort((a, b) => b.strength - a.strength)
+  };
+}
+
+function hydrateMentalStaticCopy() {
+  const center = document.querySelector("[data-mental-app]");
+  if (center) {
+    const intake = center.querySelector(".mental-intake");
+    if (intake) intake.innerHTML = `
+      <span class="mental-kicker">${mc("心理健康自测中心", "Mental Health Check-In Center")}</span>
+      <h2>${mc("照完钱包，也照顾一下自己。", "After checking the wallet, check in with yourself.")}</h2>
+      <p>${mc("这里没有排行榜，没有 NFT，也不会公开你的结果。自测只帮助你观察最近状态，不能替代医生、心理咨询师或精神科医生的判断。", "There is no leaderboard or NFT here, and your results are never made public. These check-ins help you observe recent changes; they do not replace a doctor, counselor, or psychiatrist.")}</p>
+      <ul>
+        <li>${mc("结果默认只保存在本浏览器", "Results stay in this browser by default")}</li>
+        <li>${mc("不上传服务器，不进入排行榜", "Nothing is uploaded or added to a leaderboard")}</li>
+        <li>${mc("不生成分享图，不和钱包绑定", "No share image and no wallet linkage")}</li>
+        <li>${mc("可以一键清除本地记录", "Local records can be cleared in one click")}</li>
+      </ul>
+      <div class="mental-privacy-note"><b>${mc("私密模式", "Private Mode")}</b><span>${mc("心理健康数据比钱包地址更敏感，本页只做本地自评与复测记录。", "Mental-health data is more sensitive than a wallet address. This page only supports local self-checks and retest records.")}</span></div>
+    `;
+    const tabs = center.querySelectorAll("[data-mental-mode]");
+    const tabCopy = {
+      quick: ["快速体检", "约 3 分钟", "Quick Check", "About 3 min"],
+      full: ["完整自测", "约 15 分钟", "Full Check", "About 15 min"],
+      deep: ["深度长卷", "分模块保存", "Deep Review", "Saved by module"],
+      crisis: ["危机支持", "安全优先", "Crisis Support", "Safety first"]
+    };
+    tabs.forEach((button) => {
+      const copy = tabCopy[button.dataset.mentalMode];
+      if (copy) button.innerHTML = `${currentLang === "en" ? copy[2] : copy[0]}<small>${currentLang === "en" ? copy[3] : copy[1]}</small>`;
+    });
+    const entry = center.querySelector("[data-degen-persona-entry]");
+    if (entry) entry.innerHTML = `${mc("Degen 交易人格自查", "Degen Trading Persona Check")}<small>${mc("DegenDNA 自研 · 约 8 分钟", "DegenDNA Original · About 8 min")}</small>`;
+  }
+
+  const psychePage = document.querySelector('[data-page-screen="psyche"]');
+  const softIntro = psychePage?.querySelector(".soft-intro");
+  if (softIntro) softIntro.innerHTML = `
+    <h2>${mc("心理健康自测中心", "Mental Health Check-In Center")}</h2>
+    <p>${mc("不是诊断，只是帮你更早看见自己的状态。", "Not a diagnosis, just an earlier view of how you are doing.")}</p>
+    <strong>${mc("照亮钱包，<br />也照顾一下自己。", "Illuminate the wallet.<br />Take care of yourself, too.")}</strong>
+    <ul><li>${mc("不登录", "No login")}</li><li>${mc("不上载", "No upload")}</li><li>${mc("不公开", "Private")}</li><li>${mc("不和钱包绑定", "Not tied to a wallet")}</li><li>${mc("本地保存可选", "Optional local storage")}</li></ul>
+    <div><button type="button">${mc("本地保存", "Save locally")}</button><button type="button">${mc("清除记录", "Clear records")}</button></div>
+  `;
+  const selfTestLabels = currentLang === "en"
+    ? ["Quick Check", "Low Mood", "Anxiety", "Well-Being", "Sleep", "Stress", "Trading Mindset"]
+    : ["快速体检", "情绪低落", "焦虑", "幸福感", "睡眠自测", "压力自测", "交易心理自查"];
+  psychePage?.querySelectorAll(".self-test-grid button").forEach((button, index) => {
+    button.textContent = selfTestLabels[index] || button.textContent;
+  });
+  const monitorLabels = psychePage?.querySelectorAll(".brain-monitor > span");
+  if (monitorLabels?.[0]) monitorLabels[0].textContent = mc("心电图", "ECG");
+  if (monitorLabels?.[1]) monitorLabels[1].textContent = mc("呼吸波", "Respiration");
+  const psycheSlogan = psychePage?.querySelector(".soft-slogan");
+  if (psycheSlogan) psycheSlogan.innerHTML = `${mc("你不是账户余额，也不是一次交易结果。", "You are not an account balance or the result of one trade.")}<b>degendna.fun</b>`;
+
+  document.querySelectorAll("[data-mental-back]").forEach((button) => {
+    button.textContent = mc("返回自测中心", "Back to Check-In Center");
+  });
+  document.querySelectorAll("[data-mental-crisis]").forEach((card) => {
+    card.innerHTML = `
+      <h3>${mc("安全支持优先", "Safety Support First")}</h3>
+      <p>${mc("如果你担心自己此刻无法保持安全，请先离开可能伤害自己的环境，联系当地紧急服务，或让身边可信任的人陪伴你。这个页面不会生成娱乐分数，也不会要求你分享结果。", "If you are worried that you cannot stay safe right now, move away from anything that could harm you, contact local emergency services, and ask someone you trust to stay with you. This page creates no entertainment score and never asks you to share a result.")}</p>
+      <ul>
+        <li>${mc("美国可拨打或短信 988 联系危机支持热线。", "In the United States, call or text 988 for crisis support.")}</li>
+        <li>${mc("如有即时危险，请拨打当地紧急电话（例：香港 999 / 2382 0000 / 2389 2222；澳门 999 / 110 / 112；台湾 110 / 119 / 1925）。", "If there is immediate danger, call your local emergency number (for example: Hong Kong 999 / 2382 0000 / 2389 2222; Macao 999 / 110 / 112; Taiwan 110 / 119 / 1925).")}</li>
+        <li>${mc("中国大陆可联系 120 / 110，或尽快前往急诊。", "In mainland China, call 120 / 110 or go to an emergency department as soon as possible.")}</li>
+        <li>${mc("尽量把电话号码、门锁密码、当前位置和当前情况告诉一个可信任的人。", "Tell a trusted person your phone number, location, access details, and what is happening now.")}</li>
+      </ul>
+    `;
+  });
+}
 
 const MENTAL_OPTIONS = {
   wellbeing: [
@@ -2661,7 +2772,10 @@ function shouldShowCrisisSupport(state) {
 }
 
 function mentalSeverityLabel(level) {
-  return ["状态相对平稳", "轻度需要关注", "困扰较明显", "建议认真关注", "安全支持优先"][level] || "需要关注";
+  const labels = currentLang === "en"
+    ? ["Relatively Stable", "Mild Attention Needed", "Noticeable Distress", "Please Take This Seriously", "Safety Support First"]
+    : ["状态相对平稳", "轻度需要关注", "困扰较明显", "建议认真关注", "安全支持优先"];
+  return labels[level] || mc("需要关注", "Attention Needed");
 }
 
 function mentalSeverityClass(level) {
@@ -2714,19 +2828,49 @@ const DEGEN_PERSONA_METHOD_ROWS = [
   ["长期策略倾向", "判断长线耐受与短线反应的平衡"],
   ["综合画像生成", "输出类型、盲区和可执行复盘建议"]
 ];
+const DEGEN_PERSONA_METHOD_ROWS_EN = [
+  ["On-Chain Behavior Modeling", "Build a profile from habits, position responses, and information paths"],
+  ["Decision Preference Review", "Observe the weight of narrative, data, rules, and emotion"],
+  ["Risk Response Measurement", "Identify attack, defense, review, and loss-of-control signals"],
+  ["Emotional Stability Analysis", "Track how volatility affects the execution system"],
+  ["Long-Term Strategy Tendency", "Assess long-horizon patience and short-term reaction"],
+  ["Integrated Profile", "Generate a type, blind spots, and an actionable review protocol"]
+];
 
 function degenPersonaAnsweredCount(state) {
   return Object.keys(state?.answers || {}).filter((key) => state.answers[key] !== undefined).length;
 }
 
 function degenPersonaAxisTone(dimension) {
-  if (dimension.strength >= 76) return "高强度";
-  if (dimension.strength >= 54) return "明显";
-  if (dimension.strength >= 32) return "轻度";
-  return "相对中性";
+  if (dimension.strength >= 76) return mc("高强度", "high-intensity");
+  if (dimension.strength >= 54) return mc("明显", "clear");
+  if (dimension.strength >= 32) return mc("轻度", "mild");
+  return mc("相对中性", "relatively neutral");
 }
 
 function degenPersonaProfessionalAnalysis(persona) {
+  if (currentLang === "en") {
+    const view = localizedPersona(persona);
+    const primary = view.strongest[0] || view.dimensions[0];
+    const secondary = view.strongest[1] || view.dimensions[1] || primary;
+    const byKey = (key) => view.dimensions.find((item) => item.key === key) || primary;
+    const social = byKey("social");
+    const risk = byKey("risk");
+    const execution = byKey("execution");
+    const signal = byKey("signal");
+    const horizon = byKey("horizon");
+    const validation = byKey("validation");
+    const highAxes = view.dimensions.filter((item) => item.strength >= 52).map((item) => item.name).join(", ") || "a balanced profile";
+    const softAxes = view.dimensions.filter((item) => item.strength < 32).map((item) => item.name).join(", ") || "no clearly low-sensitivity dimension";
+    return [
+      { title: "Core Trading Persona", body: `Your result is closest to ${view.type.name}, code ${view.code}. This is not a fixed identity label; it describes the response system you are more likely to use when volatility, information noise, position pressure, and social feedback arrive together. Your strongest dimensions are ${primary.name} and ${secondary.name}, showing ${degenPersonaAxisTone(primary)} and ${degenPersonaAxisTone(secondary)} tendencies.` },
+      { title: "Decision Drivers", body: `Your information intake leans toward ${social.direction}; signal processing leans toward ${signal.direction}; execution leans toward ${execution.direction}. Instead of collecting more opinions, separate entry evidence, confirmation evidence, and market emotion in your notes.` },
+      { title: "Risk and Position Profile", body: `Risk response leans toward ${risk.direction}, while capital management leans toward ${execution.direction}. Visible strengths include ${view.type.strengths.join(", ")}. Watch for ${view.type.risks.join(", ")}. A position is a stress test for the system, not proof of courage.` },
+      { title: "Emotional Triggers and Calibration", body: `Emotional stability leans toward ${validation.direction}, while opportunity sensitivity leans toward ${social.direction}. If both pull toward external stimulation, screenshots, calls, and missed moves may influence execution. Lower-sensitivity areas currently include ${softAxes}; they may be useful places to strengthen the system.` },
+      { title: "Horizon and Review", body: `Your preferred horizon leans toward ${horizon.direction}. Review on three levels: write the hypothesis before entry, record triggers during the trade, and evaluate process execution afterward. High-sensitivity dimensions are ${highAxes}; the stronger they are, the more they belong in written rules.` },
+      { title: "Execution Protocol", body: `${view.type.protocol} Add one mandatory cooldown: after two emotionally driven deviations from plan, allow only observation and notes for the rest of the day, with no new risk exposure. This is a behavioral review tool, not investment advice.` }
+    ];
+  }
   const primary = persona.strongest[0] || persona.dimensions[0];
   const secondary = persona.strongest[1] || persona.dimensions[1] || primary;
   const social = persona.dimensions.find((item) => item.key === "social") || primary;
@@ -2804,25 +2948,26 @@ function renderDegenPersonaChrome(page, state) {
   });
   if (!isDegen) return;
 
-  const persona = computeDegenPersonaResult(state);
+  const persona = localizedPersona(computeDegenPersonaResult(state));
   const total = state.queue.length || DEGEN_PERSONA_QUESTIONS.length;
   const answered = state.completed ? total : degenPersonaAnsweredCount(state);
   const percent = total ? Math.round((answered / total) * 100) : 0;
   const strongest = persona.strongest[0] || persona.dimensions[0];
 
   if (method) {
+    const methodRows = currentLang === "en" ? DEGEN_PERSONA_METHOD_ROWS_EN : DEGEN_PERSONA_METHOD_ROWS;
     method.innerHTML = `
-      <strong>DegenDNA 交易心理结构模型</strong>
-      <p>自研交易人格自查，用于娱乐、自我观察和交易复盘；不属于 MBTI 或任何第三方授权人格量表。</p>
+      <strong>${mc("DegenDNA 交易心理结构模型", "DegenDNA Trading Psychology Model")}</strong>
+      <p>${mc("自研交易人格自查，用于娱乐、自我观察和交易复盘；不属于 MBTI 或任何第三方授权人格量表。", "An original trading-persona check for entertainment, self-observation, and review. It is not MBTI or any third-party licensed personality test.")}</p>
       <div>
-        ${DEGEN_PERSONA_METHOD_ROWS.map((row) => `
+        ${methodRows.map((row) => `
           <article>
             <i></i>
             <span><b>${row[0]}</b><em>${row[1]}</em></span>
           </article>
         `).join("")}
       </div>
-      <small>所有回答只在当前浏览器参与本地结果生成，不上传、不公开、不进入排行榜。</small>
+      <small>${mc("所有回答只在当前浏览器参与本地结果生成，不上传、不公开、不进入排行榜。", "Answers are processed only in this browser. They are not uploaded, published, or added to a leaderboard.")}</small>
     `;
   }
 
@@ -2851,7 +2996,7 @@ function renderDegenPersonaChrome(page, state) {
       return `<circle cx="${point.x}" cy="${point.y}" r="2.6" style="--persona-axis:${dimension.color}"></circle>`;
     }).join("");
     const radar = `
-      <div class="degen-preview-radar" aria-label="六维交易人格雷达">
+      <div class="degen-preview-radar" aria-label="${mc("六维交易人格雷达", "Six-dimension trading persona radar")}">
         <div class="degen-radar-plot" aria-hidden="true">
           <svg class="degen-radar-svg" viewBox="0 0 120 120" role="img">
             <g class="degen-radar-grid">
@@ -2879,7 +3024,7 @@ function renderDegenPersonaChrome(page, state) {
     preview.innerHTML = state.completed ? `
       ${radar}
       <div class="persona-analysis-report">
-        <strong>交易人格专业分析</strong>
+        <strong>${mc("交易人格专业分析", "Professional Trading Persona Analysis")}</strong>
         ${degenPersonaProfessionalAnalysis(persona).map((section) => `
           <article>
             <b>${section.title}</b>
@@ -2888,7 +3033,7 @@ function renderDegenPersonaChrome(page, state) {
         `).join("")}
       </div>
     ` : `
-      <strong>当前倾向预览</strong>
+      <strong>${mc("当前倾向预览", "Current Tendency Preview")}</strong>
       ${radar}
       <p>${persona.type.name}</p>
       <small>${strongest.name}：${strongest.direction}</small>
@@ -2896,9 +3041,9 @@ function renderDegenPersonaChrome(page, state) {
   }
 
   if (archetypes) {
-    const orderedTypes = [persona.type, ...DEGEN_PERSONA_TYPES.filter((type) => type !== persona.type)].slice(0, 6);
+    const orderedTypes = [persona.type, ...DEGEN_PERSONA_TYPES.filter((type) => type.key !== persona.type.key).map((type) => localizePersonaType(currentLang, type))].slice(0, 6);
     archetypes.innerHTML = `
-      <button type="button" aria-label="上一组">‹</button>
+      <button type="button" aria-label="${mc("上一组", "Previous group")}">‹</button>
       <div>
         ${orderedTypes.map((type, index) => `
           <article class="${type === persona.type ? "active" : ""}">
@@ -2909,24 +3054,36 @@ function renderDegenPersonaChrome(page, state) {
           </article>
         `).join("")}
       </div>
-      <button type="button" aria-label="下一组">›</button>
+      <button type="button" aria-label="${mc("下一组", "Next group")}">›</button>
     `;
   }
 }
 
 function mentalQuestionOptions(question) {
   if (question?.moduleKey === "degenPersona" && question.dim) {
-    const dimension = DEGEN_PERSONA_DIMENSIONS[question.dim];
+    const dimension = localizePersonaDimension(currentLang, question.dim, DEGEN_PERSONA_DIMENSIONS[question.dim]);
+    const localized = localizeMentalQuestion(currentLang, question);
     return [
-      { value: -2, label: question.left },
+      { value: -2, label: localized.left },
       { value: -1.2, label: dimension.left },
-      { value: -0.35, label: "先观察复盘" },
-      { value: 0.35, label: "小额试错" },
+      { value: -0.35, label: mc("先观察复盘", "Observe and review first") },
+      { value: 0.35, label: mc("小额试错", "Test with a small amount") },
       { value: 1.2, label: dimension.right },
-      { value: 2, label: question.right }
+      { value: 2, label: localized.right }
     ];
   }
-  return MENTAL_OPTIONS[question.optionType] || [];
+  const options = MENTAL_OPTIONS[question.optionType] || [];
+  const labels = MENTAL_EN.options[question.optionType];
+  return currentLang === "en" && labels
+    ? options.map((option, index) => ({ ...option, label: labels[index] || option.label }))
+    : options;
+}
+
+function localizedMentalSummaryMessage(moduleKey, level, raw) {
+  if (currentLang !== "en") return null;
+  const suffix = level >= 2 || (moduleKey === "cssrs" && raw > 0) ? "High" : "Low";
+  return MENTAL_EN.summaries[`${moduleKey}${suffix}`]
+    || MENTAL_EN.summaries[level >= 2 ? "defaultHigh" : "defaultLow"];
 }
 
 function summarizeMentalModule(moduleKey, answers, queue) {
@@ -3069,13 +3226,14 @@ function summarizeMentalModule(moduleKey, answers, queue) {
       : "这个模块目前没有显示出很高的困扰线索。你仍然可以把它当作一次温柔的自我检查，继续留意状态变化。";
   }
 
+  const localizedModule = localizedMentalModule(moduleKey);
   return {
     moduleKey,
-    title,
+    title: currentLang === "en" ? localizedModule.title : title,
     display,
     level,
-    message,
-    notice: module.notice || ""
+    message: localizedMentalSummaryMessage(moduleKey, level, raw) || message,
+    notice: localizedModule.notice || ""
   };
 }
 
@@ -3153,7 +3311,7 @@ function renderMentalModules(app, state) {
   const advancedModules = ["pss10", "asrs6", "mdq", "scoff", "pcl5"];
   const showSafetyModule = true;
   const renderButton = (key) => {
-    const module = MENTAL_MODULES[key];
+    const module = localizedMentalModule(key);
     if (!module) return "";
     const selected = state?.singleModule === key;
     const phase = module.safety ? "safety" : advancedModules.includes(key) ? "phase2" : "phase1";
@@ -3165,7 +3323,7 @@ function renderMentalModules(app, state) {
     `;
   };
   modules.innerHTML = `
-    <h3>量表模块</h3>
+    <h3>${mc("量表模块", "Assessment Modules")}</h3>
     <div class="mental-primary-modules">${primaryModules.map(renderButton).join("")}</div>
     <div class="mental-advanced-modules">${advancedModules.map(renderButton).join("")}</div>
     ${showSafetyModule ? `<div class="mental-safety-module">${renderButton("cssrs")}</div>` : ""}
@@ -3176,16 +3334,27 @@ function renderMentalRecords(app) {
   const target = app.querySelector("[data-mental-records]");
   if (!target) return;
   const records = readMentalJson(MENTAL_STORAGE_KEY, []);
+  const localizedRecord = (value) => {
+    if (currentLang !== "en") return value;
+    const moduleKey = Object.keys(MENTAL_MODULES).find((key) => MENTAL_MODULES[key].title === value);
+    if (moduleKey) return localizedMentalModule(moduleKey).title;
+    const modeKey = Object.keys(MENTAL_MODE_COPY).find((key) => MENTAL_MODE_COPY[key].title === value);
+    if (modeKey) return localizedMentalMode(modeKey).title;
+    const type = DEGEN_PERSONA_TYPES.find((item) => item.name === value);
+    if (type) return localizePersonaType(currentLang, type).name;
+    const severity = ["状态相对平稳", "轻度需要关注", "困扰较明显", "建议认真关注", "安全支持优先"].indexOf(value);
+    return severity >= 0 ? mentalSeverityLabel(severity) : value;
+  };
   const recordList = records.length ? records.map((record) => `
       <article class="${record.risk ? "risk" : ""}">
-        <b>${escapeMentalHtml(record.headline)}</b>
-        <span>${escapeMentalHtml(record.mode || "自测")} · ${escapeMentalHtml(record.date)}</span>
+        <b>${escapeMentalHtml(localizedRecord(record.headline))}</b>
+        <span>${escapeMentalHtml(localizedRecord(record.mode || mc("自测", "Check-in")))} · ${escapeMentalHtml(record.date)}</span>
       </article>
-    `).join("") : `<p>暂无记录。完成一次自测后，只会保存在当前浏览器。</p>`;
+    `).join("") : `<p>${mc("暂无记录。完成一次自测后，只会保存在当前浏览器。", "No records yet. Completed check-ins are stored only in this browser.")}</p>`;
   target.innerHTML = `
     <div class="mental-records-head">
-      <h3>本地复测记录</h3>
-      <button type="button" data-mental-clear-records>清除本地记录</button>
+      <h3>${mc("本地复测记录", "Local Retest Records")}</h3>
+      <button type="button" data-mental-clear-records>${mc("清除本地记录", "Clear Local Records")}</button>
     </div>
     <div class="mental-record-list">${recordList}</div>
   `;
@@ -3195,9 +3364,10 @@ function renderMentalQuestion(app, state) {
   const card = app.querySelector("[data-mental-question-card]");
   if (!card) return;
   card.hidden = false;
+  const moduleMode = localizedMentalMode("module");
   const modeCopy = state.singleModule
-    ? { ...MENTAL_MODE_COPY.module, title: MENTAL_MODULES[state.singleModule]?.title || MENTAL_MODE_COPY.module.title }
-    : MENTAL_MODE_COPY[state.mode];
+    ? { ...moduleMode, title: localizedMentalModule(state.singleModule)?.title || moduleMode.title }
+    : localizedMentalMode(state.mode);
 
   app.querySelectorAll("[data-mental-mode]").forEach((button) => {
     button.classList.toggle("active", !state.singleModule && button.dataset.mentalMode === state.mode);
@@ -3205,17 +3375,17 @@ function renderMentalQuestion(app, state) {
 
   if (state.completed) {
     card.innerHTML = `
-      <span class="mental-section-label">已完成</span>
-      <h3>结果已生成</h3>
-      <p>本次自评已保存到本地浏览器。你可以继续复测，也可以清除本地记录。</p>
-      <button type="button" data-mental-start>重新开始</button>
+      <span class="mental-section-label">${mc("已完成", "Completed")}</span>
+      <h3>${mc("结果已生成", "Results Ready")}</h3>
+      <p>${mc("本次自评已保存到本地浏览器。你可以继续复测，也可以清除本地记录。", "This check-in has been saved locally. You can retake it or clear the local record.")}</p>
+      <button type="button" data-mental-start>${mc("重新开始", "Start Again")}</button>
     `;
     return;
   }
 
   if (!state.started) {
     card.innerHTML = `
-      <span class="mental-section-label">当前模式</span>
+      <span class="mental-section-label">${mc("当前模式", "Current Mode")}</span>
       <h3>${modeCopy.title}</h3>
       <p>${modeCopy.detail}</p>
       <button type="button" data-mental-start>${modeCopy.action}</button>
@@ -3223,11 +3393,12 @@ function renderMentalQuestion(app, state) {
     return;
   }
 
-  const question = state.queue[state.index];
-  const module = MENTAL_MODULES[question.moduleKey];
+  const rawQuestion = state.queue[state.index];
+  const question = localizeMentalQuestion(currentLang, rawQuestion);
+  const module = localizedMentalModule(question.moduleKey);
   const answered = state.answers[question.id] !== undefined;
   const progress = Math.round(((state.index + 1) / state.queue.length) * 100);
-  const dimension = question.dim ? DEGEN_PERSONA_DIMENSIONS[question.dim] : null;
+  const dimension = question.dim ? localizePersonaDimension(currentLang, question.dim, DEGEN_PERSONA_DIMENSIONS[question.dim]) : null;
   const dimensionMarkup = dimension ? `
     <div class="persona-question-axis" style="--persona-axis: ${dimension.color}">
       <span><b>${dimension.left}</b>${question.left}</span>
@@ -3236,14 +3407,14 @@ function renderMentalQuestion(app, state) {
     </div>
   ` : "";
   const questionText = isDegenPersonaState(state)
-    ? wrapMentalQuestionText(question.text, 30)
+    ? currentLang === "en" ? escapeMentalHtml(question.text) : wrapMentalQuestionText(question.text, 30)
     : escapeMentalHtml(question.text);
 
   card.innerHTML = `
     <div class="mental-module-frame" data-current-module="${question.moduleKey}" ${question.dim ? `data-persona-dim="${question.dim}"` : ""}>
       <span class="mental-section-label">${module.title} · ${state.index + 1}/${state.queue.length}</span>
       <h3>${questionText}</h3>
-      ${isDegenPersonaState(state) ? `<p class="persona-question-hint">请选择最符合你真实习惯的选项。</p>` : ""}
+      ${isDegenPersonaState(state) ? `<p class="persona-question-hint">${mc("请选择最符合你真实习惯的选项。", "Choose the option that best reflects your real habits.")}</p>` : ""}
       ${dimensionMarkup}
       <div class="mental-progress"><em style="width: ${progress}%"></em></div>
       <div class="mental-options">
@@ -3260,8 +3431,8 @@ function renderMentalQuestion(app, state) {
       </div>
       ${module.notice ? `<p class="mental-notice">${module.notice}</p>` : ""}
       <div class="mental-question-actions">
-        <button type="button" data-mental-prev ${state.index === 0 ? "disabled" : ""}>上一题</button>
-        <button type="button" data-mental-next ${answered ? "" : "disabled"}>${state.index === state.queue.length - 1 ? "生成结果" : "下一题"}</button>
+        <button type="button" data-mental-prev ${state.index === 0 ? "disabled" : ""}>${mc("上一题", "Previous")}</button>
+        <button type="button" data-mental-next ${answered ? "" : "disabled"}>${state.index === state.queue.length - 1 ? mc("生成结果", "Generate Results") : mc("下一题", "Next")}</button>
       </div>
     </div>
   `;
@@ -3271,12 +3442,14 @@ function renderMentalCenterPrompt(app, state) {
   const card = app.querySelector("[data-mental-question-card]");
   if (!card) return;
   card.hidden = false;
+  const moduleMode = localizedMentalMode("module");
   const modeCopy = state.singleModule
-    ? { ...MENTAL_MODE_COPY.module, title: MENTAL_MODULES[state.singleModule]?.title || MENTAL_MODE_COPY.module.title }
-    : MENTAL_MODE_COPY[state.mode];
-  const selectedTitle = state.singleModule ? MENTAL_MODULES[state.singleModule]?.title || modeCopy.title : modeCopy.title;
+    ? { ...moduleMode, title: localizedMentalModule(state.singleModule)?.title || moduleMode.title }
+    : localizedMentalMode(state.mode);
+  const selectedModule = state.singleModule ? localizedMentalModule(state.singleModule) : null;
+  const selectedTitle = selectedModule?.title || modeCopy.title;
   const selectedDetail = state.singleModule
-    ? `${MENTAL_MODULES[state.singleModule]?.phase || ""} · ${MENTAL_MODULES[state.singleModule]?.purpose || modeCopy.detail}`
+    ? `${selectedModule?.phase || ""} · ${selectedModule?.purpose || modeCopy.detail}`
     : modeCopy.detail;
 
   app.querySelectorAll("[data-mental-mode]").forEach((button) => {
@@ -3301,19 +3474,19 @@ function renderMentalCenterPrompt(app, state) {
   if (state.started && !state.completed) {
     const current = state.queue.length ? state.index + 1 : 0;
     card.innerHTML = `
-      <span class="mental-section-label">答题已转入专门页面</span>
-      <h3>继续上次自测</h3>
-      <p>当前进度 ${current} / ${state.queue.length}。所有题目都会在独立答题页完成，中心页只保留入口、模块和本地记录。</p>
-      <button type="button" data-mental-continue>进入专门答题页</button>
+      <span class="mental-section-label">${mc("答题已转入专门页面", "Assessment Opened on Its Own Page")}</span>
+      <h3>${mc("继续上次自测", "Continue Your Check-In")}</h3>
+      <p>${mc(`当前进度 ${current} / ${state.queue.length}。所有题目都会在独立答题页完成，中心页只保留入口、模块和本地记录。`, `Current progress: ${current} / ${state.queue.length}. Questions are completed on the dedicated assessment page; the center keeps only entry points, modules, and local records.`)}</p>
+      <button type="button" data-mental-continue>${mc("进入专门答题页", "Open Assessment Page")}</button>
     `;
     return;
   }
 
   card.innerHTML = `
-    <span class="mental-section-label">当前选择</span>
+    <span class="mental-section-label">${mc("当前选择", "Current Selection")}</span>
     <h3>${selectedTitle}</h3>
     <p>${selectedDetail}</p>
-    <button type="button" data-mental-start>进入专门答题页</button>
+    <button type="button" data-mental-start>${mc("进入专门答题页", "Open Assessment Page")}</button>
   `;
 }
 
@@ -3333,14 +3506,14 @@ function renderMentalResult(app, state) {
   }
 
   result.classList.remove("degen-persona-result");
-  const summaries = state.resultSummaries || computeMentalSummaries(state);
+  const summaries = computeMentalSummaries(state);
   const highest = summaries.reduce((max, item) => item.level > max.level ? item : max, summaries[0] || { level: 0 });
-  const headline = state.riskTriggered ? "安全支持优先" : mentalSeverityLabel(highest.level);
+  const headline = state.riskTriggered ? mc("安全支持优先", "Safety Support First") : mentalSeverityLabel(highest.level);
   result.hidden = false;
   result.innerHTML = `
-    <span class="mental-section-label">本次结果</span>
+    <span class="mental-section-label">${mc("本次结果", "Your Results")}</span>
     <h3>${headline}</h3>
-    <p>这不是诊断。结果只表示你最近一段时间的自评线索，不能替代医生、心理咨询师或精神科医生的判断。</p>
+    <p>${mc("这不是诊断。结果只表示你最近一段时间的自评线索，不能替代医生、心理咨询师或精神科医生的判断。", "This is not a diagnosis. The results only reflect recent self-reported clues and cannot replace the judgment of a doctor, counselor, or psychiatrist.")}</p>
     <div class="mental-summary-list">
       ${summaries.map((item) => `
         <article class="${mentalSeverityClass(item.level)}">
@@ -3354,11 +3527,11 @@ function renderMentalResult(app, state) {
 }
 
 function renderDegenPersonaResult(result, state) {
-  const persona = state.resultSummaries?.[0]?.persona || computeDegenPersonaResult(state);
+  const persona = localizedPersona(state.resultSummaries?.[0]?.persona || computeDegenPersonaResult(state));
   result.hidden = false;
   result.classList.add("degen-persona-result");
   result.innerHTML = `
-    <span class="mental-section-label">DegenDNA 自研结果</span>
+    <span class="mental-section-label">${mc("DegenDNA 自研结果", "DegenDNA Original Result")}</span>
     <div class="persona-result-hero">
       <div>
         <h3>${persona.type.name}</h3>
@@ -3366,7 +3539,7 @@ function renderDegenPersonaResult(result, state) {
       </div>
       <strong>${persona.code}</strong>
     </div>
-    <p class="persona-disclaimer">本测试为 DegenDNA.fun 自研的交易人格自查工具，用于娱乐、自我观察和交易行为复盘。它不属于 MBTI，也不与 Myers-Briggs Type Indicator 或相关机构存在关联；结果不构成投资建议。</p>
+    <p class="persona-disclaimer">${mc("本测试为 DegenDNA.fun 自研的交易人格自查工具，用于娱乐、自我观察和交易行为复盘。它不属于 MBTI，也不与 Myers-Briggs Type Indicator 或相关机构存在关联；结果不构成投资建议。", "This DegenDNA.fun original trading-persona check is designed for entertainment, self-observation, and behavioral review. It is not MBTI, is not affiliated with Myers-Briggs Type Indicator or related organizations, and does not constitute investment advice.")}</p>
     <div class="persona-dimension-grid">
       ${persona.dimensions.map((dimension) => `
         <article style="--persona-axis: ${dimension.color}">
@@ -3378,15 +3551,15 @@ function renderDegenPersonaResult(result, state) {
     </div>
     <div class="persona-insight-grid">
       <article>
-        <b>优势雷达</b>
+        <b>${mc("优势雷达", "Strength Radar")}</b>
         ${persona.type.strengths.map((item) => `<span>${item}</span>`).join("")}
       </article>
       <article>
-        <b>盲区警报</b>
+        <b>${mc("盲区警报", "Blind-Spot Alerts")}</b>
         ${persona.type.risks.map((item) => `<span>${item}</span>`).join("")}
       </article>
       <article>
-        <b>复盘协议</b>
+        <b>${mc("复盘协议", "Review Protocol")}</b>
         <p>${persona.type.protocol}</p>
       </article>
     </div>
@@ -3400,18 +3573,18 @@ function renderMentalCrisis(app, state) {
 }
 
 function mentalSessionTitle(state) {
-  if (isDegenPersonaState(state)) return MENTAL_MODE_COPY["degen-persona"].title;
-  if (state.singleModule) return MENTAL_MODULES[state.singleModule]?.title || MENTAL_MODE_COPY.module.title;
-  return MENTAL_MODE_COPY[state.mode]?.title || MENTAL_MODE_COPY.quick.title;
+  if (isDegenPersonaState(state)) return localizedMentalMode("degen-persona").title;
+  if (state.singleModule) return localizedMentalModule(state.singleModule)?.title || localizedMentalMode("module").title;
+  return localizedMentalMode(state.mode)?.title || localizedMentalMode("quick").title;
 }
 
 function mentalSessionDetail(state) {
-  if (isDegenPersonaState(state)) return MENTAL_MODE_COPY["degen-persona"].detail;
+  if (isDegenPersonaState(state)) return localizedMentalMode("degen-persona").detail;
   if (state.singleModule) {
-    const module = MENTAL_MODULES[state.singleModule];
-    return module ? `${module.phase} · ${module.purpose}` : MENTAL_MODE_COPY.module.detail;
+    const module = localizedMentalModule(state.singleModule);
+    return module ? `${module.phase} · ${module.purpose}` : localizedMentalMode("module").detail;
   }
-  return MENTAL_MODE_COPY[state.mode]?.detail || MENTAL_MODE_COPY.quick.detail;
+  return localizedMentalMode(state.mode)?.detail || localizedMentalMode("quick").detail;
 }
 
 function renderMentalQuizPage(state) {
@@ -3428,7 +3601,7 @@ function renderMentalQuizPage(state) {
   document.body.classList.toggle("degen-persona-quiz", isDegen);
   document.body.classList.toggle("degen-persona-result-mode", isDegen && state.completed);
 
-  setText(page.querySelector("[data-mental-quiz-kicker]"), isDegenPersonaState(state) ? "DegenDNA 自研测试" : state.singleModule ? "单模块自测" : "心理健康自测");
+  setText(page.querySelector("[data-mental-quiz-kicker]"), isDegenPersonaState(state) ? mc("DegenDNA 自研测试", "DegenDNA Original Assessment") : state.singleModule ? mc("单模块自测", "Single-Module Check") : mc("心理健康自测", "Mental Health Check-In"));
   setText(page.querySelector("[data-mental-quiz-title]"), mentalSessionTitle(state));
   setText(page.querySelector("[data-mental-quiz-subtitle]"), mentalSessionDetail(state));
 
@@ -3441,20 +3614,20 @@ function renderMentalQuizPage(state) {
     const remaining = Math.max(0, total - current);
     const estimate = Math.max(1, Math.ceil(remaining * (isDegen ? 0.4 : 0.3)));
     progress.innerHTML = `
-      <b>${isDegen ? "测评进度" : "答题进度"} <small>PROGRESS</small></b>
+      <b>${isDegen ? mc("测评进度", "Assessment Progress") : mc("答题进度", "Question Progress")} <small>PROGRESS</small></b>
       <div class="quiz-progress-orb" style="--quiz-progress: ${percent}%; --quiz-progress-deg: ${progressDeg}" aria-hidden="true"><strong>${percent}<em>%</em></strong></div>
       <dl>
-        <div><dt>已完成</dt><dd>${current}</dd></div>
-        <div><dt>剩余</dt><dd>${remaining}</dd></div>
-        <div><dt>预计耗时</dt><dd>${estimate} 分钟</dd></div>
+        <div><dt>${mc("已完成", "Completed")}</dt><dd>${current}</dd></div>
+        <div><dt>${mc("剩余", "Remaining")}</dt><dd>${remaining}</dd></div>
+        <div><dt>${mc("预计耗时", "Est. time")}</dt><dd>${estimate} ${mc("分钟", "min")}</dd></div>
       </dl>
       <i><em></em></i>
       <ol aria-hidden="true">
-        <li>开始</li>
-        <li>${isDegen ? "行为偏好" : "状态记录"}</li>
-        <li>${isDegen ? "风险反应" : "风险识别"}</li>
-        <li>综合分析</li>
-        <li>${isDegen ? "报告生成" : "结果生成"}</li>
+        <li>${mc("开始", "Start")}</li>
+        <li>${isDegen ? mc("行为偏好", "Behavior") : mc("状态记录", "Check-in")}</li>
+        <li>${isDegen ? mc("风险反应", "Risk") : mc("风险识别", "Safety")}</li>
+        <li>${mc("综合分析", "Analysis")}</li>
+        <li>${isDegen ? mc("报告生成", "Report") : mc("结果生成", "Results")}</li>
       </ol>
     `;
     const bar = progress.querySelector("i > em");

@@ -73,6 +73,7 @@ import {
   saveWorkflowResults,
   WORKFLOWS
 } from "./workflows.js";
+import { readXiaojingLanguage, saveXiaojingLanguage, xc } from "./i18n.js";
 
 const APP_BASE_URL = new URL(import.meta.env.BASE_URL, window.location.href);
 const IS_DEGENDNA_EMBEDDED = window.location.pathname.startsWith("/xiaojing");
@@ -821,6 +822,7 @@ function PrivacyDialog({ open, onClose, dataSummary, onClearData }) {
 }
 
 export default function App() {
+  const [language, setLanguage] = useState(readXiaojingLanguage);
   const [activeMode, setActiveMode] = useState("home");
   const [toneMode, setToneMode] = useState(readToneMode);
   const [workflowId, setWorkflowId] = useState(null);
@@ -840,6 +842,23 @@ export default function App() {
   const [disciplineChecks, setDisciplineChecks] = useState(readDisciplineChecks);
   const [latestPersona] = useState(readLatestDegenPersona);
   const [pauseRemaining, setPauseRemaining] = useState(0);
+
+  useEffect(() => {
+    document.documentElement.lang = language === "en" ? "en" : "zh-CN";
+    saveXiaojingLanguage(language);
+  }, [language]);
+
+  const localizedModes = useMemo(() => {
+    if (language !== "en") return MODES;
+    const copy = {
+      home: ["Calibration Desk", "Start from what is happening now"],
+      discipline: ["Discipline Protocol", "Pre-trade checks and behavioral evidence"],
+      companion: ["Talk to Xiaojing", "Open conversation and result follow-up"],
+      persona: ["Persona Reading", "Understand habits without fixed labels"],
+      records: ["Private Records", "Stored only on this device"]
+    };
+    return MODES.map((mode) => ({ ...mode, label: copy[mode.id]?.[0] || mode.label, description: copy[mode.id]?.[1] || mode.description }));
+  }, [language]);
 
   useEffect(() => {
     if (pauseRemaining <= 0) return undefined;
@@ -885,7 +904,7 @@ export default function App() {
       const support = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: crisisMessage(),
+        content: crisisMessage(language),
         timestamp: Date.now(),
         sensitive: true
       };
@@ -896,7 +915,7 @@ export default function App() {
     }
 
     setSending(true);
-    const local = localCompanionReply(text, explicitMode, toneMode);
+    const local = localCompanionReply(text, explicitMode, toneMode, language);
     try {
       let reply = local.text;
       if (providerReady) {
@@ -905,7 +924,7 @@ export default function App() {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             provider: providerSettings,
-            systemPrompt: buildSystemPrompt(explicitMode, toneMode),
+            systemPrompt: buildSystemPrompt(explicitMode, toneMode, language),
             messages: nextMessages.slice(-12).map(({ role, content }) => ({ role, content }))
           })
         });
@@ -1129,9 +1148,9 @@ export default function App() {
       <header className="topbar">
         <div className="brand-lockup">
           <img src={appUrl("degendna-logo.png")} alt="DegenDNA" />
-          <div><strong>小镜 AI</strong><span>交易状态陪伴 AI</span></div>
+          <div><strong>{xc(language, "小镜 AI", "Xiaojing AI")}</strong><span>{xc(language, "交易状态陪伴 AI", "Trading-State Companion")}</span></div>
           <i />
-          <small>{IS_DEGENDNA_EMBEDDED ? "DegenDNA 集成" : "独立模式"}</small>
+          <small>{IS_DEGENDNA_EMBEDDED ? xc(language, "DegenDNA 集成", "DegenDNA Integrated") : xc(language, "独立模式", "Standalone Mode")}</small>
         </div>
         <div className="top-actions">
           <a
@@ -1139,8 +1158,9 @@ export default function App() {
             target={IS_DEGENDNA_EMBEDDED ? undefined : "_blank"}
             rel={IS_DEGENDNA_EMBEDDED ? undefined : "noreferrer"}
           >
-            {IS_DEGENDNA_EMBEDDED ? "返回 DegenDNA" : "DegenDNA"} <ExternalLink size={14} />
+            {IS_DEGENDNA_EMBEDDED ? xc(language, "返回 DegenDNA", "Back to DegenDNA") : "DegenDNA"} <ExternalLink size={14} />
           </a>
+          <button type="button" aria-label={xc(language, "切换语言", "Switch language")} onClick={() => setLanguage((value) => value === "zh" ? "en" : "zh")}>⇄ {language === "zh" ? "中文 / EN" : "EN / 中文"}</button>
           <div className="tone-mode-switch" role="group" aria-label="小镜语气模式">
             {TONE_MODES.map((tone) => (
               <button
@@ -1153,17 +1173,17 @@ export default function App() {
               >{tone.label}</button>
             ))}
           </div>
-          <button type="button" onClick={() => setSettingsOpen(true)}><Settings2 size={16} /> 模型设置</button>
-          <button type="button" onClick={() => setPrivacyOpen(true)}><ShieldCheck size={16} /> 隐私说明</button>
-          <button type="button" onClick={resetSession}><RotateCcw size={16} /> 退出本次对话</button>
-          <IconButton label="打开导航" className="mobile-menu-trigger" onClick={() => setMobileMenuOpen((value) => !value)}><Menu size={21} /></IconButton>
+          <button type="button" onClick={() => setSettingsOpen(true)}><Settings2 size={16} /> {xc(language, "模型设置", "Model Settings")}</button>
+          <button type="button" onClick={() => setPrivacyOpen(true)}><ShieldCheck size={16} /> {xc(language, "隐私说明", "Privacy")}</button>
+          <button type="button" onClick={resetSession}><RotateCcw size={16} /> {xc(language, "退出本次对话", "Reset Session")}</button>
+          <IconButton label={xc(language, "打开导航", "Open navigation")} className="mobile-menu-trigger" onClick={() => setMobileMenuOpen((value) => !value)}><Menu size={21} /></IconButton>
         </div>
       </header>
 
       <div className={`app-body ${activeMode === "companion" ? "" : "without-observation"}`}>
         <nav className={`side-nav ${mobileMenuOpen ? "is-open" : ""}`} aria-label="主要功能">
           <div>
-            {MODES.map((mode) => {
+            {localizedModes.map((mode) => {
               const Icon = MODE_ICONS[mode.id];
               return (
                 <button
@@ -1179,7 +1199,7 @@ export default function App() {
             })}
           </div>
           <button type="button" className={activeMode === "safety" ? "active safety" : "safety"} onClick={() => switchMode("safety")}>
-            <LifeBuoy size={23} /><span>安全支持<small>危机时优先进入</small></span>
+            <LifeBuoy size={23} /><span>{xc(language, "安全支持", "Safety Support")}<small>{xc(language, "危机时优先进入", "Use first in a crisis")}</small></span>
           </button>
         </nav>
 
@@ -1190,6 +1210,7 @@ export default function App() {
               latestResult={workflowResults[0]}
               disciplineStats={disciplineStats}
               toneMode={toneMode}
+              language={language}
               onScenario={handleScenario}
               onTool={handleTool}
               onOpenDiscipline={() => switchMode("discipline")}
@@ -1201,6 +1222,7 @@ export default function App() {
               workflowId={workflowId}
               existingResult={visibleResult}
               toneMode={toneMode}
+              language={language}
               onComplete={completeWorkflow}
               onBack={() => switchMode("home")}
               onDiscuss={discussResult}
@@ -1259,7 +1281,7 @@ export default function App() {
       </div>
 
       <nav className="bottom-nav" aria-label="移动端主要功能">
-        {MODES.map((mode) => {
+        {localizedModes.map((mode) => {
           const Icon = MODE_ICONS[mode.id];
           return <button type="button" key={mode.id} className={activeMode === mode.id ? "active" : ""} onClick={() => switchMode(mode.id)}><Icon size={20} /><span>{mode.label}</span></button>;
         })}

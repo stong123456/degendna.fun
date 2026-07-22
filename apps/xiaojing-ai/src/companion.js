@@ -52,7 +52,7 @@ export function urgencyFromText(text) {
   return 4;
 }
 
-export function buildSystemPrompt(mode = "snapshot", toneMode = "clear") {
+export function buildSystemPrompt(mode = "snapshot", toneMode = "clear", language = "zh") {
   const modeName = MODES.find((item) => item.id === mode)?.label || "情绪陪伴";
   const toneInstruction = toneMode === "degen"
     ? "当前使用 Degen 语气：可以使用克制的币圈表达和轻微调侃，但不羞辱、不贴标签、不鼓励冒险。"
@@ -77,15 +77,34 @@ ${toneInstruction}
 - 可以轻微嘴毒，但只针对交易冲动，不攻击用户。例如：“K 线没有资格给你的人格估值。”
 - 危机场景完全严肃，不使用币圈黑话。
 - 结尾给一个 2 到 20 分钟内能执行的小行动。
-- 使用中文回答，除非用户明确使用其他语言。
+- ${language === "en" ? "Use English unless the user clearly chooses another language." : "使用中文回答，除非用户明确使用其他语言。"}
 
 推荐响应结构：
 共情一句 -> 帮用户整理 -> 一个小行动或一个问题。`;
 }
 
-export function localCompanionReply(text, mode = "companion", toneMode = "clear") {
+export function localCompanionReply(text, mode = "companion", toneMode = "clear", language = "zh") {
   const value = String(text || "").trim();
   const urge = urgencyFromText(value);
+
+  if (language === "en") {
+    if (/miss|fomo|pump|rally|breakout/i.test(value)) return {
+      text: "The fear of missing out is real, but a moving price does not require immediate action. Leave the trading screen for 15 minutes, then ask: if price stops rising, does the original entry reason still hold?",
+      observation: { urge, body: "Tense", action: "Leave the screen for 15 min" }
+    };
+    if (/loss|drawdown|liquidat|win it back|revenge/i.test(value)) return {
+      text: "The loss already carries enough pressure; the next trade does not need to prove anything. Pause orders and write one sentence for the original plan and one for what actually happened.",
+      observation: { urge: Math.max(urge, 8), body: "Tense / activated", action: "Pause the next trade" }
+    };
+    if (/sleep|midnight|insomnia|chart/i.test(value)) return {
+      text: "Your body is asking to close, while the market is still holding your attention. Silence alerts for 20 minutes and put the phone out of reach. Tonight's task is to return sleep to yourself.",
+      observation: { urge: Math.max(urge, 6), body: "Tired", action: "Mute and step away for 20 min" }
+    };
+    return {
+      text: "I hear you. You do not need to prove that you are fine or explain everything perfectly. What is the fact that just happened, and what is the loudest sentence in your mind? Let us separate the two.",
+      observation: { urge, body: "Needs space", action: "Separate facts from story" }
+    };
+  }
 
   if (/错过|fomo|涨了|拉升|起飞/i.test(value)) {
     return {
@@ -136,8 +155,10 @@ export function scenarioSeed(id) {
   return seeds[id] || seeds.talk;
 }
 
-export function crisisMessage() {
-  return "我很在意你现在的安全。先不聊行情：你现在是否可能在接下来的几分钟或几小时里伤害自己或他人？如果答案是“是”或“不确定”，请立即联系当地紧急服务或危机热线，并联系一个你信任的人陪在身边；同时离开可能造成伤害的物品或地点，不要独处。";
+export function crisisMessage(language = "zh") {
+  return language === "en"
+    ? "I care about your immediate safety. Let us stop discussing the market: is there a chance you may hurt yourself or someone else in the next few minutes or hours? If the answer is yes or uncertain, contact local emergency or crisis services now and ask someone you trust to stay with you. Move away from anything or any place that could cause harm, and do not remain alone."
+    : "我很在意你现在的安全。先不聊行情：你现在是否可能在接下来的几分钟或几小时里伤害自己或他人？如果答案是“是”或“不确定”，请立即联系当地紧急服务或危机热线，并联系一个你信任的人陪在身边；同时离开可能造成伤害的物品或地点，不要独处。";
 }
 
 export function personaInterpretation(payload) {
