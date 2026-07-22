@@ -80,6 +80,8 @@ const RESULT_EN = {
 };
 
 const COMMON_VALUE_EN = new Map([
+  ["价格快速拉升", "A rapid price rally"], ["群友晒盈利", "Friends posting profits"],
+  ["大 V / 社媒信息", "Influencer or social-media content"], ["刚错过上一段行情", "Missing the previous move"],
   ["偏高", "Elevated"], ["当前不高", "Not elevated"], ["明显", "Marked"], ["可控", "Manageable"],
   ["符合计划", "Followed plan"], ["需要补强", "Needs strengthening"], ["保留原规则", "Keep the original rule"],
   ["明确分批退出条件", "Define staged exit conditions"], ["计划内亏损", "Planned loss"], ["执行偏离型亏损", "Execution-drift loss"],

@@ -88,6 +88,13 @@ export function localCompanionReply(text, mode = "companion", toneMode = "clear"
   const urge = urgencyFromText(value);
 
   if (language === "en") {
+    const typeNames = {
+      "火箭冲锋手": "Rocket Raider", "链上风控师": "On-Chain Risk Surgeon", "FOMO 短跑手": "FOMO Sprinter",
+      "叙事雷达手": "Narrative Radar", "数据制图师": "Data Cartographer", "规则锻造师": "Rule Forger",
+      "社群共振体": "Social Resonator", "仓位守夜人": "Position Night Watch", "短线脉冲猎手": "Short-Term Pulse Hunter",
+      "信念架构师": "Conviction Architect", "波动侦察兵": "Volatility Scout", "回撤炼金师": "Drawdown Alchemist", "均衡复盘型": "Balanced Reviewer"
+    };
+    const localizedType = typeNames[type] || type;
     if (/miss|fomo|pump|rally|breakout/i.test(value)) return {
       text: "The fear of missing out is real, but a moving price does not require immediate action. Leave the trading screen for 15 minutes, then ask: if price stops rising, does the original entry reason still hold?",
       observation: { urge, body: "Tense", action: "Leave the screen for 15 min" }
@@ -161,7 +168,7 @@ export function crisisMessage(language = "zh") {
     : "我很在意你现在的安全。先不聊行情：你现在是否可能在接下来的几分钟或几小时里伤害自己或他人？如果答案是“是”或“不确定”，请立即联系当地紧急服务或危机热线，并联系一个你信任的人陪在身边；同时离开可能造成伤害的物品或地点，不要独处。";
 }
 
-export function personaInterpretation(payload) {
+export function personaInterpretation(payload, language = "zh") {
   const type = payload.type || payload.name || "尚未命名的交易风格";
   const code = payload.code || "未提供代码";
   const dimensions = payload.dimensions || {};
@@ -174,6 +181,27 @@ export function personaInterpretation(payload) {
     .slice(0, 2)
     .map((item) => item.name || item.key)
     .filter(Boolean);
+
+  if (language === "en") {
+    const englishNames = {
+      "机会敏感度": "Opportunity Sensitivity", "决策果断性": "Decision Style", "资金管理力": "Capital Management",
+      "风险承受力": "Risk Tolerance", "耐心与纪律": "Patience & Discipline", "情绪稳定性": "Emotional Stability"
+    };
+    const localizedStrongest = strongest.map((name) => englishNames[name] || name);
+    return {
+      title: localizedType,
+      code,
+      summary: localizedStrongest.length
+        ? `Your strongest current response dimensions are ${localizedStrongest.join(" and ")}. These describe patterns you may call on under pressure, not a permanent identity.`
+        : "Use this result to notice automatic trading responses, not to create a fixed label.",
+      trigger: /FOMO|冲锋|追高|短跑/i.test(type) ? "When price and social chatter accelerate together" : "When sudden volatility interrupts the plan",
+      lossState: /FOMO|冲锋|追高|短跑/i.test(type) ? "Entering before the exit conditions are complete" : "Drifting from the original plan as emotional load rises",
+      cooling: /FOMO|冲锋|追高|短跑/i.test(type) ? "FOMO Cooler" : "Trade Review Card",
+      preTrade: "Write the exit condition before entry. If it cannot be written, do not confirm yet.",
+      postTrade: "Review the gap between plan and action before looking for another setup.",
+      shareText: `My Degen trading persona: ${localizedType} (${code}). A behavior mirror, not a destiny label. degendna.fun`
+    };
+  }
 
   const title = type;
   const trigger = /FOMO|冲锋|追高|短跑/i.test(type)

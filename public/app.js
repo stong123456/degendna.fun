@@ -6,7 +6,7 @@ import {
   localizePersonaDimension,
   localizePersonaType,
   mentalLocale
-} from "./mental-i18n.js?v=20260722-bilingual-v158";
+} from "./mental-i18n.js?v=20260722-xiaojing-pages-v159";
 
 const form = document.querySelector("#scan-form");
 const addressInput = document.querySelector("#wallet-address");
