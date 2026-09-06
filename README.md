@@ -112,23 +112,24 @@ The `/` app includes a separate "心理健康自测中心" view. It is intention
 ## Deploy Notes
 
 - This is a zero-dependency Node app, so it can run on a VPS, Render, Railway, Fly.io, or any Node-capable container host.
-- Recommended MVP host: Railway, because this repo is a normal Node HTTP server and includes `railway.json`.
-- Railway settings:
-  - Root directory: repository root
-  - Build command: `npm install`
-  - Start command: `npm start`
-  - Environment variables:
-    - `NODE_ENV=production`
-    - `PUBLIC_SITE_URL=https://degendna.fun`
-    - `PUBLIC_SITE_HOST=degendna.fun`
-    - Optional persistent leaderboard:
-      - `SUPABASE_URL`
-      - `SUPABASE_SERVICE_ROLE_KEY`
-      - `SUPABASE_LEADERBOARD_TABLE=onchain_leaderboard`
-- DNS:
-  - Add `degendna.fun` as a custom domain in Railway service settings.
-  - Then set the `CNAME` and `TXT` records exactly as Railway shows in its domain screen.
-  - Remove any old `A` record that points `degendna.fun` to unrelated IPs.
+- Production host: Fly.io app `degendna-fun-web`, configured by `Dockerfile`, `.dockerignore`, and `fly.toml` in this repository.
+- Deploy from the repository root with `flyctl deploy --remote-only --ha=false`.
+- The Fly configuration sets `NODE_ENV=production`, `PORT=8080`, `PUBLIC_SITE_URL=https://degendna.fun`, and `PUBLIC_SITE_HOST=degendna.fun`.
+- The Machine uses a shared CPU, 256 MB RAM, and suspend-on-idle with automatic wake-up to keep low-traffic hosting costs down.
+- Health checks use `GET /api/health`.
+- Apex DNS for the current Fly app:
+  - `A degendna.fun 66.241.124.201`
+  - `AAAA degendna.fun 2a09:8280:1::184:faa7:0`
+- Add the same A/AAAA targets for `www.degendna.fun` if the `www` hostname should be supported.
+- Optional integrations remain server-side secrets and must never be committed:
+  - `SUPABASE_URL`
+  - `SUPABASE_SERVICE_ROLE_KEY`
+  - `SUPABASE_LEADERBOARD_TABLE=onchain_leaderboard`
+  - `X_BEARER_TOKEN`
+  - `SEPOLIA_MINTER_PRIVATE_KEY`
+  - `SEPOLIA_NFT_CONTRACT_ADDRESS`
+  - `NFT_CLAIM_ENABLED=true`
+- `railway.json` and `render.yaml` are retained only as legacy/fallback deployment manifests.
 - For Vercel/Next.js, move `analyzeWallet` logic from `server.mjs` into a serverless route first. Deploying this exact Node server directly to Vercel is not the best first path.
 - Point your domain to the deployment and set:
   - `PUBLIC_SITE_URL=https://degendna.fun`
