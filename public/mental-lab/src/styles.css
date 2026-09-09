@@ -407,3 +407,14 @@ details > summary:focus-visible { outline: 2px solid var(--purple); outline-offs
 @media (prefers-reduced-motion: reduce) {
   *,*::before,*::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+.about-letter { max-width: 780px; display: grid; gap: 22px; padding: 12px 0 30px; }
+.about-letter h2 { font-size: clamp(27px, 4vw, 38px); }
+.about-letter .about-lead { font-size: 19px; color: var(--ink); }
+.about-letter h3 { margin-top: 12px; }
+.about-letter blockquote { margin: 0; padding: 20px 24px; border-left: 3px solid var(--purple); background: var(--subtle); color: var(--ink); font-size: 20px; line-height: 1.8; }
+.about-signature { color: var(--ink); }
+.about-follow { max-width: 780px; display: grid; gap: 18px; padding: clamp(20px, 4vw, 32px); border: 1px solid var(--line); border-radius: 16px; background: var(--panel); }
+.about-x-link { display: inline-flex; justify-content: center; width: fit-content; max-width: 100%; padding: 14px 20px; border-radius: 10px; background: var(--purple-deep); color: white; text-decoration: none; line-height: 1.6; overflow-wrap: anywhere; }
+.about-x-link:hover { text-decoration: underline; }
+.about-follow small { color: var(--muted); }

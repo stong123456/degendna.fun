@@ -17,7 +17,7 @@ function readPreference(key) {
 const initialTheme = new URLSearchParams(location.search).get("theme") || readPreference(themeKey);
 
 const state = {
-  route: "home",
+  route: new URLSearchParams(location.search).get("page") === "about" ? "about" : "home",
   activeAssessmentId: "trading",
   answers: {},
   context: {},
@@ -34,7 +34,8 @@ const navItems = [
   ["trading", "交易心理", "chart-no-axes-combined"],
   ["records", "本地记录", "book-open"],
   ["safety", "安全支持", "heart-handshake"],
-  ["method", "方法说明", "shield-check"]
+  ["method", "方法说明", "shield-check"],
+  ["about", "关于", "heart"]
 ];
 
 function icon(name) {
@@ -80,6 +81,10 @@ function saveRecord(result) {
 
 function setRoute(route) {
   state.route = route;
+  const url = new URL(location.href);
+  if (route === "about") url.searchParams.set("page", "about");
+  else url.searchParams.delete("page");
+  history.replaceState(null, "", url);
   state.lastResult = null;
   render();
 }
@@ -550,6 +555,32 @@ function safetyStep(number, title, copy) {
   ]);
 }
 
+function aboutView() {
+  return shell([
+    el("section", { class: "about-letter", "aria-label": "关于石头与 DegenDNA" }, [
+      el("p", { class: "system-label" }, "A NOTE FROM STONE / 写给来到这里的你"),
+      el("h2", {}, "为什么我做 DegenDNA？"),
+      el("p", { class: "about-lead" }, "市场会波动，钱包会回撤，人也要好好休息。"),
+      el("p", {}, "我是石头，DegenDNA 的创建者，也是链上照妖镜的主理人。我平时研究 AI Agent、自动交易、预测市场和链上数据，也喜欢用小工具观察市场、观察自己。"),
+      el("h3", {}, "从看钱包，到看见钱包背后的人"),
+      el("p", {}, "链上照妖镜最初是一个用代码和抽象感对抗情绪低谷的加密实验。币圈里的盈亏、波动、错过机会和追高回撤，很容易把人的情绪越拉越紧。我想做一点有趣的东西，让大家能笑着看见自己的交易习惯，也记得好好爱自己。"),
+      el("blockquote", {}, "它可以吐槽你的钱包，但不会定义你的人生。"),
+      el("p", {}, "走到现在，我想把这份关心放得更近一些。除了交易，我们也会疲惫、睡不好、被压力推着走。于是有了 Mental Lab：留一块安静的地方，让你慢下来，听听自己最近的感受，看看身边还有哪些支持。"),
+      el("h3", {}, "我希望你带走的，是对自己多一点理解"),
+      el("p", {}, "一次回答不该把人定型，账户余额也不能衡量一个人的价值。我希望这份自查能帮你说清最近的处境，找到一个愿意尝试的小行动；需要帮助时，也更愿意向可信任的人和专业人士开口。"),
+      el("p", {}, "这里使用原创题目，尚未经临床验证，不提供诊断。回答默认不上传、不保存；是否把报告留在当前浏览器，由你自己决定。"),
+      el("p", { class: "about-signature" }, "愿你关心市场的时候，也别忘了关心自己。—— 石头")
+    ]),
+    el("section", { class: "about-follow", "aria-label": "关注石头的推特" }, [
+      el("p", { class: "system-label" }, "LET’S STAY IN TOUCH"),
+      el("h2", {}, "在推特，继续聊聊。"),
+      el("p", {}, "如果你也关注 AI Agent、链上探索，或者喜欢这种认真做一点小产品的尝试，欢迎来我的 X（推特）主页看看。产品建议、使用感受，或一个新的想法，都欢迎和我交流。"),
+      el("a", { class: "about-x-link", href: "https://x.com/Stone141319", target: "_blank", rel: "noopener noreferrer" }, "去 X 关注石头 · @Stone141319 ↗"),
+      el("small", {}, "关注随意，自查始终向你开放。")
+    ])
+  ]);
+}
+
 function methodView() {
   return shell([
     el("section", { class: "workspace-head" }, [
@@ -603,6 +634,7 @@ function routeView() {
   if (state.route === "records") return recordsView();
   if (state.route === "safety") return safetyView();
   if (state.route === "method") return methodView();
+  if (state.route === "about") return aboutView();
   return homeView();
 }
 
