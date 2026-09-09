@@ -1,5 +1,6 @@
 import { assessments, assessmentMap, responseScale, contextQuestions } from "./assessments.js";
 import { buildCompositeProfile, scoreAssessment, isCurrentRecord, compareRecords, sources } from "./scoring.js";
+import { humanizeReport } from "./report-copy.js";
 
 const storageKey = "degendna-mental-lab-records";
 const themeKey = "degendna-mental-lab-theme";
@@ -448,21 +449,24 @@ function completeAssessment(assessment) {
 
 function resultPanel(result) {
   if (!isCurrentRecord(result)) return el("p", {}, "旧版结果不作新版解释，请重新自查。旧记录仍保留在本地。" );
+  result = humanizeReport(result);
   const previous = getRecords().find((record) => Date.parse(record.createdAt) < Date.parse(result.createdAt) && compareRecords(result, record).length);
   const comparison = previous ? compareRecords(result, previous) : [];
   return el("section", { id: "result", class: "reflection-report", "aria-label": "多维回答报告" }, [
-    el("header", {}, [el("p", { class: "system-label" }, `${result.scope} · 原创内容审阅版 ${result.version}`), el("h2", {}, `${result.title} · 回答画像`), el("p", {}, result.summary)]),
-    el("p", { class: "coverage-note" }, `有效频率回答 ${result.answered}/${result.totalItems} 项 · 主动跳过 ${result.skipped} 项。覆盖度是资料完整程度，不是结论置信度。`),
+    el("header", {}, [el("p", { class: "system-label" }, `${result.scope} · ${result.title}`), el("h2", {}, "给此刻的你，一份温柔的回看"), el("p", {}, "谢谢你愿意停下来，看看自己的感受。你不用把这份结果当成成绩单，也不需要一下子改变很多。"), el("p", { class: "report-summary" }, result.summary)]),
+    el("p", { class: "coverage-note" }, `你回答了 ${result.answered}/${result.totalItems} 题的发生频率，主动跳过 ${result.skipped} 题。这只是你最近生活的一小部分，不是对你的定义。`),
+    el("p", { class: "coverage-note" }, "这是一份帮助你了解自己的原创自查，不是诊断，尚未经临床验证。你的真实感受比这份文字更重要。"),
     state.storageError ? el("p", { role: "alert" }, state.storageError) : null,
-    ...result.warnings.map((text) => el("p", { class: "note-band" }, text)),
-    reportSection("01 / 体验与资源分开看", [el("p", {}, "每组至少有三项有效回答且覆盖不少于四分之三，才作描述性概括；这是展示完整性规则，不是临床阈值。较常出现指经常或几乎总是。"), ...result.domains.map(domainPanel)]),
-    reportSection("02 / 生活影响与时间", [el("dl", { class: "context-results" }, result.context.flatMap((entry) => [el("dt", {}, entry.question), el("dd", {}, entry.label)])), el("p", {}, "这些信息独立于频率分布。出现时间短，也可能已经需要帮助。")]),
-    reportSection("03 / 可以一起了解的线索", result.patterns.length ? result.patterns.map((pattern) => el("article", {}, [el("h3", {}, pattern.title), el("p", {}, pattern.text), el("small", {}, `依据：${pattern.evidence.join("；")}。仅描述同时出现，不确定因果。`)])) : [el("p", {}, "本次回答没有形成足够的跨组线索，或资料覆盖不足。这里保留判断，不为凑结论而生成心理标签。")]),
+    reportSection("先看看，你现在需要什么支持", [el("h3", {}, result.support.title), el("p", {}, result.support.text), el("button", { class: "secondary", onclick: () => setRoute("safety") }, "我现在需要即时支持")]),
     ...result.notices.map((notice) => reportSection(notice.title, [el("p", {}, notice.text), evidenceList(notice.evidence)])),
-    reportSection("04 / 按你的处境选择支持", [el("h3", {}, result.support.title), el("p", {}, result.support.text), el("ul", {}, result.support.reasons.map((reason) => el("li", {}, reason))), el("button", { class: "secondary", onclick: () => setRoute("safety") }, "我现在需要即时支持")]),
-    reportSection("05 / 下一步，不必一次做完", result.plan.map((step) => el("article", {}, [el("h3", {}, step.title), el("p", {}, step.text), el("small", {}, `匹配依据：${step.reason}`)]))),
-    reportSection("06 / 复测怎么读", [el("p", {}, "可以一周后回看记录，也可以按自己的需要安排。两周或一月观察期会重叠；数字变化不证明好转、恶化或治疗效果。不必为分数频繁复测。"), comparison.length ? el("ul", {}, comparison.map((entry) => el("li", {}, `${entry.label}：较常出现的条目 ${entry.previous}/${entry.total} → ${entry.current}/${entry.total}（${entry.kind === "resource" ? "资源" : "困扰"}）。`))) : el("p", {}, "暂无同模块、同版本、相同已答项目的可比较记录。")]),
-    reportSection("07 / 解释边界与依据", [el("ul", {}, result.limitations.map((text) => el("li", {}, text))), el("p", {}, "以下资料支持内容审阅原则和求助边界，不代表这些机构认可或验证了本产品。"), el("ul", {}, sources.map((source) => el("li", {}, el("a", { href: source.url, target: "_blank", rel: "noopener noreferrer" }, source.title))))]),
+    ...result.warnings.map((text) => el("p", { class: "note-band" }, text)),
+    reportSection("01 / 从你愿意分享的事情说起", [el("p", {}, "下面既有让你费心的事，也有可能帮到你的事。回答还少的地方，我们先不猜。你可以只看现在最关心的一部分。"), ...result.domains.map(domainPanel)]),
+    reportSection("02 / 这些感受，怎样影响了你的生活", [el("dl", { class: "context-results" }, result.context.flatMap((entry) => [el("dt", {}, entry.question), el("dd", {}, entry.label)])), el("p", {}, "即使刚刚开始，只要已经让你难受，也值得找人聊聊。")]),
+    reportSection("03 / 有些事情，可以放在一起看看", result.patterns.length ? result.patterns.map((pattern) => el("article", {}, [el("h3", {}, pattern.title), el("p", {}, pattern.text), el("small", {}, `依据：${pattern.evidence.join("；")}。它们在同一段时间出现，不代表一件事造成了另一件事。`)])) : [el("p", {}, "现在还看不出这些感受之间有什么联系。没关系，我们不需要替每一种感受都找出原因。")]),
+
+    reportSection("04 / 今天，只选一件小事就好", result.plan.map((step) => el("article", {}, [el("h3", {}, step.title), el("p", {}, step.text), el("details", {}, [el("summary", {}, "为什么提到这一步？"), el("p", {}, step.reason)])]))),
+    reportSection("05 / 以后想回头看看时", [el("p", {}, "你可以过一周再回头看看，也可以等自己想聊的时候再来。不用反复做题追求一个更好的结果。前后回答变了，可能和那几天的生活有关，不能只凭数字判断自己好转或变糟。"), comparison.length ? el("ul", {}, comparison.map((entry) => el("li", {}, `${entry.label}：较常出现的条目 ${entry.previous}/${entry.total} → ${entry.current}/${entry.total}（${entry.kind === "resource" ? "资源" : "困扰"}）。`))) : el("p", {}, "现在还没有合适的旧记录可以一起看。不急，这次就从了解当下开始。")]),
+    el("details", { class: "report-section report-method" }, [el("summary", {}, "想了解这份结果是怎么来的？"),el("ul", {}, result.limitations.map((text) => el("li", {}, text))), el("p", {}, "以下资料支持内容审阅原则和求助边界，不代表这些机构认可或验证了本产品。"), el("ul", {}, sources.map((source) => el("li", {}, el("a", { href: source.url, target: "_blank", rel: "noopener noreferrer" }, source.title))))]),
     el("button", { class: "secondary", onclick: () => setRoute(state.savedThisRun ? "records" : "library") }, state.savedThisRun ? "已保存，查看本地记录" : "返回自测库")
   ]);
 }
@@ -477,14 +481,13 @@ function evidenceList(evidence) {
 
 function domainPanel(domain) {
   return el("article", { class: `domain-report kind-${domain.kind}` }, [
-    el("div", { class: "domain-heading" }, [el("h3", {}, domain.label), el("span", {}, domain.kind === "resource" ? "支持资源" : "困扰体验")]),
-    el("p", {}, domain.meaning), el("p", { class: "domain-interpretation" }, domain.interpretation),
-    el("div", { class: "frequency-distribution" }, [
+    el("div", { class: "domain-heading" }, [el("h3", {}, domain.label), el("span", {}, domain.kind === "resource" ? "可能帮到你的事" : "值得照顾的感受")]),
+    el("p", { class: "domain-interpretation" }, domain.interpretation),
+    el("details", {}, [el("summary", {}, `看看我在这里怎么回答的（${domain.answered}/${domain.total}）`), el("div", { class: "frequency-distribution" }, [
       el("span", {}, `从不 / 很少 ${domain.infrequent} 项`), el("span", {}, `有时 ${domain.occasional} 项`), el("span", {}, `经常 / 几乎总是 ${domain.frequent} 项`)
-    ]),
-    el("details", {}, [el("summary", {}, `查看 ${domain.answered}/${domain.total} 项回答依据`), evidenceList(domain.evidence)]),
-    el("p", {}, `留给自己的问题：${domain.reflection}`),
-    el("small", {}, `解释边界：${domain.limit}`)
+    ]), evidenceList(domain.evidence)]),
+    el("p", {}, `如果愿意，可以想一想：${domain.reflection}`),
+    el("details", {}, [el("summary", {}, "这一部分还不能说明什么？"), el("p", {}, domain.limit)])
   ]);
 }
 
