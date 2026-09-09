@@ -1,6 +1,7 @@
 import { assessments, assessmentMap, responseScale, contextQuestions } from "./assessments.js";
 import { buildCompositeProfile, scoreAssessment, isCurrentRecord, compareRecords, sources } from "./scoring.js";
 import { humanizeReport } from "./report-copy.js";
+import { recentType } from "./recent-type.js";
 
 const storageKey = "degendna-mental-lab-records";
 const themeKey = "degendna-mental-lab-theme";
@@ -459,6 +460,7 @@ function resultPanel(result) {
     state.storageError ? el("p", { role: "alert" }, state.storageError) : null,
     reportSection("先看看，你现在需要什么支持", [el("h3", {}, result.support.title), el("p", {}, result.support.text), el("button", { class: "secondary", onclick: () => setRoute("safety") }, "我现在需要即时支持")]),
     ...result.notices.map((notice) => reportSection(notice.title, [el("p", {}, notice.text), evidenceList(notice.evidence)])),
+    recentTypePanel(result),
     ...result.warnings.map((text) => el("p", { class: "note-band" }, text)),
     reportSection("01 / 从你愿意分享的事情说起", [el("p", {}, "下面既有让你费心的事，也有可能帮到你的事。回答还少的地方，我们先不猜。你可以只看现在最关心的一部分。"), ...result.domains.map(domainPanel)]),
     reportSection("02 / 这些感受，怎样影响了你的生活", [el("dl", { class: "context-results" }, result.context.flatMap((entry) => [el("dt", {}, entry.question), el("dd", {}, entry.label)])), el("p", {}, "即使刚刚开始，只要已经让你难受，也值得找人聊聊。")]),
@@ -473,6 +475,21 @@ function resultPanel(result) {
 
 function reportSection(title, children) {
   return el("section", { class: "report-section" }, [el("h2", {}, title), ...children]);
+}
+
+function recentTypePanel(result) {
+  const profile = recentType(result);
+  if (!profile) return null;
+  return el("section", { class: "report-section recent-type", "data-type-state": profile.state, "aria-label": "近期类型" }, [
+    el("p", { class: "system-label" }, `${result.title} · 近期类型`),
+    el("h2", {}, profile.state === "matched" ? `这段时间，你更接近：${profile.name}` : "先不急着用一个名字概括你"),
+    profile.code ? el("strong", { class: "type-code" }, profile.code) : null,
+    el("p", {}, profile.text),
+    profile.evidence ? el("details", {}, [el("summary", {}, "为什么出现这个类型？"), evidenceList(profile.evidence)]) : null,
+    profile.action ? el("p", {}, `可以试着做的一小步：${profile.action}`) : null,
+    el("p", { class: "coverage-note" }, "这是近期回答的概括，会随生活变化，不是诊断。代号只是名字的编号，不是分数或排名。"),
+    el("details", {}, [el("summary", {}, "类型是怎么选出来的？"), el("p", {}, "每个模块单独匹配：至少回答四分之三的题目，相关内容也要回答充分，其中至少两题、且不少于一半选了经常或几乎总是。多个特点接近时不选主类型。这里的规则是产品的试行整理方式，尚未经科学验证，不代表发生频率能衡量一个人的价值或能力。")])
+  ]);
 }
 
 function evidenceList(evidence) {

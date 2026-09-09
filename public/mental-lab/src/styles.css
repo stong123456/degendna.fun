@@ -418,3 +418,6 @@ details > summary:focus-visible { outline: 2px solid var(--purple); outline-offs
 .about-x-link { display: inline-flex; justify-content: center; width: fit-content; max-width: 100%; padding: 14px 20px; border-radius: 10px; background: var(--purple-deep); color: white; text-decoration: none; line-height: 1.6; overflow-wrap: anywhere; }
 .about-x-link:hover { text-decoration: underline; }
 .about-follow small { color: var(--muted); }
+
+.recent-type { padding: 24px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+.type-code { display: inline-block; padding: 8px 16px; border-radius: 8px; background: var(--subtle); color: var(--ink); font: 700 25px/1.4 monospace; letter-spacing: .1em; }
