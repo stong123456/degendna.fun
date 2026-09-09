@@ -4244,6 +4244,7 @@ async function handleApi(req, res, pathname, searchParams) {
     return json(res, 200, {
       ok: true,
       service: "onchain-mirror",
+      frontend: "mental-lab-release-20260909",
       reportVersion: REPORT_VERSION,
       leaderboard: await leaderboardStorageStatus(),
       cache: {
