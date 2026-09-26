@@ -42,7 +42,7 @@ const TOOL_ITEMS = [
   { id: "fomo", title: "3 分钟冷静器", note: "把冲动和计划拆开", icon: Clock3 },
   { id: "review", title: "交易复盘卡", note: "复盘过程，不审判结果", icon: ClipboardCheck },
   { id: "snapshot", title: "今日状态快照", note: "60 秒记录决策负荷", icon: HeartPulse },
-  { id: "persona", title: "交易人格自查", note: "进入 DegenDNA 48 题版本", icon: Radar, external: "persona" },
+  { id: "persona", title: "交易人格自查", note: "进入新版 50 题原创自查", icon: Radar, external: "persona" },
   { id: "mental", title: "心理自测中心", note: "私密、不绑定钱包、不上榜", icon: ShieldCheck, external: "mental" }
 ];
 
@@ -61,7 +61,7 @@ export default function ClinicHome({ statusCard, latestResult, disciplineStats, 
   const toolCopy = {
     discipline: ["Xiaojing Discipline Protocol", "Pre-trade checks, trigger maps, and behavioral evidence"],
     fomo: ["3-Minute Cooler", "Separate impulse from plan"], review: ["Trade Review Card", "Review process, not outcome"],
-    snapshot: ["Today's State Snapshot", "Record decision load in 60 seconds"], persona: ["Trading Persona Check", "Open the 48-question DegenDNA assessment"],
+    snapshot: ["Today's State Snapshot", "Record decision load in 60 seconds"], persona: ["Trading Persona Check", "Open the original 50-question assessment"],
     mental: ["Mental Health Check-In Center", "Private, not tied to a wallet, never ranked"]
   };
   return (
@@ -88,7 +88,7 @@ export default function ClinicHome({ statusCard, latestResult, disciplineStats, 
             <i className={statusCard.emotion === "负荷偏高" ? "high" : ""}>{statusCard.emotion}</i>
           </header>
           <dl>
-            <div><dt>{xc(language, "交易人格", "Trading Persona")}</dt><dd>{statusCard.persona}</dd></div>
+            <div><dt>{xc(language, "近期自查", "Recent Self-check")}</dt><dd>{xc(language, '在自查解读中主动读取', 'Load in Self-check Reading')}</dd></div>
             <div><dt>{xc(language, "最近触发点", "Latest Trigger")}</dt><dd>{statusCard.trigger}</dd></div>
             <div><dt>{xc(language, "建议动作", "Suggested Action")}</dt><dd>{statusCard.action}</dd></div>
             <div><dt>{xc(language, "计划轨迹", "Plan Track")}</dt><dd>{disciplineStats.total ? xc(language, `${disciplineStats.total} 次检查 · ${disciplineStats.adherence}% 计划兑现`, `${disciplineStats.total} checks · ${disciplineStats.adherence}% plan adherence`) : xc(language, "等待第一次交易前检查", "Waiting for the first pre-trade check")}</dd></div>

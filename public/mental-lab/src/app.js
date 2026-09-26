@@ -2,6 +2,7 @@ import { assessments, assessmentMap, responseScale, contextQuestions } from "./a
 import { buildCompositeProfile, scoreAssessment, isCurrentRecord, compareRecords, sources } from "./scoring.js";
 import { humanizeReport } from "./report-copy.js";
 import { recentType } from "./recent-type.js";
+import { careTools } from "./care-tools.js";
 
 const storageKey = "degendna-mental-lab-records";
 const themeKey = "degendna-mental-lab-theme";
@@ -19,7 +20,7 @@ function readPreference(key) {
 const initialTheme = new URLSearchParams(location.search).get("theme") || readPreference(themeKey);
 
 const state = {
-  route: new URLSearchParams(location.search).get("page") === "about" ? "about" : "home",
+  route: ['about','library','trading','care','scenes'].includes(new URLSearchParams(location.search).get('page')) ? new URLSearchParams(location.search).get('page') : "home",
   activeAssessmentId: "trading",
   answers: {},
   context: {},
@@ -33,7 +34,10 @@ const state = {
 const navItems = [
   ["home", "首页", "house"],
   ["library", "自测库", "layout-grid"],
+  ["scenes", "生活场景", "compass"],
   ["trading", "交易心理", "chart-no-axes-combined"],
+  ["care", "日常照顾", "sprout"],
+  ["xiaojing", "小镜 AI", "messages-square"],
   ["records", "本地记录", "book-open"],
   ["safety", "安全支持", "heart-handshake"],
   ["method", "方法说明", "shield-check"],
@@ -82,9 +86,10 @@ function saveRecord(result) {
 }
 
 function setRoute(route) {
+  if (route === 'xiaojing') { location.href = `/xiaojing/?theme=${state.theme}`; return; }
   state.route = route;
   const url = new URL(location.href);
-  if (route === "about") url.searchParams.set("page", "about");
+  if (['about','care','library','trading','scenes'].includes(route)) url.searchParams.set("page", route);
   else url.searchParams.delete("page");
   history.replaceState(null, "", url);
   state.lastResult = null;
@@ -332,12 +337,12 @@ function previewOption(option, item) {
 }
 
 function libraryView(filter = null) {
-  const list = filter ? assessments.filter((item) => item.id === filter) : assessments;
+  const list = filter === 'scenes' ? assessments.filter(item => item.category === '生活场景') : filter ? assessments.filter((item) => item.id === filter) : assessments;
   return shell([
     el("section", { class: "workspace-head" }, [
       el("div", {}, [
-        el("h2", {}, filter ? "交易心理自查" : "完整模块库"),
-        el("p", {}, filter ? "观察行情、仓位、亏损、FOMO、睡眠和自我评价之间的关系。" : "原创题库，覆盖情绪、焦虑、压力、睡眠、恢复力、社交支持和安全支持。")
+        el("h2", {}, filter === 'scenes' ? '从生活里的一件事开始' : filter ? "交易心理自查" : "完整模块库"),
+        el("p", {}, filter === 'scenes' ? '六套原创自查，每套 24 题、6 个观察角度。工作、信息、行动、关系、自我评价和生活变化，可以分开慢慢了解。' : filter ? "观察行情、仓位、亏损、FOMO、睡眠和自我评价之间的关系。" : "从近期感受、交易习惯到六种生活场景，选择此刻最关心的一部分。无需一次做完。")
       ]),
       el("button", { class: "ghost-action", onclick: () => setRoute("method") }, "查看方法")
     ]),
@@ -361,9 +366,13 @@ function assessmentView() {
         el("div", { class: "round-progress" }, `${progress}%`)
       ]),
       el("p", { class: "note-band" }, "适用于成年人自我观察，尚未经临床验证。请按指定时间内的真实体验回答；没有遇到相关情境、无法判断或不想回答时，可以跳过。频率不是能力或严重度。结果仅依据你提供的信息。"),
+      assessment.introduction ? el('p', {class:'note-band'}, assessment.introduction) : null,
       safetyQuestion(),
       el("div", { class: "progress-line" }, el("span", { style: `width:${progress}%` })),
-      el("div", { class: "questions" }, assessment.items.map((item, index) => questionCard(item, index))),
+      el("div", { class: "questions" }, assessment.category === '生活场景' ? assessment.domains.flatMap((domain, groupIndex) => [
+        el('header', {class:'question-group'}, [el('h3', {}, `${groupIndex + 1} / ${assessment.domains.length} · ${domain.label}`), el('p', {}, domain.meaning)]),
+        ...domain.items.map((item, index) => questionCard(item, groupIndex * 4 + index))
+      ]) : assessment.items.map((item, index) => questionCard(item, index))),
       contextPanel(),
       el("div", { class: "submit-panel" }, [
         el("label", { class: "local-toggle" }, [
@@ -387,6 +396,7 @@ function questionCard(item, index) {
       el("span", {}, String(index + 1).padStart(2, "0")),
       el("h3", {}, item.text)
     ]),
+    item.observes ? el('details', {class:'item-purpose'}, [el('summary', {}, '这题在了解什么？'), el('p', {}, item.observes)]) : null,
     el("div", { class: "scale-row" }, responseScale.map((option) =>
       el("label", { class: state.answers[item.id] === option.value ? "selected" : "" }, [
         el("input", {
@@ -487,8 +497,15 @@ function recentTypePanel(result) {
     el("p", {}, profile.text),
     profile.evidence ? el("details", {}, [el("summary", {}, "为什么出现这个类型？"), evidenceList(profile.evidence)]) : null,
     profile.action ? el("p", {}, `可以试着做的一小步：${profile.action}`) : null,
+    profile.secondary ? el('section', {class:'type-secondary'}, [el('h3', {}, `另一个角度：${profile.secondary.name} · ${profile.secondary.code}`), el('p', {}, profile.secondary.text), el('details', {}, [el('summary', {}, '这个特点来自哪些回答？'), evidenceList(profile.secondary.evidence)])]) : null,
+    el('h3', {}, '不只看一个名字：分开看你的不同侧面'),
+    el('p', {}, '下面描述的是回答出现的频率。困难与支持可以并存，不相互加减，也不是能力排名。'),
+    el('div', {class:'facet-grid'}, (profile.facets || []).map(facet => el('article', {class:`facet-card ${facet.kind}`, 'data-facet':facet.key}, [
+      el('small', {}, facet.kind === 'resource' ? '已有的做法与支持' : '值得照顾的处境'), el('h3', {}, facet.label), el('p', {}, facet.description),
+      el('details', {}, [el('summary', {}, `查看这方面的 ${facet.answered}/${facet.total} 个回答`), evidenceList(facet.evidence)])
+    ]))),
     el("p", { class: "coverage-note" }, "这是近期回答的概括，会随生活变化，不是诊断。代号只是名字的编号，不是分数或排名。"),
-    el("details", {}, [el("summary", {}, "类型是怎么选出来的？"), el("p", {}, "每个模块单独匹配：至少回答四分之三的题目，相关内容也要回答充分，其中至少两题、且不少于一半选了经常或几乎总是。多个特点接近时不选主类型。这里的规则是产品的试行整理方式，尚未经科学验证，不代表发生频率能衡量一个人的价值或能力。")])
+    el("details", {}, [el("summary", {}, "类型是怎么选出来的？"), el("p", {}, "每个模块单独匹配：至少回答四分之三的题目，相关内容也要回答充分，其中至少两题、且不少于一半选了经常或几乎总是。六套生活场景中，两个突出特点接近时可以并列组合；三个及以上接近时保留多面描述，不强选主类型。接近指较常回答的比例差小于 15 个百分点。这里是试行的整理规则，尚未经科学验证，不衡量人的价值或能力。")])
   ]);
 }
 
@@ -648,6 +665,8 @@ function render() {
 }
 
 function routeView() {
+  if (state.route === 'scenes') return libraryView('scenes');
+  if (state.route === 'care') return shell([careTools(el, () => setRoute('safety'), () => setRoute('xiaojing'))]);
   if (state.route === "library") return libraryView();
   if (state.route === "trading") return libraryView("trading");
   if (state.route === "assessment") return assessmentView();

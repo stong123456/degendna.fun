@@ -421,3 +421,32 @@ details > summary:focus-visible { outline: 2px solid var(--purple); outline-offs
 
 .recent-type { padding: 24px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
 .type-code { display: inline-block; padding: 8px 16px; border-radius: 8px; background: var(--subtle); color: var(--ink); font: 700 25px/1.4 monospace; letter-spacing: .1em; }
+
+.care-tools { display:grid; gap:24px; max-width:900px; }
+.care-card { padding:24px; display:grid; gap:18px; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
+.care-card label { display:grid; gap:10px; line-height:1.8; }
+.care-card textarea { width:100%; box-sizing:border-box; resize:vertical; font:inherit; padding:12px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink); }
+.care-card .care-consent { display:flex; align-items:center; }
+.care-options { display:flex; flex-wrap:wrap; gap:10px; }
+.care-options [aria-pressed=true] { background:var(--purple-deep); color:white; }
+.care-practice-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
+.mood-entry,.practice-active { display:grid; gap:12px; padding:18px 0; border-top:1px solid var(--line); }
+.mood-entry p { white-space:pre-wrap; overflow-wrap:anywhere; }
+.mood-entry time { color:var(--muted); font-size:12px; }
+.icon-rail nav { gap:8px; margin-top:30px; }
+@media(max-width:700px) { .care-card {padding:16px;} }
+
+.facet-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px;}
+.facet-card {min-width:0;padding:18px;border:1px solid var(--line);border-radius:12px;display:grid;gap:10px;background:var(--bg);}
+.facet-card.resource {border-top:3px solid var(--mint);}
+.facet-card.burden {border-top:3px solid var(--purple);}
+.facet-card small {color:var(--muted);}
+.type-secondary {padding:16px;border-left:3px solid var(--purple);display:grid;gap:10px;}
+.type-code {overflow-wrap:anywhere;}
+.question-group {padding:22px 4px 8px;display:grid;gap:10px;}
+.question-group h3 {font-size:20px;line-height:1.6;}
+.question-group p,.item-purpose {color:var(--muted);line-height:1.8;}
+.item-purpose {margin:10px 0;font-size:13px;}
+.theme-night .icon-rail nav {margin:0;gap:4px;overflow-x:auto;min-width:0;}
+.theme-night .rail-button {flex-shrink:0;}
+@media(max-width:760px){.icon-rail nav{overflow-x:auto;max-width:100%;}.facet-grid{grid-template-columns:1fr;}}

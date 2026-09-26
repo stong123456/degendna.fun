@@ -57,6 +57,8 @@ import {
   writeProviderSettings
 } from "./providers.js";
 import ClinicHome from "./ClinicHome.jsx";
+import RecentReportWorkspace from './RecentReportWorkspace.jsx';
+import { THEMES, readMentalTheme, applyMentalTheme, mentalLink } from './mental-theme.js';
 import DisciplineWorkspace from "./DisciplineWorkspace.jsx";
 import WorkflowRunner from "./WorkflowRunner.jsx";
 import {
@@ -531,9 +533,9 @@ function ChatWorkspace({
         {localReflection && messages.length > 2 ? (
           <section className="reflection-block">
             <span>{xc(language, "把事情拆开看", "Separate What Is Happening")}</span>
-            <p><b>{xc(language, "事实", "Fact")}</b>{lastUser.content}</p>
-            <p><b>{xc(language, "故事", "Story")}</b>{xc(language, "我必须立刻修复这一切，否则就是失败。", "I must fix this immediately, or it means I failed.")}</p>
-            <p><b>{xc(language, "冲动", "Urge")}</b>{localReflection.observation.action}</p>
+            <p><b>{xc(language, "你提到的", "What you shared")}</b>{lastUser.content}</p>
+            <p><b>{xc(language, "可以想想", "A question to consider")}</b>{xc(language, "哪些是已经发生的事，哪些是暂时还不确定的想法？不必现在回答。", "What has already happened, and what is still an uncertain thought? There is no need to answer now.")}</p>
+            <p><b>{xc(language, "可选一步", "An optional step")}</b>{localReflection.observation.action}</p>
             <button type="button" onClick={onTogglePause}>
               <Clock3 size={17} />
               {pauseRemaining > 0 ? `${xc(language, "暂停中", "Paused")} ${secondsLabel(pauseRemaining)}` : xc(language, "先离开交易界面 15 分钟", "Leave the trading screen for 15 minutes")}
@@ -849,6 +851,8 @@ function PrivacyDialog({ open, onClose, dataSummary, onClearData, language }) {
 }
 
 export default function App() {
+  const [theme, setTheme] = useState(readMentalTheme);
+  useEffect(() => { applyMentalTheme(theme); }, [theme]);
   const [language, setLanguage] = useState(readXiaojingLanguage);
   const [activeMode, setActiveMode] = useState("home");
   const [toneMode, setToneMode] = useState(readToneMode);
@@ -867,7 +871,7 @@ export default function App() {
   const [workflowResults, setWorkflowResults] = useState(readWorkflowResults);
   const [disciplineRules, setDisciplineRules] = useState(readDisciplineRules);
   const [disciplineChecks, setDisciplineChecks] = useState(readDisciplineChecks);
-  const [latestPersona] = useState(readLatestDegenPersona);
+  const latestPersona = null;
   const [pauseRemaining, setPauseRemaining] = useState(0);
 
   useEffect(() => {
@@ -881,7 +885,7 @@ export default function App() {
       home: ["Calibration Desk", "Start from what is happening now"],
       discipline: ["Discipline Protocol", "Pre-trade checks and behavioral evidence"],
       companion: ["Talk to Xiaojing", "Open conversation and result follow-up"],
-      persona: ["Persona Reading", "Understand habits without fixed labels"],
+      persona: ["Self-check Reading", "Choose to read a report stored on this device"],
       records: ["Private Records", "Stored only on this device"]
     };
     return MODES.map((mode) => ({ ...mode, label: copy[mode.id]?.[0] || mode.label, description: copy[mode.id]?.[1] || mode.description }));
@@ -1016,7 +1020,7 @@ export default function App() {
 
   function handleScenario(scenario) {
     if (scenario.action === "persona") {
-      window.location.href = DEGEN_PERSONA_URL;
+      window.location.href = mentalLink("trading");
       return;
     }
     if (scenario.action === "safety") {
@@ -1044,11 +1048,11 @@ export default function App() {
       return;
     }
     if (tool.external === "persona") {
-      window.location.href = DEGEN_PERSONA_URL;
+      window.location.href = mentalLink("trading");
       return;
     }
     if (tool.external === "mental") {
-      window.location.href = MENTAL_CENTER_URL;
+      window.location.href = mentalLink("library");
       return;
     }
     startWorkflow(tool.id);
@@ -1188,8 +1192,9 @@ export default function App() {
           <small>{IS_DEGENDNA_EMBEDDED ? xc(language, "DegenDNA 集成", "DegenDNA Integrated") : xc(language, "独立模式", "Standalone Mode")}</small>
         </div>
         <div className="top-actions">
+          <label className="mental-theme-picker">外观 <select aria-label="切换视觉模板" value={theme} onChange={event => setTheme(event.target.value)}>{THEMES.map(([id,label]) => <option key={id} value={id}>{label}</option>)}</select></label>
           <a
-            href={DEGEN_DNA_URL}
+            href={mentalLink('', theme)}
             target={IS_DEGENDNA_EMBEDDED ? undefined : "_blank"}
             rel={IS_DEGENDNA_EMBEDDED ? undefined : "noreferrer"}
           >
@@ -1277,7 +1282,7 @@ export default function App() {
               onBack={() => switchMode("home")}
             />
           ) : null}
-          {activeMode === "persona" ? <PersonaWorkspace language={language} onDiscuss={discussPersona} /> : null}
+          {activeMode === "persona" ? <RecentReportWorkspace theme={theme} /> : null}
           {activeMode === "records" ? (
             <RecordsWorkspace
               records={records}

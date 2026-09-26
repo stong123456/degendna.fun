@@ -1,5 +1,13 @@
 # 链上照妖镜 / Onchain Mirror
 
+当前首页为 **DegenDNA Mental Lab**：14 套成人原创自查，共 305 题；其中新增六套生活场景各 24 题、6 个内容组，支持六侧面解释和有回答依据的单特点 / 双特点类型。另有独立安全支持入口、本地心情记录、四个轻量练习，以及统一三种外观的小镜 AI。
+
+题库与类型属于自我观察的试行设计，尚未经临床或信效度验证。完整题目、观察目的、适用边界和类型代码见 [题库内容审阅](docs/scene-question-bank-20260926.md)。
+
+验证：`node --test --test-isolation=none tests/*.test.mjs`；构建小镜：`npm run build:xiaojing`。浏览器测试夹具位于 `tests/browser-release.html`，仅复制到本地服务器测试，不随公开站点部署。
+
+以下是保留的链上报告与服务端功能说明。
+
 输入一个 EVM 钱包地址，生成一份能晒、能比、能自嘲的链上人格报告。
 
 第一版直接读取公开链上数据，不连接钱包、不签名、不碰私钥。服务端会聚合 Ethereum、Base、Arbitrum、Optimism、Polygon 的 Blockscout v2 数据；BNB Chain 默认使用公开 RPC 获取基础余额和 nonce，如配置 `BSCSCAN_API_KEY` 或 `ETHERSCAN_API_KEY` 会增强交易历史。

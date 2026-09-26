@@ -1,0 +1,69 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>Scene and care release QA</title>
+<style>body{font:14px/1.8 system-ui;margin:24px}iframe{border:1px solid #888;display:block;height:900px}section{overflow:auto;margin:24px 0}pre{white-space:pre-wrap}.pass{color:green}.fail{color:#a22}</style>
+<h1>生活场景、日常照顾、小镜：发布验收</h1><p>仅在本地测试来源运行。心情保存测试使用明确标记的虚构文本，保留测试记录；不删除原有数据、不调用外部模型。</p>
+<button id="run">运行发布检查</button><pre id="results">尚未运行</pre><div id="frames"></div>
+<script type="module">
+import { sceneAssessments } from '/mental-lab/src/scene-assessments.js';
+const out=document.querySelector('#results');
+const check=(ok,msg)=>{if(!ok)throw Error(msg);};
+const press=(doc,text)=>{const b=[...doc.querySelectorAll('button')].find(b=>b.textContent.trim()===text);check(b&&!b.disabled,`Missing button ${text}`);b.click();};
+const waitFor=async(test)=>{for(let i=0;i<100;i++){if(test())return;await new Promise(r=>setTimeout(r,50));}throw Error('UI timed out');};
+const frameFor=async(theme,width,path)=>{const section=document.createElement('section'),frame=document.createElement('iframe');section.innerHTML=`<h2>${path} ${theme} ${width}</h2>`;frame.style.width=width+'px';section.append(frame);document.querySelector('#frames').append(section);await new Promise((res,rej)=>{frame.onload=res;frame.onerror=rej;frame.src=path+(path.includes('?')?'&':'?')+'theme='+theme;});return frame;};
+const overflow=doc=>check(doc.documentElement.scrollWidth<=doc.documentElement.clientWidth+1,`Overflow ${doc.documentElement.scrollWidth}/${doc.documentElement.clientWidth}`);
+document.querySelector('#run').onclick=async(e)=>{
+  check(['127.0.0.1','localhost'].includes(location.hostname),'Local testing only');
+  e.target.disabled=true;out.textContent='';document.querySelector('#frames').replaceChildren();let passed=0,failed=0;
+  for(const width of [1440,390])for(const theme of ['garden','prism','night']){
+    const label=theme+'/'+width;let f;
+    const run=async(name,fn)=>{try{await fn();passed++;out.textContent+='PASS '+label+' '+name+'\n';}catch(err){failed++;out.textContent+='FAIL '+label+' '+name+': '+err.message+'\n';}};
+    f=await frameFor(theme,width,'/?page=scenes');const doc=f.contentDocument;await waitFor(()=>doc.querySelector('.soft-module'));
+    const errors=[];f.contentWindow.addEventListener('error',e=>errors.push(e.message));f.contentWindow.addEventListener('unhandledrejection',e=>errors.push(String(e.reason)));
+    const recordsBefore=f.contentWindow.localStorage.getItem('degendna-mental-lab-records');
+    for(const scene of sceneAssessments)await run(scene.id,async()=>{
+      doc.querySelector('button[aria-label="生活场景"]').click();
+      [...doc.querySelectorAll('.soft-module')].find(b=>b.textContent.includes(scene.title)).click();
+      check(doc.querySelectorAll('.question-card').length===24,'Question count');check(doc.querySelectorAll('.question-group').length===6,'Group count');
+      check(doc.querySelectorAll('.item-purpose').length===24,'Item explanations');
+      for(const item of scene.items){doc.querySelector(`input[name="${item.id}"][value="${scene.domains.slice(0,2).some(d=>d.key===item.dimension)?3:0}"]`).click();}
+      check(!doc.querySelector('.local-toggle input').checked,'Consent default');press(doc,'生成回答画像');
+      await new Promise(r=>requestAnimationFrame(r));
+      check(doc.querySelector('#result .type-code')?.textContent===scene.typePrefix+'11','Paired type');
+      check(doc.querySelectorAll('#result .facet-card').length===6,'Six perspectives');
+      check(doc.querySelectorAll('#result .domain-report').length===6,'Six detailed explanations');
+      check(!doc.querySelector('#result').textContent.includes('undefined'),'Undefined copy');
+      const details=doc.querySelector('.recent-type details');details.querySelector('summary').click();check(details.open,'Type evidence disclosure');
+      check(recordsBefore===f.contentWindow.localStorage.getItem('degendna-mental-lab-records'),'Unexpected save');overflow(doc);check(errors.length===0,errors.join(';'));
+    });
+    if(width===1440 && theme==='garden'){
+      doc.querySelector('.local-toggle input').click();press(doc,'生成回答画像');
+    }
+    await run('care',async()=>{
+      doc.querySelector('button[aria-label="日常照顾"]').click();check(!doc.querySelector('.care-consent input').checked,'Mood consent default');
+      const before=f.contentWindow.localStorage.getItem('degendna-mood-journal-v1');press(doc,'平静');press(doc,'记住此刻，不保存');
+      check(before===f.contentWindow.localStorage.getItem('degendna-mood-journal-v1'),'Mood saved without consent');
+      const textarea=doc.querySelector('textarea');textarea.value='本地验收的虚构记录 <script>plain text<\/script>';textarea.dispatchEvent(new Event('input',{bubbles:true}));
+      doc.querySelector('.care-consent input').click();press(doc,'保存这条心情');
+      check(doc.querySelector('.mood-entry p')?.textContent.includes('<script>plain text<\/script>'),'Literal note round trip');check(!doc.querySelector('.mood-entry script'),'HTML injected');check(!doc.querySelector('.care-consent input').checked,'Consent not reset');
+      for(const button of [...doc.querySelectorAll('.care-practice-grid button')].map(b=>b.textContent)){
+        press(doc,button);press(doc,'下一步');press(doc,'跳过这一步');press(doc,'下一步');check(doc.querySelector('.practice-active').textContent.includes('不用给自己打分'),'Practice completion');press(doc,'再看一遍');press(doc,'先停在这里');check(!doc.querySelector('.practice-active'),'Practice stop');
+      }overflow(doc);
+    });
+    await run('xiaojing',async()=>{
+      const xf=await frameFor(theme,width,'/xiaojing/');const xd=xf.contentDocument;await waitFor(()=>xd.querySelector('.mental-theme-picker select'));
+      check(xd.documentElement.dataset.theme===theme,'Initial theme');
+      const picker=xd.querySelector('.mental-theme-picker select');check(picker.options.length===3,'Three themes');
+      picker.value=theme==='night'?'garden':'night';picker.dispatchEvent(new Event('change',{bubbles:true}));await waitFor(()=>xd.documentElement.dataset.theme===picker.value);
+      check(xd.querySelector('a[href^="/?theme="]')?.getAttribute('href').includes(picker.value),'Return theme');
+      picker.value=theme;picker.dispatchEvent(new Event('change',{bubbles:true}));await waitFor(()=>xd.documentElement.dataset.theme===theme);overflow(xd);
+      const nav=xd.querySelector(width<900?'.bottom-nav':'.side-nav');
+      [...nav.querySelectorAll('button')].find(b=>b.textContent.includes('自查解读')).click();
+      await waitFor(()=>xd.querySelector('.persona-workspace'));
+      check(!xd.querySelector('.persona-result'),'Report auto-loaded without click');
+      press(xd,'读取我保存的新版自查');await waitFor(()=>xd.querySelector('.persona-result'));
+      check(xd.querySelector('.persona-result').textContent.includes('CH11'),'Saved report type round trip');
+      if(width<900)check(xd.querySelector('.bottom-nav').getBoundingClientRect().bottom<=900,'Mobile navigation below viewport');
+    });
+  }
+  out.textContent+=`${passed} passed, ${failed} failed`;out.className=failed?'fail':'pass';document.body.dataset.testResult=failed?'fail':'pass';e.target.disabled=false;
+};
+</script></html>

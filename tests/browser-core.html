@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mental Lab · 本地交互验证</title>
+  <style>
+    *{box-sizing:border-box}body{margin:20px;background:#f3f5f7;color:#243239;font:14px/1.7 system-ui}button{padding:12px 18px;cursor:pointer}#results{white-space:pre-wrap}section{margin:30px 0;overflow:auto}iframe{border:1px solid #aaa;display:block;background:white}h1{font-size:22px}h2{font-size:16px}.pass{color:#18704c}.fail{color:#af2737}
+  </style>
+</head>
+<body>
+  <h1>三模板 · 题目、报告与安全入口验证</h1>
+  <p>只操作当前测试页内的界面；不保存自测记录、不删除已有记录。完成后各窗口停留在报告。</p>
+  <button id="run">运行交互检查</button>
+  <pre id="results" aria-live="polite">尚未运行</pre>
+  <div id="frames"></div>
+  <script type="module">
+    const output = document.querySelector('#results');
+    const nextFrame = () => new Promise(resolve => requestAnimationFrame(resolve));
+    const themes = ['garden', 'prism', 'night'];
+    const names = { garden:'暖光疗愈', prism:'晶体实验室', night:'夜航诊所' };
+    const check = (condition, message) => { if (!condition) throw new Error(message); };
+    const choose = (doc, name, value) => {
+      const input = doc.querySelector(`input[name="${name}"][value="${value}"]`);
+      check(input, `Missing input ${name}:${value}`); input.click();
+    };
+    const press = (doc, text) => {
+      const button = [...doc.querySelectorAll('button')].find(node => node.textContent.trim() === text);
+      check(button && !button.disabled, `Missing/enabled button: ${text}`); button.click();
+    };
+    const startQuick = (doc) => {
+      doc.querySelector('button[aria-label="自测库"]').click();
+      doc.querySelector('.soft-module').click();
+    };
+    const fillQuick = (doc) => {
+      startQuick(doc);
+      for (const id of ['q1','q3','q11','q5','q7','q9','q2','q4','q8','q6','q10','q13']) choose(doc,id,id === 'q11' ? '2' : '3');
+      choose(doc,'context-intensity','overwhelming');
+      choose(doc,'context-work','clear');
+      choose(doc,'context-duration','months');
+      press(doc,'生成回答画像');
+    };
+    document.querySelector('#run').addEventListener('click', async (event) => {
+      event.target.disabled = true;
+      output.textContent = '';
+      document.querySelector('#frames').replaceChildren();
+      let failed = 0;
+      for (const width of [1440,390]) for (const theme of themes) {
+        const label = `${theme} / ${width}px`;
+        const section = document.createElement('section');
+        const title = document.createElement('h2'); title.textContent = label;
+        const frame = document.createElement('iframe'); frame.title = label;
+        frame.style.width = `${width}px`; frame.style.height = '900px';
+        section.append(title,frame); document.querySelector('#frames').append(section);
+        try {
+          await new Promise((resolve,reject) => {
+            frame.onload = resolve; frame.onerror = reject;
+            frame.src = `/?theme=${theme}&qa=content-v2`;
+          });
+          const doc = frame.contentDocument;
+          const runtimeErrors = [];
+          frame.contentWindow.addEventListener('error', e => runtimeErrors.push(e.message));
+          frame.contentWindow.addEventListener('unhandledrejection', e => runtimeErrors.push(String(e.reason)));
+          const recordsBefore = frame.contentWindow.localStorage.getItem('degendna-mental-lab-records');
+          check(doc.querySelector('.product-shell'),'App did not load');
+          startQuick(doc);
+          const saveOption = doc.querySelector('input[type="checkbox"]');
+          check(saveOption && !saveOption.checked, 'New assessment must default to no saving');
+          saveOption.click();
+          check(saveOption.checked, 'Save option did not respond');
+          startQuick(doc);
+          check(!doc.querySelector('input[type="checkbox"]').checked, 'Save consent leaked into a new assessment');
+          fillQuick(doc);
+          await nextFrame();
+          let report = doc.querySelector('#result');
+          check(report && report.textContent.includes('12/12'),'Complete report missing');
+          check(report.querySelectorAll('.domain-report').length === 4,'Domain count');
+          check(report.textContent.includes('现在，先找个人陪你一起面对'),'Context not applied');
+          check(!doc.querySelector('.score-ring'),'Obsolete score visible');
+          const next = themes[(themes.indexOf(theme)+1)%3];
+          doc.querySelector(`button[aria-label="${names[next]}"]`).click();
+          check(doc.querySelectorAll('.questions input:checked').length === 12,'Answers lost on theme switch');
+          check(doc.querySelector('#result') === report,'Report replaced on theme switch');
+          doc.querySelector(`button[aria-label="${names[theme]}"]`).click();
+          report.querySelector('summary').click();
+          check(report.querySelector('details').open,'Answer evidence does not open');
+          startQuick(doc); choose(doc,'q1','skip'); press(doc,'查看已答 1 题的结果');
+          check(doc.querySelector('#result').textContent.includes('你还没有选择具体的发生频率'),'Skipped treated as zero');
+          choose(doc,'safety','yes');
+          check(doc.querySelector('.product-shell').dataset.route === 'safety','Safety did not route immediately');
+          check(!doc.querySelector('#result') && !doc.querySelector('.status-panel'),'Report/history visible during safety support');
+          check(frame.contentWindow.getComputedStyle(doc.querySelector('.intro-panel')).display === 'none','Safety blocked by decorative intro');
+          check(doc.querySelector('.safety-hero').getBoundingClientRect().top < 160,'Safety guidance below fold');
+          doc.querySelector('button[aria-label="交易心理"]').click(); doc.querySelector('.soft-module').click();
+          check(doc.querySelectorAll('.question-card').length === 50,'Trading bank incomplete');
+          choose(doc,'tr41','1'); press(doc,'查看已答 1 题的结果');
+          check(doc.querySelector('#result').textContent.includes('单独关注资金与生活安全'),'Rare financial harm missed');
+          check(doc.querySelector('.product-shell').dataset.route === 'assessment','Financial answer misclassified as self-harm');
+          fillQuick(doc);
+          await nextFrame();
+          check(recordsBefore === frame.contentWindow.localStorage.getItem('degendna-mental-lab-records'),'Unexpected record write');
+          const root = doc.documentElement;
+          check(root.scrollWidth <= root.clientWidth + 1,`Horizontal overflow ${root.scrollWidth}/${root.clientWidth}`);
+          const reportWidth = doc.querySelector('#result').getBoundingClientRect().width;
+          check(reportWidth > 250,'Report too narrow');
+          check(runtimeErrors.length === 0, runtimeErrors.join(';'));
+          doc.querySelector('#result').scrollIntoView({block:'start'});
+          section.dataset.result = 'pass';
+          output.textContent += `PASS ${label}: complete / partial / evidence / theme state / safety / trading / privacy / overflow (${root.clientWidth}px)\n`;
+        } catch(error) { failed++; section.dataset.result='fail'; output.textContent += `FAIL ${label}: ${error.message}\n`; }
+      }
+      output.textContent += failed ? `${failed} scenarios failed` : '6/6 scenarios passed';
+      output.className = failed ? 'fail' : 'pass';
+      document.body.dataset.testResult = failed ? 'fail' : 'pass';
+      event.target.disabled = false;
+    });
+  </script>
+</body>
+</html>

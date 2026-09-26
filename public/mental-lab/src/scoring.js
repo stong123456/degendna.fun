@@ -1,4 +1,4 @@
-import { contextQuestions, reportVersion, responseScale } from "./assessments.js";
+import { contextQuestions, reportVersion, responseScale, assessmentMap } from "./assessments.js";
 
 export const sources = [
   { title: "COSMIN：内容效度与测量质量", url: "https://www.cosmin.nl/" },
@@ -11,13 +11,22 @@ export const sources = [
 
 export const isAnswer = (value) => Number.isInteger(value) && value >= 0 && value <= 4;
 export const isCurrentRecord = (record) => Boolean(
-  record?.schemaVersion === 2 && record.version === reportVersion && !record.safetyTriggered &&
+  record?.schemaVersion === 2 && assessmentMap[record.id] && record.version === assessmentMap[record.id].version && !record.safetyTriggered &&
   typeof record.id === "string" && typeof record.title === "string" && Number.isFinite(Date.parse(record.createdAt)) &&
+  Number.isInteger(record.answered) && record.answered >= 0 && record.answered <= record.totalItems &&
+  record.totalItems === assessmentMap[record.id].items.length &&
   Array.isArray(record.domains) && record.domains.length > 0 && record.domains.every((domain) =>
     domain && typeof domain.key === "string" && typeof domain.label === "string" &&
     Number.isInteger(domain.answered) && Number.isInteger(domain.frequent) &&
+    Number.isInteger(domain.total) && domain.total > 0 && domain.answered >= 0 && domain.answered <= domain.total &&
+    Number.isInteger(domain.occasional) && Number.isInteger(domain.infrequent) &&
+    domain.frequent >= 0 && domain.occasional >= 0 && domain.infrequent >= 0 &&
+    domain.frequent + domain.occasional + domain.infrequent === domain.answered &&
+    typeof domain.interpretable === 'boolean' &&
     Array.isArray(domain.evidence) && domain.evidence.every((item) => item && typeof item.id === "string" && typeof item.text === "string")) &&
   ["context", "patterns", "notices", "plan", "warnings", "limitations"].every((key) => Array.isArray(record[key])) &&
+  ['context', 'patterns', 'notices', 'plan'].every(key => record[key].every(item => item && typeof item === 'object')) &&
+  ['warnings', 'limitations'].every(key => record[key].every(item => typeof item === 'string')) &&
   record.support && Array.isArray(record.support.reasons)
 );
 const frequency = (value) => responseScale.find((option) => option.value === value)?.zh;
@@ -100,7 +109,7 @@ function noticesFor(assessment, answers) {
 export function scoreAssessment(assessment, answers = {}, context = {}) {
   const safetyTriggered = context.safety === "yes" || assessment.items.some((item) => item.riskFlag && isAnswer(answers[item.id]) && answers[item.id] > 0);
   if (assessment.safetyOnly || safetyTriggered) return {
-    schemaVersion: 2, version: reportVersion, id: assessment.id, safetyTriggered: true, score: null,
+    schemaVersion: 2, version: assessment.version || reportVersion, id: assessment.id, safetyTriggered: true, score: null,
     title: "先查看安全支持", domains: [], summary: "出现过自伤想法值得认真对待，但本工具不预测危险程度。若此刻可能伤害自己，请立即联系当地紧急服务或身边可信任的人。", createdAt: new Date().toISOString()
   };
   const answeredItems = assessment.items.filter((item) => isAnswer(answers[item.id]));
@@ -129,7 +138,7 @@ export function scoreAssessment(assessment, answers = {}, context = {}) {
   plan.push({ title: "接下来一周", text: "选一个最可行的行动，观察它是否有帮助。没有改善时可以调整，也可以请人协助，不把执行程度当成自律成绩。", reason: "这是一般的自我观察安排，不是治疗处方。" });
   plan.push({ title: "准备一次支持对话", text: "可以带上困扰何时开始、影响哪些必要任务、近期身体或睡眠变化，以及已经试过的方法。涉及药物时与开药人员讨论，不自行调整。", reason: support.title });
   return {
-    schemaVersion: 2, version: reportVersion, id: assessment.id, title: assessment.title, scope: assessment.scope,
+    schemaVersion: 2, version: assessment.version || reportVersion, id: assessment.id, title: assessment.title, scope: assessment.scope,
     score: null, safetyTriggered: false, answered: answeredItems.length, totalItems: assessment.items.length,
     skipped: assessment.items.filter((item) => answers[item.id] === "skip").length,
     summary, domains, context: contextEntries, patterns, notices: noticesFor(assessment, answers), support, plan, warnings,

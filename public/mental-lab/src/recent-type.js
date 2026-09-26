@@ -1,4 +1,5 @@
 import { isCurrentRecord } from './scoring.js';
+import { sceneAssessments } from './scene-assessments.js';
 
 const type = (name, code, keys, text) => ({ name, code, keys, text });
 // Editorial grouping of recent answers, not a validated personality taxonomy.
@@ -13,16 +14,53 @@ const catalog = {
   support: [type('有人可聊型', 'CN08', ['available'], '你提到被倾听或联系到支持的经历。合适的关系值得珍惜。'), type('愿意借力型', 'AS21', ['asking'], '你有过表达需要、接受帮助的行动。不必每次都独自处理。'), type('开口顾虑型', 'HD03', ['barriers'], '想求助的时候，心里也有一些顾虑。可以从让你安心的一小步开始。'), type('关系孤单型', 'IS22', ['isolation'], '你提到一些孤单或关系中的难处。这些感受值得被听见。')]
 };
 
+for (const scene of sceneAssessments) catalog[scene.id] = scene.domains.map((domain, index) => ({
+  name: `${domain.short}型`, code: `${scene.typePrefix}${String(index + 1).padStart(2, '0')}`,
+  keys: [domain.key], text: `${domain.meaning}这部分有些事情在你的回答中较常出现，可以结合生活中的具体处境看看。`,
+  short: domain.short, index
+}));
+
+export function typeOptions(moduleId) {
+  const singles = catalog[moduleId] || [];
+  const scene = sceneAssessments.find(s => s.id === moduleId);
+  if (!scene) return singles.map(({ name, code, keys }) => ({ name, code, keys }));
+  const pairs = [];
+  for (let a = 0; a < singles.length; a++) for (let b = a + 1; b < singles.length; b++) {
+    pairs.push({ name: `${singles[a].short}·${singles[b].short}型`, code: `${scene.typePrefix}${11 + pairs.length}`, keys: [singles[a].keys[0], singles[b].keys[0]] });
+  }
+  return [...singles.map(({ name, code, keys }) => ({ name, code, keys })), ...pairs];
+}
+
+function facetProfile(result) {
+  return result.domains.map(d => ({
+    key: d.key, label: d.label, kind: d.kind, answered: d.answered, total: d.total,
+    state: !d.interpretable ? 'incomplete' : d.frequent >= 2 && d.frequent / d.answered >= 0.5 ? 'prominent' : d.frequent || d.occasional ? 'sometimes' : 'infrequent',
+    description: !d.interpretable ? '回答还不够，先不概括。' : d.frequent >= 2 && d.frequent / d.answered >= 0.5 ? (d.kind === 'resource' ? '你较常提到的支持或做法。' : '你较常提到、值得照顾的感受。') : d.frequent || d.occasional ? '有些回答提到过，暂不作为突出特点。' : '这部分主要选了从不或很少，不代表其他方面没有困难。',
+    frequent: d.frequent, occasional: d.occasional, infrequent: d.infrequent, evidence: d.evidence, action: d.action
+  }));
+}
+
 export function recentType(result) {
   if (!isCurrentRecord(result) || !catalog[result.id]) return null;
-  if (result.answered / result.totalItems < 0.75) return { state: 'incomplete', text: '还想多了解你一点。回答还不够，我们先不选类型；留白也没关系。' };
+  const facets = facetProfile(result);
+  const base = { facets, ruleVersion: 'types-20260926', scope: result.scope };
+  if (result.answered / result.totalItems < 0.75) return { ...base, state: 'incomplete', text: '还想多了解你一点。回答还不够，我们先不选类型；留白也没关系。' };
   const candidates = catalog[result.id].flatMap(t => {
     const groups = t.keys.map(key => result.domains.find(d => d.key === key));
     if (!groups.every(d => d?.interpretable && d.frequent >= 2 && d.frequent / d.answered >= 0.5)) return [];
     return [{ ...t, strength: Math.min(...groups.map(d => d.frequent / d.answered)), evidence: groups.flatMap(d => d.evidence.filter(e => e.value >= 3)), action: groups[0].action }];
   }).sort((a, b) => b.strength - a.strength);
-  if (!candidates.length) return { state: 'none', text: '这次没有特别突出的类型。我们不把“没有类型”当成健康证明，也不需要给每个人都贴一个名字。' };
-  if (candidates[1] && candidates[0].strength - candidates[1].strength < 0.15) return { state: 'mixed', text: '几种特点同时出现，现在不急着选一个主类型。你可以继续往下看，哪一部分最贴近自己。' };
+  if (!candidates.length) return { ...base, state: 'none', text: '这次没有特别突出的类型。我们不把“没有类型”当成健康证明，也不需要给每个人都贴一个名字。' };
+  const scene = sceneAssessments.find(s => s.id === result.id);
+  const close = candidates.filter(c => candidates[0].strength - c.strength < 0.15);
+  if (close.length === 2 && scene) {
+    const pair = typeOptions(result.id).find(t => t.keys.length === 2 && close.every(c => t.keys.includes(c.keys[0])));
+    return { ...base, ...pair, state: 'matched', composite: true,
+      text: '这两种特点在本次回答中都比较突出。它们可以同时存在，我们不把其中一种当成另一种的原因，也不把支持当成抵消困难的分数。',
+      evidence: close.flatMap(c => c.evidence), action: close.map(c => c.action).join(' 或者：') };
+  }
+  if (close.length > 1) return { ...base, state: 'mixed', text: '几种特点同时出现，现在不急着选一个主类型。下面分开呈现它们，你可以看看哪一部分最贴近自己。' };
   const { strength, keys, ...main } = candidates[0];
-  return { state: 'matched', ...main };
+  const second = candidates[1];
+  return { ...base, state: 'matched', ...main, secondary: second ? { name: second.name, code: second.code, text: second.text, evidence: second.evidence } : null };
 }

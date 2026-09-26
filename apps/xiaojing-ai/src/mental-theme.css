@@ -1,0 +1,32 @@
+:root, :root[data-theme="garden"] { color-scheme:light; --bg:#f7f8fa; --bg-soft:#f0f1f5; --surface:#ffffff; --surface-strong:#ffffff; --surface-muted:#f0f1f5; --line:#dddce7; --line-strong:#8970c8; --cyan:#7053ae; --cyan-soft:#594584; --purple:#8970c8; --gold:#916c23; --danger:#a53846; --success:#26755e; --text:#24232d; --text-soft:#575661; --muted:#696974; --shadow-cyan:0 8px 26px #24223d08; --shadow-purple:none; --theme-art:url('/mental-lab/assets/garden.png'); }
+:root[data-theme="prism"] { --bg:#f1f4fa; --bg-soft:#e8edf6; --surface:#ffffff; --surface-strong:#f9fbff; --surface-muted:#e8edf6; --line:#d5dfed; --line-strong:#7589b2; --cyan:#496b9b; --cyan-soft:#395576; --purple:#7488ae; --text:#233348; --text-soft:#506078; --muted:#60718a; --theme-art:url('/mental-lab/assets/prism.png'); }
+:root[data-theme="night"] { color-scheme:dark; --bg:#121c1d; --bg-soft:#1b2929; --surface:#182526; --surface-strong:#1b2929; --surface-muted:#243735; --line:#344845; --line-strong:#8faaa1; --cyan:#bad0c6; --cyan-soft:#d2e1da; --purple:#9bb5aa; --gold:#dec692; --danger:#f2adb6; --success:#a4d0b9; --text:#e2e9e5; --text-soft:#c4d0ca; --muted:#a3b5ac; --shadow-cyan:none; --theme-art:url('/mental-lab/assets/night.png'); }
+body { background:var(--bg); background-image:none; }
+.app-shell::before,.app-shell::after,.scan-line,.topbar::after { display:none; }
+.app-shell { grid-template-rows:auto minmax(0,1fr); }
+.topbar { flex-wrap:wrap; padding:14px 22px; gap:12px; background:var(--surface); box-shadow:none; }
+.top-actions { flex-wrap:wrap; gap:10px; }
+.mental-theme-picker { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:12px; }
+.mental-theme-picker select { padding:8px; border:1px solid var(--line); border-radius:8px; background:var(--surface-muted); color:var(--text); }
+.brand-lockup img { filter:none; }
+.side-nav,.bottom-nav,.main-stage,.clinic-home { background:var(--bg); }
+.side-nav button,.top-actions button,.top-actions a { border-radius:8px; }
+.side-nav button.active,.bottom-nav button.active,.tone-mode-switch button.active,.provider-list button.active { background:var(--surface-muted); color:var(--cyan); box-shadow:none; }
+.clinic-intro { background:var(--surface); }
+.clinic-intro > .intro-copy { padding:24px; border-radius:16px; background-image:linear-gradient(var(--surface),transparent 230%),var(--theme-art); background-size:cover; background-position:center; }
+.scenario-card,.status-card,.tool-strip button,.message,.composer,.reflection-block,.workflow-question,.result-reading article,.settings-drawer,.privacy-dialog { border-radius:12px; box-shadow:none; }
+.primary-outline,.secondary-button { border-radius:8px; box-shadow:none; }
+.message.user { background:var(--surface-muted); }
+.send-button { color:var(--cyan); }
+.tool-workspace h1 { color:var(--text); }
+.tool-workspace > p { line-height:1.9; margin:18px 0; }
+@media(max-width:900px) {
+  body {overflow:hidden;}
+  .topbar {padding:10px 16px;position:relative;}
+  .top-actions {width:100%;justify-content:flex-start;}
+  .top-actions .mental-theme-picker {display:flex;}
+  .app-shell {height:100dvh;min-height:0;grid-template-rows:auto minmax(0,1fr) 64px;}
+  .app-body {min-height:0;overflow:hidden;}
+  .main-stage,.clinic-home,.workflow-shell,.discipline-workspace,.tool-workspace {height:100%;min-height:0;overflow:auto;}
+  .clinic-intro > .intro-copy {padding:18px;}
+}

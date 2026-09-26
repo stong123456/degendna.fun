@@ -2,7 +2,7 @@ export const MODES = [
   { id: "home", label: "状态校准台", description: "从正在发生的交易情境进入" },
   { id: "discipline", label: "纪律协议", description: "交易前检查与行为证据" },
   { id: "companion", label: "和小镜聊聊", description: "开放对话与结果追问" },
-  { id: "persona", label: "人格解读", description: "读懂交易习惯，不给你贴死标签" },
+  { id: "persona", label: "自查解读", description: "主动读取本机结果，看看自己的近况" },
   { id: "records", label: "私密记录", description: "只保存在当前设备" }
 ];
 
