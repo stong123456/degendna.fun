@@ -3,6 +3,7 @@ import { buildCompositeProfile, scoreAssessment, isCurrentRecord, compareRecords
 import { humanizeReport } from "./report-copy.js";
 import { recentType } from "./recent-type.js";
 import { careTools } from "./care-tools.js";
+import { currentState } from "./current-state.js";
 
 const storageKey = "degendna-mental-lab-records";
 const themeKey = "degendna-mental-lab-theme";
@@ -461,10 +462,21 @@ function completeAssessment(assessment) {
 function resultPanel(result) {
   if (!isCurrentRecord(result)) return el("p", {}, "旧版结果不作新版解释，请重新自查。旧记录仍保留在本地。" );
   result = humanizeReport(result);
+  const status = currentState(result);
   const previous = getRecords().find((record) => Date.parse(record.createdAt) < Date.parse(result.createdAt) && compareRecords(result, record).length);
   const comparison = previous ? compareRecords(result, previous) : [];
   return el("section", { id: "result", class: "reflection-report", "aria-label": "多维回答报告" }, [
-    el("header", {}, [el("p", { class: "system-label" }, `${result.scope} · ${result.title}`), el("h2", {}, "给此刻的你，一份温柔的回看"), el("p", {}, "谢谢你愿意停下来，看看自己的感受。你不用把这份结果当成成绩单，也不需要一下子改变很多。"), el("p", { class: "report-summary" }, result.summary)]),
+    el("header", {class:'current-state', 'data-state':status.kind}, [
+      el("p", { class: "system-label" }, `${result.scope} · ${result.title} · 当前状态`),
+      el("h2", {}, status.title), el("p", {class:'state-description'}, status.description),
+      el('p', {class:'state-priority'}, `现在优先做什么：${status.priority}`),
+      el('details', {}, [el('summary', {}, '为什么得到这个结果？'), el('ul', {}, status.reasons.map(text=>el('li',{},text))), evidenceList(status.evidence)]),
+      ...status.caveats.map(text=>el('p',{class:'coverage-note'},text)),
+      el('p',{class:'coverage-note'},status.boundary)
+    ]),
+    reportSection('接下来怎么改善：按这个顺序开始', status.steps.map(step=>el('article',{class:'state-step'},[el('small',{},step.when),el('h3',{},step.title),el('p',{},step.text)]))),
+    el('details',{class:'report-section'},[el('summary',{},'怎样知道调整有没有帮助？什么时候需要更多支持？'),el('p',{},status.checkpoint),el('p',{},status.escalation)]),
+    el('details', {class:'report-section'}, [el('summary',{},'回看本次回答摘要'),el('p',{class:'report-summary'},result.summary)]),
     el("p", { class: "coverage-note" }, `你回答了 ${result.answered}/${result.totalItems} 题的发生频率，主动跳过 ${result.skipped} 题。这只是你最近生活的一小部分，不是对你的定义。`),
     el("p", { class: "coverage-note" }, "这是一份帮助你了解自己的原创自查，不是诊断，尚未经临床验证。你的真实感受比这份文字更重要。"),
     state.storageError ? el("p", { role: "alert" }, state.storageError) : null,
@@ -476,7 +488,6 @@ function resultPanel(result) {
     reportSection("02 / 这些感受，怎样影响了你的生活", [el("dl", { class: "context-results" }, result.context.flatMap((entry) => [el("dt", {}, entry.question), el("dd", {}, entry.label)])), el("p", {}, "即使刚刚开始，只要已经让你难受，也值得找人聊聊。")]),
     reportSection("03 / 有些事情，可以放在一起看看", result.patterns.length ? result.patterns.map((pattern) => el("article", {}, [el("h3", {}, pattern.title), el("p", {}, pattern.text), el("small", {}, `依据：${pattern.evidence.join("；")}。它们在同一段时间出现，不代表一件事造成了另一件事。`)])) : [el("p", {}, "现在还看不出这些感受之间有什么联系。没关系，我们不需要替每一种感受都找出原因。")]),
 
-    reportSection("04 / 今天，只选一件小事就好", result.plan.map((step) => el("article", {}, [el("h3", {}, step.title), el("p", {}, step.text), el("details", {}, [el("summary", {}, "为什么提到这一步？"), el("p", {}, step.reason)])]))),
     reportSection("05 / 以后想回头看看时", [el("p", {}, "你可以过一周再回头看看，也可以等自己想聊的时候再来。不用反复做题追求一个更好的结果。前后回答变了，可能和那几天的生活有关，不能只凭数字判断自己好转或变糟。"), comparison.length ? el("ul", {}, comparison.map((entry) => el("li", {}, `${entry.label}：较常出现的条目 ${entry.previous}/${entry.total} → ${entry.current}/${entry.total}（${entry.kind === "resource" ? "资源" : "困扰"}）。`))) : el("p", {}, "现在还没有合适的旧记录可以一起看。不急，这次就从了解当下开始。")]),
     el("details", { class: "report-section report-method" }, [el("summary", {}, "想了解这份结果是怎么来的？"),el("ul", {}, result.limitations.map((text) => el("li", {}, text))), el("p", {}, "以下资料支持内容审阅原则和求助边界，不代表这些机构认可或验证了本产品。"), el("ul", {}, sources.map((source) => el("li", {}, el("a", { href: source.url, target: "_blank", rel: "noopener noreferrer" }, source.title))))]),
     el("button", { class: "secondary", onclick: () => setRoute(state.savedThisRun ? "records" : "library") }, state.savedThisRun ? "已保存，查看本地记录" : "返回自测库")

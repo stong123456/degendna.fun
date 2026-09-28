@@ -74,6 +74,8 @@
           await nextFrame();
           let report = doc.querySelector('#result');
           check(report && report.textContent.includes('12/12'),'Complete report missing');
+          check(report.querySelector('.current-state')?.dataset.state === 'support-now','Explicit impact not prioritized');
+          check(report.querySelectorAll('.state-step').length === 3,'Action sequence missing');
           check(report.querySelectorAll('.domain-report').length === 4,'Domain count');
           check(report.textContent.includes('现在，先找个人陪你一起面对'),'Context not applied');
           check(!doc.querySelector('.score-ring'),'Obsolete score visible');
@@ -86,6 +88,7 @@
           check(report.querySelector('details').open,'Answer evidence does not open');
           startQuick(doc); choose(doc,'q1','skip'); press(doc,'查看已答 1 题的结果');
           check(doc.querySelector('#result').textContent.includes('你还没有选择具体的发生频率'),'Skipped treated as zero');
+          check(doc.querySelector('.current-state')?.dataset.state === 'incomplete','Skipped report must not infer wellbeing');
           choose(doc,'safety','yes');
           check(doc.querySelector('.product-shell').dataset.route === 'safety','Safety did not route immediately');
           check(!doc.querySelector('#result') && !doc.querySelector('.status-panel'),'Report/history visible during safety support');

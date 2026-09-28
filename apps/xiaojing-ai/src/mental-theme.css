@@ -20,6 +20,10 @@ body { background:var(--bg); background-image:none; }
 .send-button { color:var(--cyan); }
 .tool-workspace h1 { color:var(--text); }
 .tool-workspace > p { line-height:1.9; margin:18px 0; }
+.current-state {line-height:1.9;overflow-wrap:anywhere;}
+.current-state h3 {font-size:22px;line-height:1.6;}
+.current-state .state-step {padding:16px 0;border-bottom:1px solid var(--line);}
+.current-state p,.current-state details {margin:12px 0;}
 @media(max-width:900px) {
   body {overflow:hidden;}
   .topbar {padding:10px 16px;position:relative;}

@@ -29,6 +29,8 @@ document.querySelector('#run').onclick=async(e)=>{
       await new Promise(r=>requestAnimationFrame(r));
       check(doc.querySelector('#result .type-code')?.textContent===scene.typePrefix+'11','Paired type');
       check(doc.querySelectorAll('#result .facet-card').length===6,'Six perspectives');
+      check(doc.querySelector('#result .current-state')?.dataset.state==='recurring','Current state missing');
+      check(doc.querySelectorAll('#result .state-step').length===3,'Specific action steps missing');
       check(doc.querySelectorAll('#result .domain-report').length===6,'Six detailed explanations');
       check(!doc.querySelector('#result').textContent.includes('undefined'),'Undefined copy');
       const details=doc.querySelector('.recent-type details');details.querySelector('summary').click();check(details.open,'Type evidence disclosure');
@@ -61,6 +63,7 @@ document.querySelector('#run').onclick=async(e)=>{
       check(!xd.querySelector('.persona-result'),'Report auto-loaded without click');
       press(xd,'读取我保存的新版自查');await waitFor(()=>xd.querySelector('.persona-result'));
       check(xd.querySelector('.persona-result').textContent.includes('CH11'),'Saved report type round trip');
+      check(xd.querySelector('.persona-result .current-state')?.dataset.state==='recurring','Xiaojing state mismatch');
       if(width<900)check(xd.querySelector('.bottom-nav').getBoundingClientRect().bottom<=900,'Mobile navigation below viewport');
     });
   }
