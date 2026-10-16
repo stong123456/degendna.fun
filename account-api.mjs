@@ -26,7 +26,7 @@ export function createAccountApi({config=accountConfig(),fetcher=fetch,now=Date.
     res.setHeader('set-cookie',[...(res.getHeader('set-cookie')||[]),item]);
   }
   function readCookie(req,name){const raw=(req.headers.cookie||'').split(';').map(s=>s.trim()).find(s=>s.startsWith(prefix+name+'='));if(!raw)return '';try{return decodeURIComponent(raw.slice(raw.indexOf('=')+1));}catch{return '';}}
-  function clear(res){for(const name of ['access','refresh','pkce','reauth'])cookie(res,name,'',0);}
+  function clear(res){for(const name of ['access','refresh','pkce','pending','reauth'])cookie(res,name,'',0);}
   function session(res,s){if(typeof s.access_token!=='string'||typeof s.refresh_token!=='string'||s.access_token.length>4000||s.refresh_token.length>2000)throw new HttpError(502,'登录服务返回异常，请重试。');cookie(res,'access',s.access_token,Math.min(Number(s.expires_in)||3600,3600));cookie(res,'refresh',s.refresh_token,60*60*24*30);}
   async function provider(path,{method='GET',body,token,admin=false}={}) {
     let response;try {response=await fetcher(config.url+'/auth/v1'+path,{method,headers:{apikey:admin?config.admin:config.key,...(token?{authorization:'Bearer '+token}:admin&&roleOf(config.admin)==='service_role'?{authorization:'Bearer '+config.admin}:{}),...(body?{'content-type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(12000),redirect:'error'});}catch{throw new HttpError(503,'登录服务暂时不可用，请稍后再试。');}
@@ -74,16 +74,26 @@ export function createAccountApi({config=accountConfig(),fetcher=fetch,now=Date.
         const challenge=createHash('sha256').update(verifier).digest('base64url');
         await provider('/otp?redirect_to='+encodeURIComponent(config.origin+'/auth/callback.html'),{method:'POST',body:{email,create_user:true,code_challenge:challenge,code_challenge_method:'s256',...(body.captchaToken?{gotrue_meta_security:{captcha_token:body.captchaToken}}:{})}});
         cookie(res,'pkce',verifier,3600);
+        const pending=Buffer.from(JSON.stringify({email,expires:now()+3600000})).toString('base64url');cookie(res,'pending',pending+'.'+reauthProof(pending,'login'),3600);
         send(200,{ok:true,message:'登录邮件请求已提交，请在发起登录的同一浏览器中打开邮件链接。',retryAfter:60});return true;
       }
       if(req.method==='POST'&&action==='callback'){
-        const body=await bodyOf(req);fields(body,['code']);const verifier=readCookie(req,'pkce');
-        if(typeof body.code!=='string'||body.code.length>2048||!body.code||!/^[a-f0-9]{64}$/.test(verifier))throw new HttpError(401,'登录链接已失效，或不是在发起登录的浏览器中打开。请返回账号页重新申请。');
-        limited('callback',verifier,8,600000);
-        const s=await provider('/token?grant_type=pkce',{method:'POST',body:{auth_code:body.code,code_verifier:verifier}});
-        const u=await provider('/user',{token:s.access_token});if(!verified(u))throw new HttpError(401,'未能确认邮箱身份。');
+        const body=await bodyOf(req);fields(body,['code','accessToken','refreshToken']);const verifier=readCookie(req,'pkce');
+        if(!/^[a-f0-9]{64}$/.test(verifier))throw new HttpError(401,'请在发起登录的同一浏览器打开链接，或重新申请登录邮件。');
+        limited('callback',verifier,8,600000);let s,u;
+        if(body.code!==undefined){
+          if(typeof body.code!=='string'||body.code.length>2048||!body.code||body.accessToken!==undefined||body.refreshToken!==undefined)throw new HttpError(400,'登录链接格式异常。');
+          s=await provider('/token?grant_type=pkce',{method:'POST',body:{auth_code:body.code,code_verifier:verifier}});u=await provider('/user',{token:s.access_token});
+        }else{
+          const [pending,signature]=readCookie(req,'pending').split('.');let expected;
+          try{if(!pending||signature!==reauthProof(pending,'login'))throw Error();expected=JSON.parse(Buffer.from(pending,'base64url'));if(expected.expires<=now()||expected.expires>now()+3600000||!emailOf(expected.email))throw Error();}catch{throw new HttpError(401,'登录请求已失效，请返回账号页重新申请。');}
+          if(typeof body.accessToken!=='string'||body.accessToken.length>4000||!body.accessToken||typeof body.refreshToken!=='string'||body.refreshToken.length>2000||!body.refreshToken)throw new HttpError(400,'登录链接缺少凭证。');
+          const original=await provider('/user',{token:body.accessToken});if(!verified(original)||emailOf(original.email)!==expected.email)throw new HttpError(401,'登录邮箱与本次申请不一致，请重新申请。');
+          s=await provider('/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:body.refreshToken}});u=await provider('/user',{token:s.access_token});if(u.id!==original.id)throw new HttpError(401,'登录身份校验失败。');
+        }
+        if(!verified(u))throw new HttpError(401,'未能确认邮箱身份。');
         if(config.adminReady){const managed=await provider('/admin/users/'+u.id,{admin:true});if(!verified(managed.user||managed))throw new HttpError(401,'账号暂不可用。');}
-        session(res,s);cookie(res,'pkce','',0);const expiry=now()+600000;cookie(res,'reauth',expiry+'.'+reauthProof(u.id,expiry),600);send(200,{user:publicUser(u)});return true;
+        session(res,s);cookie(res,'pkce','',0);cookie(res,'pending','',0);const expiry=now()+600000;cookie(res,'reauth',expiry+'.'+reauthProof(u.id,expiry),600);send(200,{user:publicUser(u)});return true;
       }
       if(req.method==='POST'&&action==='verify'){
         const body=await bodyOf(req);fields(body,['email','code']);const email=emailOf(body.email);if(!email||!codeOf(body.code))throw new HttpError(400,'请输入有效邮箱和六位验证码。');limited('verify',email,8,600000);

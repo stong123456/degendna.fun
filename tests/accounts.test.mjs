@@ -55,3 +55,10 @@ test('email links use PKCE and a fixed callback; missing, expired and cross-orig
  assert.equal((await f.request('callback',{body:{code:'valid-link'}})).status,401);assert.equal((await f.request('callback',{cookie:pkce,body:{code:'expired'}})).status,401);assert.equal((await f.request('callback',{cookie:pkce,origin:'https://evil.test',body:{code:'valid-link'}})).status,403);
  const r=await f.request('callback',{cookie:pkce,body:{code:'valid-link'}});assert.equal(r.status,200);assert.ok(!JSON.stringify(await r.json()).includes('token'));assert.ok(r.headers.getSetCookie().some(c=>c.startsWith('ddna-pkce=;')&&c.includes('Max-Age=0')));
 });
+
+test('fragment-session callback requires signed browser request, matching email, and verified token rotation',async t=>{
+ const f=await fixture(t);const sent=await f.request('send',{body:{email:'tester@example.test',consent:true}});const cookies=sent.headers.getSetCookie().map(c=>c.split(';')[0]).join('; ');
+ assert.equal((await f.request('callback',{cookie:'ddna-pkce='+ 'a'.repeat(64),body:{accessToken:'user-token',refreshToken:'refresh-token'}})).status,401);
+ assert.equal((await f.request('callback',{cookie:cookies,body:{accessToken:'admin-token',refreshToken:'refresh-token'}})).status,401);
+ const ok=await f.request('callback',{cookie:cookies,body:{accessToken:'user-token',refreshToken:'refresh-token'}});assert.equal(ok.status,200);assert.equal((await ok.json()).user.id,USER);assert.ok(ok.headers.getSetCookie().some(c=>c.startsWith('ddna-pending=;')&&c.includes('Max-Age=0')));
+});
