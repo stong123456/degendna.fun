@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-16T05:02:34.335Z",
+  "date": "2026-10-16T05:52:17.654Z",
   "scope": "Source-level product checks only; not clinical validation or a production penetration test.",
   "findings": [
     {
@@ -48,6 +48,30 @@
     },
     {
       "name": "trading-topics.js: no outbound answer transport",
+      "status": "PASS"
+    },
+    {
+      "name": "scene-assessments.js: no outbound answer transport",
+      "status": "PASS"
+    },
+    {
+      "name": "report-copy.js: no outbound answer transport",
+      "status": "PASS"
+    },
+    {
+      "name": "recent-type.js: no outbound answer transport",
+      "status": "PASS"
+    },
+    {
+      "name": "current-state.js: no outbound answer transport",
+      "status": "PASS"
+    },
+    {
+      "name": "result-insights.js: no outbound answer transport",
+      "status": "PASS"
+    },
+    {
+      "name": "report-text.js: no outbound answer transport",
       "status": "PASS"
     },
     {

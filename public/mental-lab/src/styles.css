@@ -472,3 +472,14 @@ details > summary:focus-visible { outline: 2px solid var(--purple); outline-offs
 button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid #62897b;outline-offset:3px}
 @media(max-width:850px){.product-lines{grid-template-columns:1fr}.product-line{padding:16px}.journey-grid .secondary{max-width:100%;white-space:normal}.reset-field textarea{font-size:16px}.care-card input{font-size:16px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+/* Results remain readable while reviewing answers, including on small screens. */
+.submit-panel { position: static; }
+#result, #play-result, .report-section { scroll-margin-top: 90px; }
+.insight-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px; }
+.insight-grid > section { min-width:0; }
+.insight-card { padding:18px 0;border-bottom:1px solid var(--line); }
+.insight-card h4,.insight-exercise h4 { margin:14px 0 8px; }
+.insight-exercise { margin-top:24px;padding:20px;border:1px solid var(--line);border-radius:8px; }
+.insight-card p,.insight-exercise p { margin:10px 0; }
+@media(max-width:700px) { .insight-grid {grid-template-columns:1fr;} .insight-exercise{padding:16px;} }

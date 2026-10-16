@@ -21,6 +21,13 @@ export const playStyles = [
     text: "在这些情境里，你更常给自己留一点时间。旁观和休息，也可以是主动选择。",
   },
 ];
+// Editorial reflections on these choices, never a psychometric personality result.
+const styleGuides = {
+  research: { trait:'遇到不确定时，先找证据和出处。', strength:'这种选择可以为讨论提供可核对的事实，减少只凭单一说法作决定。', blindSpot:'信息越多未必越清楚。可以核对自己是否一直补材料，却没有明确要解决的问题。', action:'下次研究前写一个问题、两类必要信息和结束条件；分开记录事实与猜测。', question:'什么新事实真的会改变你的判断？' },
+  plan: { trait:'先对照已有安排，再考虑是否改变方向。', strength:'这种选择可以保留决定依据，让之后的复盘有清楚的参照。', blindSpot:'原来的条件可能已变化。可以核对自己是在保持一致，还是忽略了值得更新的新事实。', action:'为一个计划写下适用条件、允许调整的事实和下一次回看时点；变化时记录理由。', question:'你守住的是重要条件，还是已经不适用的旧安排？' },
+  social: { trait:'通过听取和交流不同观点来整理想法。', strength:'这种选择可以让讨论看见单一视角遗漏的信息，也更容易表达疑问。', blindSpot:'一致意见并不自动成为证据。可以核对谁有不同经历，以及你自己的判断依据是什么。', action:'交流后独立写三行：对方的事实、对方的解释、你仍需要确认的部分。', question:'如果没有群体赞同，你仍认同哪些理由？' },
+  space: { trait:'先给自己留时间，再决定是否参与。', strength:'这种选择可以保护注意力，让眼前的生活安排也有位置。', blindSpot:'等待也需要回看点。可以核对自己是在主动留白，还是因为不清楚下一步而一直拖延。', action:'为一件在意的小事约定回看时间和一个可逆的下一步；允许最后决定不参与。', question:'留白之后，你想带着什么信息回来？' }
+};
 export const playQuestions = [
   [
     "群里突然开始刷同一个项目，你先做什么？",
@@ -100,6 +107,10 @@ export function playResult(answers) {
         ? top[0].text
         : "几种选择同样常出现，不强选一种风格。你可以在不同情境里使用不同方式。",
     version: "play-20261016-v1",
+    interpretationVersion: "play-reflection-20261016-v2",
+    distribution: counts.map(({id,name,count})=>({id,name,count})),
+    perspectives: top.map(style=>({ id:style.id, name:style.name, count:style.count, ...styleGuides[style.id],
+      evidence:playQuestions.flatMap((q,i)=>answers[i]===playStyles.findIndex(s=>s.id===style.id)?[{question:q.text,answer:q.options[answers[i]]}]:[]) })),
   };
 }
 let playMemory = [];
@@ -176,7 +187,15 @@ export function playView(el) {
           ? el("section", { id: "play-result", class: "care-card" }, [
               el("h3", {}, result.name),
               el("p", {}, result.text),
-              el("p", {}, "这些只是本次情境选择的概括，不是固定人格。"),
+              el("p", {}, "这些只是本次情境选择的概括，不是固定人格。优势是这些选择可能带来的帮助，盲点是值得核对的问题，并不表示你一定存在这些缺点。"),
+              el('p',{},`本次分布：${result.distribution.map(s=>`${s.name} ${s.count}/8`).join('；')}。次数是本次选项数，不是能力分或百分位。`),
+              ...result.perspectives.map(style=>el('article',{class:'insight-card'},[
+                el('h4',{},style.name),el('p',{},`本次选择反映的倾向：${style.trait}`),
+                el('h4',{},'可能的优势'),el('p',{},style.strength),el('h4',{},'值得核对的盲点'),el('p',{},style.blindSpot),
+                el('h4',{},'下一次可以试试'),el('p',{},style.action),el('p',{},style.question),
+                el('details',{},[el('summary',{},'对应哪些选择？'),el('ul',{},style.evidence.map(e=>el('li',{},`${e.question} → ${e.answer}`)))])
+              ])),
+              el('small',{},`解读版本：${result.interpretationVersion} · 情境题不衡量人格、心理健康或交易表现。`),
               el("details", {}, [
                 el("summary", {}, "风格怎样产生？"),
                 el(
