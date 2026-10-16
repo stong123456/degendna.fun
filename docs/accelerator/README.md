@@ -46,4 +46,4 @@
 ## 当前认证方案更新：邮箱登录链接
 用户决定先使用默认邮件中的登录链接，验证码升级暂停；上文 OTP 模板配置步骤不作为本版本登录前置条件。接口 send 使用 PKCE challenge；专用 /auth/callback.html 接收 code，立即清除地址栏参数并向同源服务器提交。verifier 只在 HttpOnly cookie 中保存，服务端交换并远程验证身份后设置会话。需同一浏览器打开邮件链接；跨浏览器、重复、过期与缺失参数有明确失败提示。账号注销改为10分钟内新链接验证后输入 DELETE，不再要求数字验证码。
 
-Supabase URL Configuration 必须设置 Site URL=https://degendna.fun，并在 Redirect URLs 加入 https://degendna.fun/auth/callback.html。本机真实测试还需 http://127.0.0.1:8794/auth/callback.html。最新读回旧配置为 localhost:3000、空白回跳列表，因此真实回跳尚未通过；不要据隔离测试宣称已上线可用。默认邮件的公开收件范围限制仍存在，后续运营升级邮件服务是独立里程碑。
+Supabase URL Configuration 必须设置 Site URL=https://degendna.fun，并在 Redirect URLs 加入 https://degendna.fun/auth/callback.html。本机真实测试还需 http://127.0.0.1:8794/auth/callback.html。2026-10-16 已回读确认正式域名和两个回跳地址保存正确。随后真实发信返回429；项目当前默认发信额度每小时2封，未配置自有SMTP。真实邮件点击登录仍未通过；不要据隔离测试宣称已上线可用。默认邮件的公开收件范围限制仍存在，后续运营升级邮件服务是独立里程碑。
