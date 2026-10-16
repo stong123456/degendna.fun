@@ -1,6 +1,6 @@
 import { localStore } from "./storage.js";
 import { assessments, assessmentMap, responseScale, contextQuestions } from "./assessments.js";
-import { buildCompositeProfile, scoreAssessment, isCurrentRecord, compareRecords, sources } from "./scoring.js";
+import { buildCompositeProfile, scoreAssessment, isCurrentRecord, compareRecords, chronologicalRecords, previousComparableRecord, sources } from "./scoring.js";
 import { humanizeReport } from "./report-copy.js";
 import { resultInsights } from "./result-insights.js";
 import { privateReportText } from "./report-text.js";
@@ -41,6 +41,8 @@ const state = {
   lastResult: null,
   savedThisRun: false,
   storageError: "",
+  recordsError: "",
+  recordsFilter: "all",
   saveLocal: false,
   theme: themes.some((theme) => theme.id === initialTheme) ? initialTheme : "garden"
 };
@@ -83,17 +85,24 @@ function el(tag, attrs = {}, children = []) {
 }
 
 function getRawRecords() {
-  try {const rows=JSON.parse(localStore.getItem(storageKey)||'[]');return Array.isArray(rows)?rows.slice(0,100):[];}
-  catch {return [];}
+  state.recordsError = "";
+  try {
+    const rows=JSON.parse(localStore.getItem(storageKey)||'[]');
+    if(!Array.isArray(rows))throw Error('Invalid records');
+    return rows.slice(0,100);
+  } catch {
+    state.recordsError = "暂时无法读取本地记录，可能是浏览器限制或数据损坏。这不表示记录为空；请先检查浏览器权限或保留原始备份，不要急着清除数据。";
+    return [];
+  }
 }
 
 function getRecords() {
   try {
     const records = getRawRecords();
-    return Array.isArray(records) ? records.slice(0,100).filter(record=>record&&typeof record.title==='string').map(record=>{
+    return Array.isArray(records) ? chronologicalRecords(records.slice(0,100).filter(record=>record&&typeof record.title==='string').map(record=>{
       try {return validateBackup({format:'degendna-private-backup',version:1,values:{[REPORT_KEY]:[record]}})[REPORT_KEY][0];}
       catch {return {id:typeof record.id==='string'?record.id:'unknown',title:record.title,createdAt:typeof record.createdAt==='string'?record.createdAt:'',legacy:true};}
-    }) : [];
+    })) : [];
   } catch {
     return [];
   }
@@ -102,6 +111,7 @@ function getRecords() {
 function saveRecord(result) {
   if (!isCurrentRecord(result)) return false;
   const records = getRawRecords();
+  if(state.recordsError){state.storageError="未能读取已有记录，为避免覆盖，暂未保存。本次报告仍可查看和导出。";return false;}
   records.unshift(result);
   try {
     localStore.setItem(storageKey, JSON.stringify(records.slice(0, 100)));
@@ -507,7 +517,7 @@ function resultPanel(result) {
   if (!isCurrentRecord(result)) return el("p", {}, "旧版结果不作新版解释，请重新自查。旧记录仍保留在本地。" );
   result = humanizeReport(result);
   const status = currentState(result);
-  const previous = getRecords().find((record) => Date.parse(record.createdAt) < Date.parse(result.createdAt) && compareRecords(result, record).length);
+  const previous = previousComparableRecord(result, getRecords());
   const comparison = previous ? compareRecords(result, previous) : [];
   return el("section", { id: "result", class: "reflection-report", "aria-label": "多维回答报告" }, [
     el("header", {class:'current-state', 'data-state':status.kind}, [
@@ -518,7 +528,10 @@ function resultPanel(result) {
       ...status.caveats.map(text=>el('p',{class:'coverage-note'},text)),
       el('p',{class:'coverage-note'},status.boundary)
     ]),
-    reportSection('接下来怎么改善：按这个顺序开始', status.steps.map(step=>el('article',{class:'state-step'},[el('small',{},step.when),el('h3',{},step.title),el('p',{},step.text)]))),
+    el('nav',{class:'report-jumps','aria-label':'报告内容导航'},[
+      ['report-actions','行动建议'],['report-insights','优势与消耗'],['report-evidence','完整回答依据'],['report-review','前后回看']
+    ].map(([id,label])=>el('a',{href:'#'+id,onclick:e=>{e.preventDefault();const target=document.getElementById(id);target?.scrollIntoView({block:'start'});target?.focus({preventScroll:true});}},label))),
+    el('div',{id:'report-actions',tabindex:'-1'},reportSection('接下来怎么改善：按这个顺序开始', status.steps.map(step=>el('article',{class:'state-step'},[el('small',{},step.when),el('h3',{},step.title),el('p',{},step.text)])))),
     el('details',{class:'report-section'},[el('summary',{},'怎样知道调整有没有帮助？什么时候需要更多支持？'),el('p',{},status.checkpoint),el('p',{},status.escalation)]),
     el('details', {class:'report-section'}, [el('summary',{},'回看本次回答摘要'),el('p',{class:'report-summary'},result.summary)]),
     el("p", { class: "coverage-note" }, `你回答了 ${result.answered}/${result.totalItems} 题的发生频率，主动跳过 ${result.skipped} 题。这只是你最近生活的一小部分，不是对你的定义。`),
@@ -533,11 +546,15 @@ function resultPanel(result) {
     insightsPanel(result),
     recentTypePanel(result),
     ...result.warnings.map((text) => el("p", { class: "note-band" }, text)),
-    reportSection("01 / 从你愿意分享的事情说起", [el("p", {}, "下面既有让你费心的事，也有可能帮到你的事。回答还少的地方，我们先不猜。你可以只看现在最关心的一部分。"), ...result.domains.map(domainPanel)]),
+    el('div',{id:'report-evidence',tabindex:'-1'},reportSection("01 / 从你愿意分享的事情说起", [el("p", {}, "下面既有让你费心的事，也有可能帮到你的事。回答还少的地方，我们先不猜。你可以只看现在最关心的一部分。"), ...result.domains.map(domainPanel)])),
     reportSection("02 / 这些感受，怎样影响了你的生活", [el("dl", { class: "context-results" }, result.context.flatMap((entry) => [el("dt", {}, entry.question), el("dd", {}, entry.label)])), el("p", {}, "即使刚刚开始，只要已经让你难受，也值得找人聊聊。")]),
     reportSection("03 / 有些事情，可以放在一起看看", result.patterns.length ? result.patterns.map((pattern) => el("article", {}, [el("h3", {}, pattern.title), el("p", {}, pattern.text), el("small", {}, `依据：${pattern.evidence.join("；")}。它们在同一段时间出现，不代表一件事造成了另一件事。`)])) : [el("p", {}, "本次没有按预设规则生成组合提示；这不说明这些体验之间没有联系。可以结合一次具体经历，看看它们是否在同一情境出现，不急着推断原因。")]),
 
-    reportSection("04 / 以后想回头看看时", [el("p", {}, "你可以在适合本套观察期的时间再回头看看，也可以等自己想聊的时候再来。不用反复做题追求一个更好的结果。前后回答变了，可能和那几天的生活有关，不能只凭数字判断自己好转或变糟。"), comparison.length ? el("ul", {}, comparison.map((entry) => el("li", {}, `${entry.label}：较常出现的条目 ${entry.previous}/${entry.total} → ${entry.current}/${entry.total}（${entry.kind === "resource" ? "资源" : "困扰"}）。`))) : el("p", {}, "现在还没有合适的旧记录可以一起看。不急，这次就从了解当下开始。")]),
+    el('div',{id:'report-review',tabindex:'-1'},reportSection("04 / 以后想回头看看时", [
+      el("p", {}, "你可以在适合本套观察期的时间再回头看看，也可以等自己想聊的时候再来。不用反复做题追求一个更好的结果。前后回答变了，可能和那几天的生活有关，不能只凭数字判断自己好转或变糟。"),
+      previous?el('p',{class:'note-band'},`比较日期：${recordDate(previous.createdAt)} → ${recordDate(result.createdAt)}。仅比较同模块、同版本、同观察期且有效回答项目相同的维度；未列出的维度不作比较。时间段可能重叠。`):null,
+      comparison.length ? el("ul", {}, comparison.map((entry) => el("li", {}, `${entry.label}：较常出现的条目 ${entry.previous}/${entry.total} → ${entry.current}/${entry.total}（${entry.kind === "resource" ? "资源" : "困扰"}）。`))) : el("p", {}, "现在还没有日期更早、版本和已答项目相符的记录可以一起看。不急，这次就从了解当下开始。")
+    ])),
     el("details", { class: "report-section report-method" }, [el("summary", {}, "想了解这份结果是怎么来的？"),el("ul", {}, result.limitations.map((text) => el("li", {}, text))), el("p", {}, "以下资料支持内容审阅原则和求助边界，不代表这些机构认可或验证了本产品。"), el("ul", {}, sources.map((source) => el("li", {}, el("a", { href: source.url, target: "_blank", rel: "noopener noreferrer" }, source.title))))]),
     el('div',{class:'care-options'},[
       el('button',{class:'secondary',onclick:()=>downloadFile(`degendna-${result.id}-private.txt`, privateReportText(result),'text/plain;charset=utf-8')},'导出私密文字报告'),
@@ -560,7 +577,7 @@ function insightsPanel(result) {
     el('p',{},`${d.kind==='resource'?'保留与使用':'可尝试的一步'}：${d.action}`)
   ]);
   const exercise = profile.exercise;
-  return reportSection('了解自己的不同侧面：优势、消耗与调整方向',[
+  return el('div',{id:'report-insights',tabindex:'-1'},reportSection('了解自己的不同侧面：优势、消耗与调整方向',[
     el('p',{},profile.lens),el('p',{class:'coverage-note'},profile.boundary),
     el('div',{class:'insight-grid'},[
       el('section',{},[el('h3',{},'已有优势与资源'),...(profile.strengths.length?profile.strengths.map(card):[el('p',{},profile.strengthsEmpty)])]),
@@ -576,7 +593,7 @@ function insightsPanel(result) {
       el('h4',{},'如何知道有没有帮助'),el('p',{},exercise.checkpoint),
       el('p',{},`留给自己的问题：${exercise.question}`)
     ]),el('small',{},`展示解读版本：${profile.version}；按当前规则整理本次原始回答，题库版本与保存日期见报告。`)
-  ].filter(Boolean));
+  ].filter(Boolean)));
 }
 
 function recentTypePanel(result) {
@@ -621,31 +638,51 @@ function domainPanel(domain) {
 function recordsView() {
   const records = getRecords();
   const profile = buildCompositeProfile(records);
+  const modules = assessments.filter(a=>!a.safetyOnly && records.some(r=>r.id===a.id));
+  if(state.recordsFilter!=='all'&&!modules.some(a=>a.id===state.recordsFilter))state.recordsFilter='all';
+  const visible = records.filter(r=>state.recordsFilter==='all'||r.id===state.recordsFilter);
   return shell([
-    el("section", { class: "workspace-head" }, [
+    el("section", { class: "workspace-head records-head" }, [
       el("div", {}, [
         el("h2", {}, "本地复测记录"),
         el("p", {}, "记录含回答依据，只在当前浏览器。不是加密保险箱，共用设备请谨慎；不会与钱包绑定。"), el("button",{class:"secondary",onclick:()=>setRoute("privacy")},"隐私、备份与全部清除")
       ]),
       records.length ? el("button", { class: "ghost-action", onclick: () => { if (confirm("清除这个浏览器中的全部自测记录？此操作无法撤销。")) { try { localStore.removeItem(storageKey); state.lastResult = null; render(); } catch { alert("未能清除，请检查浏览器存储权限。"); } } } }, "清除记录") : null
     ]),
-    el("p", { class: "note-band" }, `已保存 ${profile.modules.length} 类新版自查。不计算跨模块健康总分。${profile.legacyCount ? `另有 ${profile.legacyCount} 条旧版记录，保留原始存储，不沿用其分级，也不混入新版比较。` : ""}`),
+    el("p", { class: "note-band" }, state.recordsError ? "记录数量暂不可读取，请先查看下方提示。现有数据不会被新报告覆盖。" : `已保存 ${profile.modules.length} 类新版自查。不计算跨模块健康总分。${profile.legacyCount ? `另有 ${profile.legacyCount} 条旧版记录，保留原始存储，不沿用其分级，也不混入新版比较。` : ""}`),
+    state.recordsError ? el('p',{role:'alert'},state.recordsError) : null,
+    records.length ? el('div',{class:'records-toolbar'},[
+      el('label',{},[el('span',{},'按测评筛选'),el('select',{'aria-label':'按测评筛选',onchange:e=>{state.recordsFilter=e.target.value;state.lastResult=null;render();document.querySelector('.records-toolbar select')?.focus({preventScroll:true});}},[
+        el('option',{value:'all',selected:state.recordsFilter==='all'},`全部记录（${records.length}）`),
+        ...modules.map(a=>el('option',{value:a.id,selected:state.recordsFilter===a.id},`${a.title}（${records.filter(r=>r.id===a.id).length}）`))
+      ])]),el('p',{role:'status'},`显示 ${visible.length} 份，按报告生成日期从新到旧。只概括各次回答，不形成跨测评人格画像。`)
+    ]) : null,
     records.length
-      ? el("div", { class: "record-list" }, records.map(recordCard))
-      : el("div", { class: "empty" }, "还没有本地记录。完成自测并勾选保存后，会出现在这里。"),
+      ? el("div", { class: "record-list" }, visible.map(recordCard))
+      : !state.recordsError ? el("div", { class: "empty" }, [el('p',{},'还没有本地记录。完成自测后，可主动选择保存；匿名使用也能保存。登录不会自动恢复其他设备的记录。'),el('button',{class:'secondary',onclick:()=>setRoute('library')},'选择一套自查'),el('button',{class:'secondary',onclick:()=>setRoute('privacy')},'恢复已有加密备份')]) : null,
     state.lastResult ? resultPanel(state.lastResult) : null
   ]);
+}
+
+function recordDate(value) {
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date.toLocaleString('zh-CN') : '日期不可用';
 }
 
 function recordCard(record) {
   return el("article", { class: "record-card" }, [
     el("div", {}, [
       el("h3", {}, record.title),
-      el("p", {}, new Date(record.createdAt).toLocaleString("zh-CN")),
+      el("p", {}, recordDate(record.createdAt)),
+      isCurrentRecord(record) ? el('p',{class:'record-state'},currentState(record).title) : null,
       el("small", {}, isCurrentRecord(record) ? `${record.answered}/${record.totalItems} 项有效回答 · ${record.version}` : "旧版记录：解释模型已更换，不继续展示原分级")
     ]),
-    el('button',{class:'secondary',onclick:()=>{if(!confirm('删除这份自查报告？此操作无法撤销。'))return;try{const records=getRawRecords();const target=records.findIndex(r=>r?.createdAt===record.createdAt&&r?.id===record.id);if(target>=0)records.splice(target,1);localStore.setItem(storageKey,JSON.stringify(records));state.lastResult=null;render();}catch{alert('删除失败，请检查浏览器存储权限。');}}},'删除这份'),
-    isCurrentRecord(record) ? el("button", { class: "secondary", onclick: () => { state.lastResult = record; state.savedThisRun = true; render(); document.querySelector("#result")?.scrollIntoView({ block: "start" }); } }, "查看报告") : null
+    el('div',{class:'record-actions'},[
+    isCurrentRecord(record) ? el("button", { class: "secondary", onclick: () => { state.lastResult = record; state.savedThisRun = true; render(); document.querySelector("#result")?.scrollIntoView({ block: "start" }); } }, "查看报告") : null,
+    isCurrentRecord(record) ? el('button',{class:'secondary',onclick:()=>selectAssessment(record.id,'assessment')},'同项复测') : null,
+    isCurrentRecord(record) ? el('button',{class:'secondary',onclick:()=>downloadFile(`degendna-${record.id}-private.txt`,privateReportText(record),'text/plain;charset=utf-8')},'导出这份') : null,
+    el('button',{class:'ghost-action',onclick:()=>{if(!confirm('删除这份自查报告？此操作无法撤销。'))return;try{const records=getRawRecords();if(state.recordsError)throw Error();const target=records.findIndex(r=>r?.createdAt===record.createdAt&&r?.id===record.id);if(target>=0)records.splice(target,1);localStore.setItem(storageKey,JSON.stringify(records));state.lastResult=null;render();}catch{alert('删除失败，请检查浏览器存储权限。');}}},'删除这份')
+    ])
   ]);
 }
 
@@ -774,7 +811,7 @@ function render() {
 function routeView() {
   if (state.route === "version") return shell([versionView(el)]);
   if (state.route === "external-ai" || state.route === "account" && productBuild.mode==='deweb') return shell([el('section',{class:'care-card'},[el('h2',{},state.route==='account'?'前往账号服务':'可选的链外 AI 服务'),el('p',{},'这个功能需要离开公开链上核心包，在 DegenDNA 正式域名使用。不会自动携带你的自查答案或本地记录；不同站点的本地存储彼此独立。'),el('a',{href:state.route==='account'?productBuild.accountPortal:productBuild.aiPortal,target:'_blank',rel:'noopener noreferrer'},'了解并前往正式网站')])]);
-  if (state.route === "account") return shell([accountView(el)]);
+  if (state.route === "account") return shell([accountView(el,setRoute)]);
   if (state.route === 'play') return shell([playView(el)]);
   if (state.route === 'reset') return shell([resetView(el,state.resetTool,()=>setRoute('safety'))]);
   if (state.route === 'privacy') return shell([privacyView(el,()=>{state.answers={};state.context={};state.lastResult=null;state.savedThisRun=false;clearCareMemory();clearResetMemory();clearPlayMemory();})]);

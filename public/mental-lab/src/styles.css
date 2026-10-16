@@ -519,3 +519,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .profile-security{grid-column:1/-1;}.profile-security .account-delete{margin-top:24px;padding-top:20px;border-top:1px solid var(--line);}
 @media(max-width:900px){.profile-layout{grid-template-columns:minmax(0,1fr);}.profile-main{grid-row:auto;}.profile-security{grid-column:auto;}}
 @media(max-width:450px){.profile-identity{gap:12px;}.profile-avatar{width:58px;height:58px;font-size:30px;border-radius:18px;}.profile-actions>*{flex:1 1 auto;justify-content:center;}.profile-avatar-options{gap:6px;}}
+
+.report-jumps{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0;}
+.report-jumps a{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:8px;color:var(--ink);text-decoration:none;font-size:13px;box-sizing:border-box;}
+.report-jumps a:hover{background:var(--panel);}
+#report-actions,#report-insights,#report-evidence,#report-review{scroll-margin-top:90px;}
+.records-toolbar{display:flex;flex-wrap:wrap;align-items:end;gap:20px;padding:20px 0;border-bottom:1px solid var(--line);}
+.records-toolbar label{display:grid;gap:8px;font-size:13px;}.records-toolbar select{max-width:100%;min-height:44px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit;font-size:16px;}
+.records-toolbar p{max-width:440px;font-size:12px;color:var(--muted);line-height:1.8;}
+.record-card>div:first-child{min-width:0;flex:1;}.record-card .record-state{font-size:14px;color:var(--ink);line-height:1.8;}
+.record-actions{display:flex;flex-wrap:wrap;gap:10px;max-width:310px;justify-content:flex-end;}.record-actions button{margin:0;min-height:44px;}
+@media(max-width:700px){.record-card{align-items:stretch;flex-direction:column;gap:12px;}.record-actions{justify-content:flex-start;max-width:none;}.records-toolbar{display:grid;gap:10px;}.records-toolbar label{min-width:0;}.report-jumps a{flex:1 1 40%;justify-content:center;}}
+.records-head{flex-wrap:wrap;align-items:flex-start;}.records-head>div{flex:1 1 280px;min-width:0;}.records-head>.ghost-action{flex-shrink:0;min-height:44px;white-space:nowrap;}
