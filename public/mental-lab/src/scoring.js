@@ -175,8 +175,20 @@ export function scoreAssessment(assessment, answers = {}, context = {}) {
 // Keep modules and versions separate. There is deliberately no composite score.
 export function buildCompositeProfile(results) {
   const latest = new Map();
-  for (const result of results) if (isCurrentRecord(result) && !latest.has(result.id)) latest.set(result.id, result);
+  for (const result of chronologicalRecords(results)) if (isCurrentRecord(result) && !latest.has(result.id)) latest.set(result.id, result);
   return { modules: [...latest.values()], legacyCount: results.filter((result) => !isCurrentRecord(result)).length };
+}
+
+// A restored backup need not be in creation order. Never mutate its source array.
+export function chronologicalRecords(results) {
+  const time = record => Number.isFinite(Date.parse(record?.createdAt)) ? Date.parse(record.createdAt) : -Infinity;
+  return [...results].sort((a,b) => time(b) - time(a));
+}
+
+export function previousComparableRecord(current, records) {
+  const time = Date.parse(current?.createdAt);
+  if (!Number.isFinite(time)) return null;
+  return chronologicalRecords(records).find(record => Date.parse(record?.createdAt) < time && compareRecords(current, record).length) || null;
 }
 
 export function compareRecords(current, previous) {

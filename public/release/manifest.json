@@ -1,7 +1,7 @@
 {
   "format": "degendna-public-release-v1",
   "mode": "web",
-  "sourceRevision": "public-files:85809e550cf4452e1d9b77a09ed5f4edd6233c846ccb0d15312b870a295552e0",
+  "sourceRevision": "public-files:28618272c34055a6503cf2c2b1409e7b13922a39f4131e262b2712d9ffded01d",
   "interpretationVersion": "reflection-20261016-v2",
   "typeVersion": "types-20261016-v2",
   "stateVersion": "current-state-20260927",
@@ -138,13 +138,13 @@
     },
     {
       "path": "/mental-lab/src/account.js",
-      "bytes": 11504,
-      "sha256": "7bb7d9966752a8b2228cea7da0f7477bf761625ea95ab602f452f2225124a77a"
+      "bytes": 11638,
+      "sha256": "7f05bace40bd518552be9c2ad004b6720f1f4f67c9daf0b383b0ec9316fe7f94"
     },
     {
       "path": "/mental-lab/src/app.js",
-      "bytes": 49952,
-      "sha256": "6348702c883839d6f4c9792d73a8184805bd8134214bc2f6f4c9e09b02dd578b"
+      "bytes": 53579,
+      "sha256": "73b3df5bb78c7fd406141e673f736d22e15ff982a268ce02c43782f656353a32"
     },
     {
       "path": "/mental-lab/src/assessments.js",
@@ -208,8 +208,8 @@
     },
     {
       "path": "/mental-lab/src/scoring.js",
-      "bytes": 19181,
-      "sha256": "61aced806c9a7659377e4f47564120b0978f14135d9e9613647233d40937f9a8"
+      "bytes": 19806,
+      "sha256": "ff7564a75efd759a11c4c7d909c5cb833a8fa448a929236fdb1aa7dcf96b0af7"
     },
     {
       "path": "/mental-lab/src/storage.js",
@@ -218,8 +218,8 @@
     },
     {
       "path": "/mental-lab/src/styles.css",
-      "bytes": 43020,
-      "sha256": "af28c0c228827760c28a3e3abe840511a8de5ac0d3987b82830f9b8542b1120b"
+      "bytes": 44619,
+      "sha256": "aae13b06a6117f64cb015a7226f5a853f3973f23d3cc7eaa64fb252df46a909a"
     },
     {
       "path": "/mental-lab/src/trading-topics.js",
@@ -242,5 +242,5 @@
       "sha256": "fc3ec2766fddfbe26905acbd3a46e2bad7a8f8ac7ef5f30e3707b5abb750cf9a"
     }
   ],
-  "releaseId": "f0836f01c5d0e505d9a89dbce26ca40f283bc9c69b4bdc0e95b90ff2086fbdc6"
+  "releaseId": "84cd609b28d7152baaee30cdfdaf8a500d1f074d855fe3024d6d13c16d3cec18"
 }

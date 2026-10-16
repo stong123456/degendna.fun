@@ -1,5 +1,5 @@
 // Account transport is deliberately isolated: never reads or sends assessment/local-record data.
-export function accountView(el) {
+export function accountView(el, navigate) {
   const root=el('section',{class:'account-workspace'});
   let ready=null,user=null,stage='email',email='',code='',nickname='',avatar='sprout',consent=false,busy=false,message='正在检查账号服务…',error='',cooldownUntil=0,page=1,users=null,hasMore=false,deleting=false,deleteCode='',deleteConfirm='';
   const api=async(action,body)=>{
@@ -12,7 +12,7 @@ export function accountView(el) {
   const avatars=[{id:'sprout',label:'新芽',symbol:'🌱'},{id:'sun',label:'日光',symbol:'☀️'},{id:'moon',label:'月亮',symbol:'🌙'},{id:'gem',label:'晶石',symbol:'💎'}];
   const dateText=value=>{const d=new Date(value);return value&&Number.isFinite(d.getTime())?new Intl.DateTimeFormat('zh-CN',{dateStyle:'medium',timeStyle:'short'}).format(d):'暂无记录';};
   const readUser=async()=>{user=(await api('me')).user;nickname=user?.nickname||'';avatar=user?.avatar||'sprout';};
-  const go=(label,page)=>el('a',{class:'profile-link',href:'/?page='+page},label);
+  const go=(label,page)=>el('a',{class:'profile-link',href:'/?page='+page,onclick:e=>{if(navigate&&!e.metaKey&&!e.ctrlKey&&!e.shiftKey&&!e.altKey&&e.button===0){e.preventDefault();navigate(page);}}},label);
   const loadUsers=async()=>{const d=await api('users?page='+page);users=d.users;hasMore=d.hasMore;};
   function render(){
     root.replaceChildren(...[
