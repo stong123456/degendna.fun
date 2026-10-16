@@ -1,6 +1,7 @@
 import { createHash, randomBytes, createHmac } from 'node:crypto';
 
 const emailOf = v => typeof v === 'string' && v.trim().length<=254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? v.trim().toLowerCase() : null;
+const avatarKeys=new Set(['sprout','sun','moon','gem']);
 const codeOf = v => typeof v==='string' && /^\d{6}$/.test(v);
 const uuid = v => typeof v==='string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
 const roleOf = key => {try{return JSON.parse(Buffer.from(key.split('.')[1], 'base64url')).role;}catch{return null;}};
@@ -35,7 +36,7 @@ export function createAccountApi({config=accountConfig(),fetcher=fetch,now=Date.
     return data;
   }
   const verified=u=>u&&uuid(u.id)&&emailOf(u.email)&&u.email_confirmed_at&&(!u.banned_until||Date.parse(u.banned_until)<=now());
-  function publicUser(u){return {id:u.id,email:u.email,nickname:typeof u.user_metadata?.nickname==='string'?u.user_metadata.nickname.slice(0,40):'DegenDNA 用户',createdAt:u.created_at,lastSignInAt:u.last_sign_in_at,isAdmin:config.adminReady&&config.admins.has(u.id)};}
+  function publicUser(u){return {id:u.id,email:u.email,nickname:typeof u.user_metadata?.nickname==='string'?u.user_metadata.nickname.slice(0,40):'DegenDNA 用户',avatar:avatarKeys.has(u.user_metadata?.avatar)?u.user_metadata.avatar:'sprout',emailVerified:!!u.email_confirmed_at,createdAt:u.created_at,lastSignInAt:u.last_sign_in_at,isAdmin:config.adminReady&&config.admins.has(u.id)};}
   async function identity(req,res,required=true){
     let access=readCookie(req,'access'),u;
     if(access){try{u=await provider('/user',{token:access});}catch(e){if(e.status!==401)throw e;}}
@@ -56,7 +57,7 @@ export function createAccountApi({config=accountConfig(),fetcher=fetch,now=Date.
     const send=(status,data)=>{res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','vary':'Cookie'});res.end(JSON.stringify(data));};
     try{
       const action=path.slice('/api/account/'.length);
-      if(req.method==='GET'&&action==='status'){send(200,{ready:config.enabled&&config.ready,method:'email-link',privacy:'账号只保存邮箱、昵称与登录信息，不同步测评或日记。'});return true;}
+      if(req.method==='GET'&&action==='status'){send(200,{ready:config.enabled&&config.ready,method:'email-link',privacy:'账号只保存邮箱、昵称、预设头像与登录信息，不同步测评或日记。'});return true;}
       if(!config.enabled||!config.ready)throw new HttpError(503,'邮箱登录尚未接通。你仍可匿名使用全部自查与工具。');
       if(!['GET','POST'].includes(req.method))throw new HttpError(405,'不支持此请求方法。');
       if(req.method==='POST'){
@@ -116,8 +117,9 @@ export function createAccountApi({config=accountConfig(),fetcher=fetch,now=Date.
         await provider('/admin/users/'+id.user.id,{method:'DELETE',admin:true,body:{should_soft_delete:false}});clear(res);send(200,{ok:true});return true;
       }
       if(req.method==='POST'&&action==='profile'){
-        const body=await bodyOf(req);fields(body,['nickname']);const nickname=typeof body.nickname==='string'?body.nickname.trim():'';if(!nickname||nickname.length>40||/[\x00-\x1f]/.test(nickname))throw new HttpError(400,'昵称需要1至40个字符。');
-        const u=await provider('/user',{method:'PUT',token:id.access,body:{data:{nickname}}});send(200,{user:publicUser(u)});return true;
+        const body=await bodyOf(req);fields(body,['nickname','avatar']);const nickname=typeof body.nickname==='string'?body.nickname.trim():'';if(!nickname||nickname.length>40||/[\x00-\x1f]/.test(nickname))throw new HttpError(400,'昵称需要1至40个字符。');
+        if(body.avatar!==undefined&&!avatarKeys.has(body.avatar))throw new HttpError(400,'请选择列表中的头像。');
+        const u=await provider('/user',{method:'PUT',token:id.access,body:{data:{nickname,...(body.avatar!==undefined?{avatar:body.avatar}:{})}}});send(200,{user:publicUser(u)});return true;
       }
       if(action==='users'&&req.method==='GET'){
         if(!config.adminReady||!config.admins.has(id.user.id))throw new HttpError(403,'仅指定管理员可管理账号。');

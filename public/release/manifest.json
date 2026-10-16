@@ -1,7 +1,7 @@
 {
   "format": "degendna-public-release-v1",
   "mode": "web",
-  "sourceRevision": "public-files:4ef115f7967acd08190adaecc010e7a2e7ad77143d0ac78765495a64fca039c5",
+  "sourceRevision": "public-files:85809e550cf4452e1d9b77a09ed5f4edd6233c846ccb0d15312b870a295552e0",
   "interpretationVersion": "reflection-20261016-v2",
   "typeVersion": "types-20261016-v2",
   "stateVersion": "current-state-20260927",
@@ -138,8 +138,8 @@
     },
     {
       "path": "/mental-lab/src/account.js",
-      "bytes": 7744,
-      "sha256": "544769d1ef984f883195e5231f47c68a1701658398dcf192c2d8d5db200e2528"
+      "bytes": 11504,
+      "sha256": "7bb7d9966752a8b2228cea7da0f7477bf761625ea95ab602f452f2225124a77a"
     },
     {
       "path": "/mental-lab/src/app.js",
@@ -218,8 +218,8 @@
     },
     {
       "path": "/mental-lab/src/styles.css",
-      "bytes": 40452,
-      "sha256": "c2e9025b5eb72c941d5b91e0a7919645f57bead63bb698f2b4bedd3667d759d4"
+      "bytes": 43020,
+      "sha256": "af28c0c228827760c28a3e3abe840511a8de5ac0d3987b82830f9b8542b1120b"
     },
     {
       "path": "/mental-lab/src/trading-topics.js",
@@ -242,5 +242,5 @@
       "sha256": "fc3ec2766fddfbe26905acbd3a46e2bad7a8f8ac7ef5f30e3707b5abb750cf9a"
     }
   ],
-  "releaseId": "0dee604cad9b2063b04a8cd81ac7559d36233136b4c6c291fa876980aea9afec"
+  "releaseId": "f0836f01c5d0e505d9a89dbce26ca40f283bc9c69b4bdc0e95b90ff2086fbdc6"
 }

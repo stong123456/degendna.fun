@@ -62,3 +62,10 @@ test('fragment-session callback requires signed browser request, matching email,
  assert.equal((await f.request('callback',{cookie:cookies,body:{accessToken:'admin-token',refreshToken:'refresh-token'}})).status,401);
  const ok=await f.request('callback',{cookie:cookies,body:{accessToken:'user-token',refreshToken:'refresh-token'}});assert.equal(ok.status,200);assert.equal((await ok.json()).user.id,USER);assert.ok(ok.headers.getSetCookie().some(c=>c.startsWith('ddna-pending=;')&&c.includes('Max-Age=0')));
 });
+
+test('profile persists preset avatar, validates choices, and returns verified email without leaking metadata',async t=>{
+ const f=await fixture(t);const r=await f.request('profile',{cookie,body:{nickname:'新的资料',avatar:'moon'}});assert.equal(r.status,200);const user=(await r.json()).user;assert.equal(user.avatar,'moon');assert.equal(user.emailVerified,true);assert.equal((await(await f.request('me',{cookie})).json()).user.avatar,'moon');
+ assert.equal((await f.request('profile',{cookie,body:{nickname:'新的资料',avatar:'https://example.test/avatar.png'}})).status,400);
+ assert.equal((await f.request('profile',{cookie,body:{nickname:'新的资料',avatar:'sun',isAdmin:true}})).status,400);
+ assert.equal((await f.request('profile',{cookie,body:{nickname:'\u0000'}})).status,400);
+});
