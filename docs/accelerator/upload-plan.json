@@ -1,14 +1,14 @@
 {
   "format": "degendna-unsigned-upload-plan-v1",
   "chainId": 196,
-  "releaseId": "c4c08a93e48e767a1edb2610eff8b7938d82b8af8b77e5f662369130e2f5858c",
+  "releaseId": "a335bbd7f9f78df18a1409f92e79951e5025c05cf7c1130093907f836b5cfb71",
   "chunkBytes": 24000,
   "fallback": "index.html",
   "status": "ready-not-published",
   "transactionsSent": 0,
-  "totalBytes": 6453089,
-  "fileCount": 27,
-  "chunkWrites": 285,
+  "totalBytes": 738306,
+  "fileCount": 24,
+  "chunkWrites": 46,
   "fees": "Not estimated; user must review current chain-196 wallet estimates before signing",
   "files": [
     {
@@ -17,27 +17,6 @@
       "bytes": 735,
       "sha256": "3975ec0b47b6b8ba99786510a8be867bcb7636e32150c3b8e1ca39f62de62a45",
       "chunks": 1
-    },
-    {
-      "path": "mental-lab/assets/garden.png",
-      "contentType": "image/png",
-      "bytes": 1678844,
-      "sha256": "57d10eab5901582b60a0e6e96e3b121234858d2384676874fde797fa1075bb3d",
-      "chunks": 70
-    },
-    {
-      "path": "mental-lab/assets/night.png",
-      "contentType": "image/png",
-      "bytes": 2241352,
-      "sha256": "7030502e557be5c9b54965a931fa26641bfd7deb2d40361f18af540d50d370c3",
-      "chunks": 94
-    },
-    {
-      "path": "mental-lab/assets/prism.png",
-      "contentType": "image/png",
-      "bytes": 1794518,
-      "sha256": "a814077ec97aee015cd6284e8eabaf3743addd71f34b6962e80bc90beb9f843a",
-      "chunks": 75
     },
     {
       "path": "mental-lab/src/account.js",
@@ -49,8 +28,8 @@
     {
       "path": "mental-lab/src/app.js",
       "contentType": "text/javascript; charset=utf-8",
-      "bytes": 49952,
-      "sha256": "6348702c883839d6f4c9792d73a8184805bd8134214bc2f6f4c9e09b02dd578b",
+      "bytes": 49897,
+      "sha256": "0870b89ce33ba1d3754ab4c41dcaf63440be4b5a1e4dbfeae737b0bd8b95e64b",
       "chunks": 3
     },
     {
@@ -154,8 +133,8 @@
     {
       "path": "mental-lab/src/styles.css",
       "contentType": "text/css; charset=utf-8",
-      "bytes": 43020,
-      "sha256": "af28c0c228827760c28a3e3abe840511a8de5ac0d3987b82830f9b8542b1120b",
+      "bytes": 43505,
+      "sha256": "3ab4a7156953103a95190fcb3e7e64293c86703447617091eb2629136e6e25c6",
       "chunks": 2
     },
     {
@@ -190,14 +169,14 @@
       "path": "release/deployment.json",
       "contentType": "application/json",
       "bytes": 206,
-      "sha256": "0c6dde5693c0c90cee293b104a04837b0bcd1433709b76da3e95ce59195dc61a",
+      "sha256": "25f124358fa0c6d6ceaa210ef105599c71f6dd996478b1f679fbd3e96b84080b",
       "chunks": 1
     },
     {
       "path": "release/manifest.json",
       "contentType": "application/json",
-      "bytes": 7127,
-      "sha256": "3728cbb7da124c40f8836ffe70a64b16f1ff5a45f95f00fce6496a2bfea2c253",
+      "bytes": 6628,
+      "sha256": "190a2664ecdce083f78228bc6b6596b87ca5d14d7b9776f6c693920e98a5109e",
       "chunks": 1
     }
   ]
