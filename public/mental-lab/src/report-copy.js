@@ -22,7 +22,7 @@ export function humanizeReport(result) {
     else interpretation = '你在这一部分选的都是“从不”或“很少”。这些事情最近可能不太打扰你。如果还有题目没问到的难处，你的感受依然值得被听见。';
     const example = domain.interpretable && domain.evidence.find(item => item.value >= 3);
     if (example) interpretation = `比如“${example.text}”，你选了“${example.response}”。${interpretation}`;
-    return { ...domain, label: labels[domain.key] || domain.label, interpretation, reflection: resource ? '这里面，哪一件事曾让你稍微轻松一点？' : '如果只想聊一件事，你现在最想让别人理解什么？' };
+    return { ...domain, label: ["fomo","loss","marketbound","execution"].includes(result.id) ? domain.label : labels[domain.key] || domain.label, interpretation, reflection: resource ? '这里面，哪一件事曾让你稍微轻松一点？' : '如果只想聊一件事，你现在最想让别人理解什么？' };
   });
   const frequent = domains.filter(d => d.interpretable && d.kind === 'burden' && d.frequent);
   const understood = domains.some(d => d.interpretable && d.kind === 'burden');

@@ -1,9 +1,16 @@
+import { localStore } from "./storage.js";
 import { assessments, assessmentMap, responseScale, contextQuestions } from "./assessments.js";
 import { buildCompositeProfile, scoreAssessment, isCurrentRecord, compareRecords, sources } from "./scoring.js";
 import { humanizeReport } from "./report-copy.js";
 import { recentType } from "./recent-type.js";
 import { careTools } from "./care-tools.js";
 import { currentState } from "./current-state.js";
+import { tradingTopics, topicJourneys } from './trading-topics.js';
+import { resetView, resetTools, clearResetMemory } from './reset.js';
+import { playView, clearPlayMemory } from './play.js';
+import { privacyView, writeDraft, readDraft, DRAFT_KEY, downloadFile, validateBackup, REPORT_KEY } from './privacy.js';
+import { clearCareMemory } from './care-tools.js';
+const routes = ['home','about','library','trading','care','scenes','play','reset','privacy','records','safety','method'];
 
 const storageKey = "degendna-mental-lab-records";
 const themeKey = "degendna-mental-lab-theme";
@@ -16,13 +23,14 @@ const themes = [
 ];
 
 function readPreference(key) {
-  try { return localStorage.getItem(key); } catch { return null; }
+  try { return localStore.getItem(key); } catch { return null; }
 }
 const initialTheme = new URLSearchParams(location.search).get("theme") || readPreference(themeKey);
 
 const state = {
-  route: ['about','library','trading','care','scenes'].includes(new URLSearchParams(location.search).get('page')) ? new URLSearchParams(location.search).get('page') : "home",
-  activeAssessmentId: "trading",
+  route: routes.includes(new URLSearchParams(location.search).get('page')) ? new URLSearchParams(location.search).get('page') : "home",
+  activeAssessmentId: "fomo",
+  resetTool: new URLSearchParams(location.search).get("tool") || "pause",
   answers: {},
   context: {},
   lastResult: null,
@@ -34,6 +42,8 @@ const state = {
 
 const navItems = [
   ["home", "首页", "house"],
+  ["play", "Play 趣味风格", "sparkles"],
+  ["reset", "Reset 缓冲工具", "leaf"],
   ["library", "自测库", "layout-grid"],
   ["scenes", "生活场景", "compass"],
   ["trading", "交易心理", "chart-no-axes-combined"],
@@ -41,6 +51,7 @@ const navItems = [
   ["xiaojing", "小镜 AI", "messages-square"],
   ["records", "本地记录", "book-open"],
   ["safety", "安全支持", "heart-handshake"],
+  ["privacy", "隐私与备份", "lock-keyhole"],
   ["method", "方法说明", "shield-check"],
   ["about", "关于", "heart"]
 ];
@@ -64,10 +75,18 @@ function el(tag, attrs = {}, children = []) {
   return node;
 }
 
+function getRawRecords() {
+  try {const rows=JSON.parse(localStore.getItem(storageKey)||'[]');return Array.isArray(rows)?rows.slice(0,100):[];}
+  catch {return [];}
+}
+
 function getRecords() {
   try {
-    const records = JSON.parse(localStorage.getItem(storageKey) || "[]");
-    return Array.isArray(records) ? records.filter((record) => record && typeof record === "object" && typeof record.title === "string") : [];
+    const records = getRawRecords();
+    return Array.isArray(records) ? records.slice(0,100).filter(record=>record&&typeof record.title==='string').map(record=>{
+      try {return validateBackup({format:'degendna-private-backup',version:1,values:{[REPORT_KEY]:[record]}})[REPORT_KEY][0];}
+      catch {return {id:typeof record.id==='string'?record.id:'unknown',title:record.title,createdAt:typeof record.createdAt==='string'?record.createdAt:'',legacy:true};}
+    }) : [];
   } catch {
     return [];
   }
@@ -75,10 +94,10 @@ function getRecords() {
 
 function saveRecord(result) {
   if (!isCurrentRecord(result)) return false;
-  const records = getRecords();
+  const records = getRawRecords();
   records.unshift(result);
   try {
-    localStorage.setItem(storageKey, JSON.stringify(records.slice(0, 100)));
+    localStore.setItem(storageKey, JSON.stringify(records.slice(0, 100)));
     return true;
   } catch {
     state.storageError = "浏览器未能保存记录。本次报告仍可查看，但关闭页面后可能丢失。";
@@ -90,14 +109,16 @@ function setRoute(route) {
   if (route === 'xiaojing') { location.href = `/xiaojing/?theme=${state.theme}`; return; }
   state.route = route;
   const url = new URL(location.href);
-  if (['about','care','library','trading','scenes'].includes(route)) url.searchParams.set("page", route);
+  if (routes.includes(route) && route !== 'home') url.searchParams.set("page", route);
   else url.searchParams.delete("page");
   history.replaceState(null, "", url);
   state.lastResult = null;
   render();
+  window.scrollTo(0, 0);
 }
 
 function selectAssessment(id, route = "home") {
+  if (Object.keys(state.answers).length && !state.lastResult && !confirm('开始另一套自查会清空当前内存中的回答。已主动保存的草稿仍会保留。继续吗？')) return;
   state.activeAssessmentId = id;
   state.saveLocal = false;
   state.answers = {};
@@ -119,14 +140,14 @@ function shell(content) {
     sideIntro(),
     el("main", { class: "workspace", id: "main-content" }, [
       el("header", { class: "workspace-toolbar" }, [
-        el("span", { class: "breadcrumb" }, "MENTAL LAB / 个人觉察空间"), compactThemeSwitch()
+        el("span", { class: "breadcrumb" }, state.route === "play" ? "PLAY / 趣味探索" : state.route === "reset" ? "RESET / 给自己一点缓冲" : "MENTAL LAB / 个人觉察空间"), compactThemeSwitch()
       ]), ...content,
       el("footer", { class: "workspace-footer" }, [
         el("span", {}, "你不是账户余额，也不是一次交易结果。"),
         el("button", { onclick: () => setRoute("method") }, "原创自测 · 非诊断")
       ])
     ]),
-    state.route === "safety" ? null : statusRail()
+    ["safety","play"].includes(state.route) ? null : statusRail()
   ]);
 }
 
@@ -221,7 +242,7 @@ function statusRail() {
 function setTheme(theme) {
   if (!themes.some((item) => item.id === theme)) return;
   state.theme = theme;
-  try { localStorage.setItem(themeKey, theme); } catch { /* Theme works without storage. */ }
+  try { localStore.setItem(themeKey, theme); } catch { /* Theme works without storage. */ }
   const url = new URL(location.href);
   url.searchParams.set("theme", theme);
   history.replaceState(null, "", url);
@@ -234,7 +255,7 @@ function setTheme(theme) {
 
 function homeView() {
   const active = getActiveAssessment();
-  const modules = ["trading", "stress", "mood", "sleep"].map((id) => assessmentMap[id]);
+  const modules = ["fomo", "loss", "marketbound", "execution"].map((id) => assessmentMap[id]);
   return shell([
     el("section", { class: "workspace-head" }, [
       el("div", {}, [
@@ -244,6 +265,13 @@ function homeView() {
       ]),
       el("span", { class: "section-count" }, "01 / EXPLORE")
     ]),
+    el('section', {class:'product-lines', 'aria-label':'选择产品入口'}, [
+      ['play','PLAY','认识我的交易风格','8 个想象情境 · 娱乐结果可预览后下载'],
+      ['library','MENTAL LAB','看看最近的自己','私密原创自查 · 不公开 · 不绑定钱包'],
+      ['reset','RESET','给自己一点缓冲','记录、暂停、温和复盘 · 不计算健康总分']
+    ].map(([route,name,title,copy])=>el('button',{class:'product-line',onclick:()=>setRoute(route)},[el('small',{},name),el('h3',{},title),el('p',{},copy)]))),
+    draftBanner(),
+    el('section',{class:'care-card'},[el('h3',{},'从最近的一件事开始'),el('div',{class:'journey-grid'},topicJourneys.map(j=>el('button',{class:'secondary',onclick:()=>selectAssessment(j.id,'assessment')},j.label)))]),
     el("section", { class: "module-showcase" }, modules.map((module) => moduleTile(module, module.id === active.id))),
     previewQuestion(active)
   ]);
@@ -338,7 +366,7 @@ function previewOption(option, item) {
 }
 
 function libraryView(filter = null) {
-  const list = filter === 'scenes' ? assessments.filter(item => item.category === '生活场景') : filter ? assessments.filter((item) => item.id === filter) : assessments;
+  const list = filter === 'scenes' ? assessments.filter(item => item.category === '生活场景') : filter ? assessments.filter((item) => item.id === filter || filter === 'trading' && item.category === '交易专题') : assessments;
   return shell([
     el("section", { class: "workspace-head" }, [
       el("div", {}, [
@@ -370,10 +398,17 @@ function assessmentView() {
       assessment.introduction ? el('p', {class:'note-band'}, assessment.introduction) : null,
       safetyQuestion(),
       el("div", { class: "progress-line" }, el("span", { style: `width:${progress}%` })),
-      el("div", { class: "questions" }, assessment.category === '生活场景' ? assessment.domains.flatMap((domain, groupIndex) => [
+      el("div", { class: "questions" }, ['生活场景','交易专题'].includes(assessment.category) ? assessment.domains.flatMap((domain, groupIndex) => [
         el('header', {class:'question-group'}, [el('h3', {}, `${groupIndex + 1} / ${assessment.domains.length} · ${domain.label}`), el('p', {}, domain.meaning)]),
-        ...domain.items.map((item, index) => questionCard(item, groupIndex * 4 + index))
+        ...domain.items.map((item, index) => questionCard(item, assessment.domains.slice(0,groupIndex).reduce((sum,d)=>sum+d.items.length,0) + index))
       ]) : assessment.items.map((item, index) => questionCard(item, index))),
+      el('div',{class:'care-options'},[
+        el('button',{class:'secondary',onclick:()=>{
+          try { writeDraft(assessment.id,state.answers,state.context,localStore);state.storageError='草稿已主动保存在本机（未加密）。安全支持问题的回答不会保存。'; } catch {state.storageError='草稿未能保存，请检查浏览器存储权限。';}render();
+        }},'保存草稿，稍后继续'),
+        el('button',{class:'secondary',onclick:()=>{try{localStore.removeItem(DRAFT_KEY);state.storageError='已删除本机续答草稿，当前页面回答仍保留。';}catch{state.storageError='删除失败，请检查浏览器存储权限。';}render();}},'删除续答草稿')
+      ]),
+      state.storageError ? el('p',{role:'status'},state.storageError) : null,
       contextPanel(),
       el("div", { class: "submit-panel" }, [
         el("label", { class: "local-toggle" }, [
@@ -426,7 +461,7 @@ function safetyQuestion() {
       el("input", { type: "radio", name: "safety", value, checked: state.context.safety === value, onchange: () => {
         state.context.safety = value;
         state.lastResult = null;
-        if (value === "yes") { state.route = "safety"; state.answers = {}; }
+        if (value === "yes") { state.route = "safety"; state.answers = {}; try {localStore.removeItem(DRAFT_KEY);}catch{} }
         render();
         if (value === "yes") window.scrollTo(0, 0);
       } }), label
@@ -453,6 +488,7 @@ function completeAssessment(assessment) {
   const result = scoreAssessment(assessment, state.answers, state.context);
   if (result.safetyTriggered) { state.route = "safety"; state.lastResult = null; render(); return; }
   state.lastResult = result;
+  try { const draft=readDraft(localStore);if(draft?.id===assessment.id)localStore.removeItem(DRAFT_KEY); }catch{}
   state.storageError = "";
   state.savedThisRun = state.saveLocal ? saveRecord(result) : false;
   render();
@@ -482,14 +518,22 @@ function resultPanel(result) {
     state.storageError ? el("p", { role: "alert" }, state.storageError) : null,
     reportSection("先看看，你现在需要什么支持", [el("h3", {}, result.support.title), el("p", {}, result.support.text), el("button", { class: "secondary", onclick: () => setRoute("safety") }, "我现在需要即时支持")]),
     ...result.notices.map((notice) => reportSection(notice.title, [el("p", {}, notice.text), evidenceList(notice.evidence)])),
+    reportSection('现在，可以直接打开一个小工具', [
+      el('p',{},'先选一个用得上的动作。工具不会自动接收你的自查答案；不想做也可以。'),
+      el('div',{class:'care-options'},recommendedTools(result).map(t=>el('button',{class:'secondary',onclick:()=>{state.resetTool=t.id;setRoute('reset');}},t.title)))
+    ]),
     recentTypePanel(result),
     ...result.warnings.map((text) => el("p", { class: "note-band" }, text)),
     reportSection("01 / 从你愿意分享的事情说起", [el("p", {}, "下面既有让你费心的事，也有可能帮到你的事。回答还少的地方，我们先不猜。你可以只看现在最关心的一部分。"), ...result.domains.map(domainPanel)]),
     reportSection("02 / 这些感受，怎样影响了你的生活", [el("dl", { class: "context-results" }, result.context.flatMap((entry) => [el("dt", {}, entry.question), el("dd", {}, entry.label)])), el("p", {}, "即使刚刚开始，只要已经让你难受，也值得找人聊聊。")]),
     reportSection("03 / 有些事情，可以放在一起看看", result.patterns.length ? result.patterns.map((pattern) => el("article", {}, [el("h3", {}, pattern.title), el("p", {}, pattern.text), el("small", {}, `依据：${pattern.evidence.join("；")}。它们在同一段时间出现，不代表一件事造成了另一件事。`)])) : [el("p", {}, "现在还看不出这些感受之间有什么联系。没关系，我们不需要替每一种感受都找出原因。")]),
 
-    reportSection("05 / 以后想回头看看时", [el("p", {}, "你可以过一周再回头看看，也可以等自己想聊的时候再来。不用反复做题追求一个更好的结果。前后回答变了，可能和那几天的生活有关，不能只凭数字判断自己好转或变糟。"), comparison.length ? el("ul", {}, comparison.map((entry) => el("li", {}, `${entry.label}：较常出现的条目 ${entry.previous}/${entry.total} → ${entry.current}/${entry.total}（${entry.kind === "resource" ? "资源" : "困扰"}）。`))) : el("p", {}, "现在还没有合适的旧记录可以一起看。不急，这次就从了解当下开始。")]),
+    reportSection("04 / 以后想回头看看时", [el("p", {}, "你可以在适合本套观察期的时间再回头看看，也可以等自己想聊的时候再来。不用反复做题追求一个更好的结果。前后回答变了，可能和那几天的生活有关，不能只凭数字判断自己好转或变糟。"), comparison.length ? el("ul", {}, comparison.map((entry) => el("li", {}, `${entry.label}：较常出现的条目 ${entry.previous}/${entry.total} → ${entry.current}/${entry.total}（${entry.kind === "resource" ? "资源" : "困扰"}）。`))) : el("p", {}, "现在还没有合适的旧记录可以一起看。不急，这次就从了解当下开始。")]),
     el("details", { class: "report-section report-method" }, [el("summary", {}, "想了解这份结果是怎么来的？"),el("ul", {}, result.limitations.map((text) => el("li", {}, text))), el("p", {}, "以下资料支持内容审阅原则和求助边界，不代表这些机构认可或验证了本产品。"), el("ul", {}, sources.map((source) => el("li", {}, el("a", { href: source.url, target: "_blank", rel: "noopener noreferrer" }, source.title))))]),
+    el('div',{class:'care-options'},[
+      el('button',{class:'secondary',onclick:()=>downloadFile(`degendna-${result.id}-private.txt`, privateReportText(result),'text/plain;charset=utf-8')},'导出私密文字报告'),
+      !state.savedThisRun ? el('button',{class:'secondary',onclick:()=>{if(!confirm('将报告和回答依据保存在当前浏览器？本地没有加密，共用设备请谨慎。'))return;state.savedThisRun=saveRecord(result);render();}},'将这份报告保存到本机') : null
+    ]),
     el("button", { class: "secondary", onclick: () => setRoute(state.savedThisRun ? "records" : "library") }, state.savedThisRun ? "已保存，查看本地记录" : "返回自测库")
   ]);
 }
@@ -543,9 +587,9 @@ function recordsView() {
     el("section", { class: "workspace-head" }, [
       el("div", {}, [
         el("h2", {}, "本地复测记录"),
-        el("p", {}, "记录含回答依据，只在当前浏览器。不是加密保险箱，共用设备请谨慎；不会与钱包绑定。")
+        el("p", {}, "记录含回答依据，只在当前浏览器。不是加密保险箱，共用设备请谨慎；不会与钱包绑定。"), el("button",{class:"secondary",onclick:()=>setRoute("privacy")},"隐私、备份与全部清除")
       ]),
-      records.length ? el("button", { class: "ghost-action", onclick: () => { if (confirm("清除这个浏览器中的全部自测记录？此操作无法撤销。")) { try { localStorage.removeItem(storageKey); state.lastResult = null; render(); } catch { alert("未能清除，请检查浏览器存储权限。"); } } } }, "清除记录") : null
+      records.length ? el("button", { class: "ghost-action", onclick: () => { if (confirm("清除这个浏览器中的全部自测记录？此操作无法撤销。")) { try { localStore.removeItem(storageKey); state.lastResult = null; render(); } catch { alert("未能清除，请检查浏览器存储权限。"); } } } }, "清除记录") : null
     ]),
     el("p", { class: "note-band" }, `已保存 ${profile.modules.length} 类新版自查。不计算跨模块健康总分。${profile.legacyCount ? `另有 ${profile.legacyCount} 条旧版记录，保留原始存储，不沿用其分级，也不混入新版比较。` : ""}`),
     records.length
@@ -562,6 +606,7 @@ function recordCard(record) {
       el("p", {}, new Date(record.createdAt).toLocaleString("zh-CN")),
       el("small", {}, isCurrentRecord(record) ? `${record.answered}/${record.totalItems} 项有效回答 · ${record.version}` : "旧版记录：解释模型已更换，不继续展示原分级")
     ]),
+    el('button',{class:'secondary',onclick:()=>{if(!confirm('删除这份自查报告？此操作无法撤销。'))return;try{const records=getRawRecords();const target=records.findIndex(r=>r?.createdAt===record.createdAt&&r?.id===record.id);if(target>=0)records.splice(target,1);localStore.setItem(storageKey,JSON.stringify(records));state.lastResult=null;render();}catch{alert('删除失败，请检查浏览器存储权限。');}}},'删除这份'),
     isCurrentRecord(record) ? el("button", { class: "secondary", onclick: () => { state.lastResult = record; state.savedThisRun = true; render(); document.querySelector("#result")?.scrollIntoView({ block: "start" }); } }, "查看报告") : null
   ]);
 }
@@ -665,6 +710,25 @@ function infoBlock(title, copy) {
   ]);
 }
 
+function draftBanner() {
+  const d=readDraft(localStore);
+  if(!d)return null;
+  return el('section',{class:'note-band'},[
+    el('p',{},`本机有一份你主动保存的草稿：${assessmentMap[d.id].title} · ${new Date(d.at).toLocaleString('zh-CN')}`),
+    el('button',{class:'secondary',onclick:()=>{state.activeAssessmentId=d.id;state.answers=d.answers;state.context=d.context;state.lastResult=null;state.saveLocal=false;state.savedThisRun=false;state.route='assessment';render();}},'继续这份草稿')
+  ]);
+}
+function recommendedTools(result) {
+  const primary=assessmentMap[result.id]?.tool || topicJourneys.find(j=>j.id===result.id)?.tool || (result.id==='sleep'?'sleep':'daily');
+  return [...new Set([primary,'daily'])].map(id=>resetTools.find(t=>t.id===id)).filter(Boolean);
+}
+function privateReportText(result) {
+  return ['DegenDNA 私密自查报告',result.title,`观察期：${result.scope}`,`生成于：${result.createdAt}`,`题库版本：${result.version}`,
+    '仅依据本次自报回答，原创工具，尚未经临床验证，不是诊断。请保管文件，不建议公开分享。',result.summary,
+    ...result.domains.flatMap(d=>[d.label,d.interpretation,...d.evidence.map(e=>`${e.text}：${e.response}`),`可尝试：${d.action}`,`边界：${d.limit}`]),
+    ...result.context.map(e=>`${e.question}：${e.label}`),...result.notices.map(n=>`${n.title}：${n.text}`),result.support.text,...result.limitations].join('\n\n');
+}
+
 function render() {
   const focus = document.activeElement;
   const focusName = focus?.getAttribute("name");
@@ -676,6 +740,9 @@ function render() {
 }
 
 function routeView() {
+  if (state.route === 'play') return shell([playView(el)]);
+  if (state.route === 'reset') return shell([resetView(el,state.resetTool,()=>setRoute('safety'))]);
+  if (state.route === 'privacy') return shell([privacyView(el,()=>{state.answers={};state.context={};state.lastResult=null;state.savedThisRun=false;clearCareMemory();clearResetMemory();clearPlayMemory();})]);
   if (state.route === 'scenes') return libraryView('scenes');
   if (state.route === 'care') return shell([careTools(el, () => setRoute('safety'), () => setRoute('xiaojing'))]);
   if (state.route === "library") return libraryView();

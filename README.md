@@ -1,10 +1,14 @@
 # 链上照妖镜 / Onchain Mirror
 
-当前首页为 **DegenDNA Mental Lab**：14 套成人原创自查，共 305 题；其中新增六套生活场景各 24 题、6 个内容组，支持六侧面解释和有回答依据的单特点 / 双特点类型。另有独立安全支持入口、本地心情记录、四个轻量练习，以及统一三种外观的小镜 AI。
+当前首页提供 **DegenDNA Play / Mental Lab / Reset** 三条产品入口。Mental Lab 共 18 套成人原创自查、353 道观察题；新增 FOMO、亏损反应、看盘边界、决策执行四套交易专题。Play 为独立的 8 题娱乐小游戏，Reset 提供 7 个本机记录工具及最近 7 天回看。
 
-题库与类型属于自我观察的试行设计，尚未经临床或信效度验证。完整题目、观察目的、适用边界和类型代码见 [题库内容审阅](docs/scene-question-bank-20260926.md)。
+自查默认不保存，草稿与报告需要主动保存。隐私中心可下载 AES-GCM 加密备份、校验恢复和清除四类本机私密数据。娱乐分享卡与心理自查隔离，不自动向 AI 提交答案。
 
-验证：`node --test --test-isolation=none tests/*.test.mjs`；构建小镜：`npm run build:xiaojing`。浏览器测试夹具位于 `tests/browser-release.html`，仅复制到本地服务器测试，不随公开站点部署。
+这不是诊断工具，原创题库与类型尚未经临床或信效度验证。专业审阅、用户访谈和试测状态见 [实施与验收](docs/product-lines/IMPLEMENTATION.md)，完整产品约定见 [产品规范](docs/product-lines/PRODUCT.md)，新增原题见 [内容审阅](docs/product-lines/QUESTION_BANK.md)。历史题库审阅仍保留在 `docs/scene-question-bank-20260926.md`。
+
+运行：`npm run dev`，访问 `http://127.0.0.1:8787/`。Node 20+，核心自查无需额外依赖。
+
+验证：`npm test`、`npm run audit:product`；构建小镜：`npm run build:xiaojing`。浏览器验收步骤见 `docs/product-lines/AUDIT.md`。源码级审计不等于真人体验研究或渗透测试。
 
 以下是保留的链上报告与服务端功能说明。
 

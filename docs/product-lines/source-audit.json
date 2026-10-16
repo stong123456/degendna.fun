@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-16T05:02:34.335Z",
+  "scope": "Source-level product checks only; not clinical validation or a production penetration test.",
+  "findings": [
+    {
+      "name": "18 original self-checks and 353 observation items",
+      "status": "PASS"
+    },
+    {
+      "name": "new topics have an explicit version, purpose, direction and next step for every item",
+      "status": "PASS"
+    },
+    {
+      "name": "all eight user journeys resolve to existing tools",
+      "status": "PASS"
+    },
+    {
+      "name": "storage.js: no outbound answer transport",
+      "status": "PASS"
+    },
+    {
+      "name": "app.js: no outbound answer transport",
+      "status": "PASS"
+    },
+    {
+      "name": "play.js: no outbound answer transport",
+      "status": "PASS"
+    },
+    {
+      "name": "reset.js: no outbound answer transport",
+      "status": "PASS"
+    },
+    {
+      "name": "privacy.js: no outbound answer transport",
+      "status": "PASS"
+    },
+    {
+      "name": "care-tools.js: no outbound answer transport",
+      "status": "PASS"
+    },
+    {
+      "name": "scoring.js: no outbound answer transport",
+      "status": "PASS"
+    },
+    {
+      "name": "assessments.js: no outbound answer transport",
+      "status": "PASS"
+    },
+    {
+      "name": "trading-topics.js: no outbound answer transport",
+      "status": "PASS"
+    },
+    {
+      "name": "entrypoint has no third-party scripts or analytics",
+      "status": "PASS"
+    }
+  ]
+}

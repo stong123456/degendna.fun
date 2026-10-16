@@ -1,3 +1,4 @@
+import { tradingTopics } from "./trading-topics.js";
 import { sceneAssessments } from "./scene-assessments.js";
 export const reportVersion = "2.0-content-review";
 export const responseScale = [
@@ -148,6 +149,7 @@ export const assessments = [
         ["sp6", "遇到困难时，我觉得只能独自承担。"], ["sp12", "我觉得自己的处境没有被理解。"], ["sp14", "孤独的感受让我难以投入日常活动。"]
       ])
     ]),
+  ...tradingTopics,
   ...sceneAssessments,
   { id: "safety", title: "安全支持", enTitle: "Support, Not a Score", accent: "red", scope: "此刻", minutes: 1,
     subtitle: "无需答题，也不评分。直接查看陪伴与求助方式。", version: reportVersion, safetyOnly: true, items: [], domains: [] }

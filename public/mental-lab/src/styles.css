@@ -457,3 +457,18 @@ details > summary:focus-visible { outline: 2px solid var(--purple); outline-offs
 .theme-night .icon-rail nav {margin:0;gap:4px;overflow-x:auto;min-width:0;}
 .theme-night .rail-button {flex-shrink:0;}
 @media(max-width:760px){.icon-rail nav{overflow-x:auto;max-width:100%;}.facet-grid{grid-template-columns:1fr;}}
+
+/* Product lines, Reset and privacy — reuse the existing three theme tokens. */
+.product-lines{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 24px}
+.product-line{padding:20px;text-align:left;border:1px solid currentColor;border-radius:18px;background:transparent;color:inherit;cursor:pointer}
+.product-line small{letter-spacing:.12em}.product-line h3{font-size:19px;margin:12px 0}.product-line p{font-size:13px;line-height:1.7;margin:0}
+.journey-grid{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.journey-grid button[aria-pressed=true]{outline:2px solid currentColor;outline-offset:2px}
+.reset-field{display:flex;flex-direction:column;gap:8px;margin:18px 0;line-height:1.7}
+.reset-field textarea,.care-card input[type=password],.care-card input[type=file]{width:100%;max-width:100%;padding:12px;border:1px solid #78968b80;border-radius:10px;background:transparent;color:inherit;font:inherit;box-sizing:border-box}
+.reset-field textarea{resize:vertical;min-height:80px}.care-card form,.care-card label{line-height:1.8}.care-card button{margin:10px 10px 0 0}
+.reset-entry{padding:16px 0;border-bottom:1px solid #78968b40}.reset-entry p{white-space:pre-wrap;overflow-wrap:anywhere}
+.play-options{display:grid;gap:12px;margin-top:16px}.play-options label{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid #78968b50;border-radius:10px;cursor:pointer}
+.share-preview{padding:28px;border:1px solid #78968b80;border-radius:18px;line-height:1.8}.care-card{overflow-wrap:anywhere}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid #62897b;outline-offset:3px}
+@media(max-width:850px){.product-lines{grid-template-columns:1fr}.product-line{padding:16px}.journey-grid .secondary{max-width:100%;white-space:normal}.reset-field textarea{font-size:16px}.care-card input{font-size:16px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}

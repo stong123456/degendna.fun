@@ -1,3 +1,4 @@
+import { localStore } from "./storage.js";
 export const MOOD_KEY = 'degendna-mood-journal-v1';
 const moods = ['轻松', '平静', '说不清', '疲惫', '烦躁', '低落'];
 export const practices = [
@@ -8,13 +9,14 @@ export const practices = [
 ];
 const validMood = r => r?.version === 1 && typeof r.id === 'string' && moods.includes(r.mood) && typeof r.note === 'string' && r.note.length <= 500 && Number.isFinite(Date.parse(r.at));
 export function readMoodRecords(storage) {
-  try { const rows = JSON.parse((storage || localStorage).getItem(MOOD_KEY) || '[]'); return Array.isArray(rows) ? rows.filter(validMood).slice(0,100) : []; } catch { return []; }
+  try { const rows = JSON.parse((storage || localStore).getItem(MOOD_KEY) || '[]'); return Array.isArray(rows) ? rows.filter(validMood).slice(0,100) : []; } catch { return []; }
 }
-export function saveMoodRecord(record, storage = localStorage) {
+export function saveMoodRecord(record, storage = localStore) {
   if (!validMood(record)) throw new Error('Invalid mood record');
   storage.setItem(MOOD_KEY, JSON.stringify([record, ...readMoodRecords(storage)].slice(0,100)));
 }
 let mood = '', note = '', consent = false, feedback = '', selected = -1, step = 0;
+export function clearCareMemory(){mood='';note='';consent=false;feedback='';selected=-1;step=0;}
 export function careTools(el, onSafety, onChat) {
   consent = false;
   const root = el('section', { class: 'care-tools' });
@@ -36,7 +38,7 @@ export function careTools(el, onSafety, onChat) {
       ]),
       el('section', { class:'care-card' }, [el('h3', {}, '留在本机的小记录'), el('p', {}, '只按时间回看，不计算情绪健康分数。最多保留最近 100 条。'), ...readMoodRecords().map(row => el('article', {class:'mood-entry'}, [
         el('strong', {}, row.mood), el('time', {}, new Date(row.at).toLocaleString('zh-CN')), el('p', {}, row.note),
-        el('button', {class:'secondary',onclick:() => { if (!confirm('删除这条心情记录？删除后无法恢复。')) return; try { localStorage.setItem(MOOD_KEY,JSON.stringify(readMoodRecords().filter(r=>r.id!==row.id))); feedback='已删除这条记录。'; } catch { feedback='未能删除，请检查浏览器存储权限。'; } render(); }}, '删除这条')
+        el('button', {class:'secondary',onclick:() => { if (!confirm('删除这条心情记录？删除后无法恢复。')) return; try { localStore.setItem(MOOD_KEY,JSON.stringify(readMoodRecords().filter(r=>r.id!==row.id))); feedback='已删除这条记录。'; } catch { feedback='未能删除，请检查浏览器存储权限。'; } render(); }}, '删除这条')
       ])), !readMoodRecords().length ? el('p', {}, '还没有保存的记录。只是来看看，也很好。') : null]),
       el('section', {class:'care-card'}, [el('h3', {}, '照顾自己的一小步'), el('div', {class:'care-practice-grid'}, practices.map((p,i)=>el('button',{class:'secondary',onclick:()=>{selected=i;step=0;render();}},p.title))),
         selected >= 0 ? el('article',{class:'practice-active','aria-live':'polite'},[
