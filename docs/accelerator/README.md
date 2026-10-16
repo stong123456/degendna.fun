@@ -12,8 +12,8 @@
 | 个人资料 | 昵称、四款预设头像、验证状态、账号时间、导出与注销；本机验收通过 |
 | 用户管理 | 服务端 UUID 白名单；已确认维护者邮箱验证完成，白名单仅存部署密钥 |
 | 邮件容量 | 当前Supabase限额30封/小时；仍需与Resend实际套餐额度匹配 |
-| 隔离验证 | 137项自动测试，22项产品审计；三主题×桌面/手机交互通过 |
-| 正式部署 | 准备本轮发布；结果以部署验收记录为准 |
+| 隔离验证 | 138项自动测试，22项产品审计；三主题×桌面/手机交互通过 |
+| 正式部署 | 已发布Fly v11；正式域名匿名入口和版本核对通过，正式域名真实邮件点击待维护者验收 |
 | X Layer | 链196双RPC、固定区块与协议实现预检通过；见xlayer-preflight.json |
 | DeWEB | 完整静态核心已构建；未部署到本产品链上容器 |
 | 用户研究 | 尚无10人访谈、留存或付费意愿证据，不能虚构 |
@@ -35,7 +35,7 @@
 
 1. npm run build:release；npm run build:deweb。正式网站包与DeWEB包模式不同，releaseId不同。dist/deweb仅含公开前端、题库和工具，不含认证服务器或任何凭证。
 2. 生成上传计划并打包，逐文件核验大小、哈希、MIME和24000字节分块数。文件路径去掉开头斜杠；首页为index.html，设置fallback=index.html。
-3. 在官方HashPort控制台选择X Layer链196、本人拥有的processor/circuit，确认实际费用后由用户钱包签署。只连钱包，不收集私钥。没有交易前不得填写容器或交易哈希。
+3. 使用已确认支持X Layer链196的发布入口，选择本人拥有的processor/circuit，确认实际费用后由用户钱包签署。只连钱包，不收集私钥。没有交易前不得填写容器或交易哈希。
 4. 上传公开文件及release/manifest.json；账号/AI只提供有离站说明的外链，不自动请求链外服务，不传个人答案。
 5. 用真实编号执行：
    node scripts/tapeout/verify-deployment.mjs --processor-index N --circuit-id ID --directory dist/deweb --output docs/accelerator/verified-deployment.json
@@ -50,3 +50,10 @@
 
 ## 提交材料
 以活动期间Git提交、正式访问链接、真实链上证据和三分钟演示说明新增开发。Demo顺序：用户问题→完成自查→解读及行动→隐私与账号边界→真实DeWEB及版本核对→商业假设及用户证据。视频、报名和10人研究尚未完成；不得把发布准备包当成已参赛完成。
+
+
+## 已核对的发布入口
+官方HashPort公共控制台 https://www.hashport.ai/app 当前页内配置为chainId 56，不能直接照用于本次X Layer发布。
+第三方TapeOutScan发布器 https://deweb.tapeoutscan.io/deweb/publish.html 提供X Layer选择。2026-10-16读取公开发布器与xlayer-config.js：factory/opener/registry/binding及预期实现地址与本仓库固定配置一致；这是配置与代码路径核对，不是独立安全审计。默认可能是BNB，必须明确选择X Layer 196。其临时上传钱包涉及授权与充值，金额和权限须由用户在钱包逐项确认，上传完成后按工具提示退回余额并移除授权。
+
+目前维护者已有钱包，但尚未确认持有X Layer电路或容器。下一步在 https://tapeout.net/#containers 选择X Layer查看；未得到真实容器地址和本人确认的费用前，不执行购买、开通或上传交易。
