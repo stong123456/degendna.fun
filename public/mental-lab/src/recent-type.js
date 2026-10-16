@@ -1,4 +1,5 @@
 import { isCurrentRecord } from './scoring.js';
+import { tradingTopics } from './trading-topics.js';
 import { sceneAssessments } from './scene-assessments.js';
 
 const type = (name, code, keys, text) => ({ name, code, keys, text });
@@ -13,6 +14,10 @@ const catalog = {
   recovery: [type('小步照顾型', 'RC07', ['care'], '吃饭、休息和缓和情绪的小行动，都可以是一种照顾。'), type('对己留白型', 'SP06', ['compassion'], '你有过减少要求、认可小进展的时刻。不必总拿表现衡量自己。'), type('休息受阻型', 'RB20', ['barriers'], '你想恢复时，可能有现实安排或心里的顾虑挡着。先看看最需要哪种帮助。'), type('愿意借力型', 'CN08', ['support'], '你有过表达需要、调整安排或寻找支持的行动。')],
   support: [type('有人可聊型', 'CN08', ['available'], '你提到被倾听或联系到支持的经历。合适的关系值得珍惜。'), type('愿意借力型', 'AS21', ['asking'], '你有过表达需要、接受帮助的行动。不必每次都独自处理。'), type('开口顾虑型', 'HD03', ['barriers'], '想求助的时候，心里也有一些顾虑。可以从让你安心的一小步开始。'), type('关系孤单型', 'IS22', ['isolation'], '你提到一些孤单或关系中的难处。这些感受值得被听见。')]
 };
+
+for (const [index,topic] of tradingTopics.entries()) catalog[topic.id] = topic.domains.map((d,i)=>type(
+  `${d.label}较常出现`, `TP${index+1}${i+1}`, [d.key], `${d.meaning}这是近期回答的整理，会随情境变化，不是固定人格。`
+));
 
 for (const scene of sceneAssessments) catalog[scene.id] = scene.domains.map((domain, index) => ({
   name: `${domain.short}型`, code: `${scene.typePrefix}${String(index + 1).padStart(2, '0')}`,
