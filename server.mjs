@@ -4245,7 +4245,7 @@ async function handleApi(req, res, pathname, searchParams) {
     return json(res, 200, {
       ok: true,
       service: "onchain-mirror",
-      frontend: "result-audit-20261016-v2",
+      frontend: "account-link-20261016-v3",
       reportVersion: REPORT_VERSION,
       leaderboard: await leaderboardStorageStatus(),
       cache: {

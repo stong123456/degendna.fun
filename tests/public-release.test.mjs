@@ -5,3 +5,10 @@ test('DeWEB build is reproducible, complete, and contains no account secrets or 
  const build=await readFile('dist/deweb/mental-lab/src/build-mode.js','utf8');assert.ok(build.includes("mode: 'deweb'"));const receipt=JSON.parse(await readFile('dist/deweb/release/deployment.json','utf8'));assert.equal(receipt.status,'not-published');assert.equal(receipt.deployments.length,0);
  await assert.rejects(readFile('dist/deweb/account-api.mjs'));await assert.rejects(readFile('dist/deweb/.env'));await assert.rejects(readFile('dist/deweb/server.mjs'));
 });
+
+test('unsigned upload plan includes exact public bytes and rejects a changed release before publishing',async()=>{
+ const {mkdtemp,cp,rm,writeFile}=await import('node:fs/promises');const {tmpdir}=await import('node:os');const {join}=await import('node:path');const temp=await mkdtemp(join(tmpdir(),'degendna-upload-'));
+ try{await cp('dist/deweb',join(temp,'site'),{recursive:true});execFileSync(process.execPath,['scripts/tapeout/prepare-upload.mjs','--directory',join(temp,'site'),'--output',join(temp,'plan.json')]);const plan=JSON.parse(await readFile(join(temp,'plan.json'),'utf8'));assert.equal(plan.chainId,196);assert.equal(plan.transactionsSent,0);assert.equal(plan.status,'ready-not-published');assert.equal(plan.fallback,'index.html');assert.ok(plan.files.some(f=>f.path==='release/manifest.json'));assert.ok(plan.files.every(f=>!f.path.startsWith('/')&&f.chunks>=1&&f.contentType));
+ await writeFile(join(temp,'site/index.html'),'tampered');assert.throws(()=>execFileSync(process.execPath,['scripts/tapeout/prepare-upload.mjs','--directory',join(temp,'site'),'--output',join(temp,'bad-plan.json')],{stdio:'pipe'}));
+ }finally{await rm(temp,{recursive:true,force:true});}
+});
