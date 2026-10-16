@@ -57,6 +57,12 @@ for (const name of [
   "scoring.js",
   "assessments.js",
   "trading-topics.js",
+  "scene-assessments.js",
+  "report-copy.js",
+  "recent-type.js",
+  "current-state.js",
+  "result-insights.js",
+  "report-text.js",
 ]) {
   const source = await readFile(
     new URL(`../public/mental-lab/src/${name}`, import.meta.url),

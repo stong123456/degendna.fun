@@ -27,8 +27,28 @@ export const isCurrentRecord = (record) => Boolean(
   ["context", "patterns", "notices", "plan", "warnings", "limitations"].every((key) => Array.isArray(record[key])) &&
   ['context', 'patterns', 'notices', 'plan'].every(key => record[key].every(item => item && typeof item === 'object')) &&
   ['warnings', 'limitations'].every(key => record[key].every(item => typeof item === 'string')) &&
-  record.support && Array.isArray(record.support.reasons)
+  record.support && Array.isArray(record.support.reasons) && coherentRecord(record)
 );
+// Reject internally inconsistent or unknown saved evidence before any result renderer uses it.
+function coherentRecord(record) {
+  const module = assessmentMap[record.id];
+  if (record.scope !== module.scope || record.domains.length !== module.domains.length ||
+      new Set(record.domains.map(d=>d.key)).size !== module.domains.length ||
+      record.answered !== record.domains.reduce((n,d)=>n+d.answered,0)) return false;
+  for (const d of record.domains) {
+    const definition = module.domains.find(x=>x.key===d.key);
+    if (!definition || d.kind !== definition.kind || d.total !== definition.items.length ||
+        d.evidence.length !== d.answered || new Set(d.evidence.map(e=>e.id)).size !== d.answered ||
+        d.interpretable !== (d.answered>=3 && d.answered/d.total>=.75) ||
+        d.evidence.some(e=>!isAnswer(e.value) || !definition.items.some(i=>i.id===e.id && i.text===e.text)) ||
+        d.frequent !== d.evidence.filter(e=>e.value>=3).length ||
+        d.occasional !== d.evidence.filter(e=>e.value===2).length) return false;
+  }
+  if (record.context.length !== contextQuestions.length || new Set(record.context.map(e=>e.id)).size !== contextQuestions.length ||
+      record.context.some(e=>!contextQuestions.some(q=>q.id===e.id && q.options.some(([v])=>v===e.value)) || e.provided !== (e.value!=='skip'))) return false;
+  const expectedNotices = [...new Set(module.items.filter(i=>i.notice && record.domains.some(d=>d.evidence.some(e=>e.id===i.id && e.value>0))).map(i=>i.notice))].sort();
+  return record.notices.map(n=>n.type).sort().join() === expectedNotices.join();
+}
 const frequency = (value) => responseScale.find((option) => option.value === value)?.zh;
 
 function contextReport(context) {
@@ -71,10 +91,10 @@ function supportRecommendation(context, answered) {
     text: "你报告困扰很难承受，或必要任务、基本生活受到了较大影响。建议尽快联系合格的心理健康专业人员或医疗服务，并请可信任的人协助眼前的生活需要。不必等待困扰满两周。若无法保障基本安全，请寻求即时帮助。",
     reasons: context.filter((entry) => entry.value === "substantial" || entry.value === "overwhelming").map((entry) => `${entry.question}：${entry.label}`)
   };
-  const reasons = context.filter((entry) => entry.value === "clear" || entry.value === "worse" || ["weeks", "months", "long"].includes(entry.value)).map((entry) => `${entry.question}：${entry.label}`);
+  const reasons = context.filter((entry) => entry.value === "clear" || entry.value === "worse" || entry.id === "intensity" && entry.value === "distressing" || ["weeks", "months", "long"].includes(entry.value)).map((entry) => `${entry.question}：${entry.label}`);
   if (reasons.length) return {
     title: "考虑进一步的专业支持",
-    text: "你提到了持续、加重或明显影响生活的困扰。可以预约心理健康专业人员或先与医生讨论。专业评估会结合情境、身体状况和个人经历，而不只看这些回答。",
+    text: "你提供的信息中，有值得进一步了解的难受程度、持续时间、变化或生活影响。可以预约心理健康专业人员或先与医生讨论。专业评估会结合情境、身体状况和个人经历，而不只看这些回答。",
     reasons
   };
   return {

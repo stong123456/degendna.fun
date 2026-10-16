@@ -5,7 +5,7 @@ import { sceneAssessments } from './scene-assessments.js';
 const type = (name, code, keys, text) => ({ name, code, keys, text });
 // Editorial grouping of recent answers, not a validated personality taxonomy.
 const catalog = {
-  quick: [type('思绪绕圈型', 'LP01', ['distress'], '有些事情在心里绕了很久。可以先挑一件最在意的事，慢慢说清楚。'), type('暂时透支型', 'RS04', ['load'], '疲惫或紧绷最近常来打扰你。可以先照顾休息和必要的生活安排。'), type('小步照顾型', 'RC07', ['restoration'], '你提到一些照顾日常生活的小事。可以留住其中真正帮到你的那一件。')],
+  quick: [type('支持留白型', 'SA23', ['space'], '你提到一些获得倾听、安排自主空间的经历。这些是可继续了解的支持条件，不代表所有困难都已解决。'), type('思绪绕圈型', 'LP01', ['distress'], '有些事情在心里绕了很久。可以先挑一件最在意的事，慢慢说清楚。'), type('暂时透支型', 'RS04', ['load'], '疲惫或紧绷最近常来打扰你。可以先照顾休息和必要的生活安排。'), type('小步照顾型', 'RC07', ['restoration'], '你提到一些照顾日常生活的小事。可以留住其中真正帮到你的那一件。')],
   mood: [type('对己严格型', 'SC05', ['self_view'], '没有达到期待时，你可能会先责备自己。也值得看看，当时的处境有多不容易。'), type('日常费力型', 'DL09', ['daily'], '最近，一些日常小事做起来也费力。你可以把任务缩小，或请别人搭把手。'), type('心情低落型', 'ML10', ['mood'], '最近的心情或兴趣让你有些费心。不必要求自己马上开心起来。'), type('小步照顾型', 'RC07', ['restoration'], '你有过让自己缓一缓的行动。这些小尝试值得被看见。')],
   anxiety: [type('思绪绕圈型', 'LP01', ['worry'], '有些还没确定的事，会让你提前担心。可以先分清眼前能做的一步。'), type('反复确认型', 'CK11', ['checking'], '你提到反复检查、确认或避开一些事情。可以留意，那一刻你最担心的是什么。'), type('紧绷费神型', 'TN12', ['tension'], '紧张有时也会牵动身体和注意力。身体不适仍值得按需要就医。'), type('留有余地型', 'SP06', ['regulation'], '你有过调整注意、给计划留余地的行动。这不要求你随时都能做到。')],
   stress: [type('思绪绕圈型', 'LP01', ['rumination'], '反复想事情、和别人比较，最近可能占了不少心力。'), type('暂时透支型', 'RS04', ['demands'], '事情多、休息少的时候，可以先看看哪些安排能少扛一点。'), type('硬撑应对型', 'HD03', ['coping_load'], '你提到一些扛压力时的做法。可以看看它们有没有让自己更累。'), type('小步照顾型', 'RC07', ['resources'], '你有过给自己安排恢复空间的行动，值得继续留意哪些最有帮助。')],
@@ -48,7 +48,7 @@ function facetProfile(result) {
 export function recentType(result) {
   if (!isCurrentRecord(result) || !catalog[result.id]) return null;
   const facets = facetProfile(result);
-  const base = { facets, ruleVersion: 'types-20260926', scope: result.scope };
+  const base = { facets, ruleVersion: 'types-20261016-v2', scope: result.scope };
   if (result.answered / result.totalItems < 0.75) return { ...base, state: 'incomplete', text: '还想多了解你一点。回答还不够，我们先不选类型；留白也没关系。' };
   const candidates = catalog[result.id].flatMap(t => {
     const groups = t.keys.map(key => result.domains.find(d => d.key === key));

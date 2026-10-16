@@ -1,16 +1,5 @@
 // Presentation only: keep saved answers, scoring rules and comparisons unchanged.
 export function humanizeReport(result) {
-  const labels = {
-    load: '累不累，能不能集中精神', distress: '心里反复绕着的那些事', restoration: '让自己缓过来的小事', space: '给自己留一点空间',
-    mood: '最近的心情与兴趣', self_view: '你怎样看待自己和以后', daily: '日常小事做起来费不费力', worry: '那些放不下的担心',
-    checking: '反复确认，或不敢面对的事', tension: '紧张时，身体和注意力的变化', regulation: '担心的时候，怎样缓一缓',
-    demands: '事情多不多，能不能歇一歇', rumination: '总在想，也总在和别人比', coping_load: '扛压力时，自己付出了什么', resources: '能让你喘口气的安排',
-    sleep: '晚上睡得怎么样', night_screen: '夜里还放不下的消息', daytime: '白天能不能保持清醒', sleep_resources: '给休息留出时间',
-    market_pull: '会不会被行情和消息带着走', loss_reaction: '亏损之后，想马上做点什么', exposure: '交易有没有挤占生活的钱', life_emotion: '交易之外，你过得怎么样',
-    planning: '给交易和生活的钱留好界限', pause: '情绪上来时，能不能停一下', care: '吃饭、休息，也照顾自己', compassion: '对自己，能不能少一点责备',
-    barriers: result.id === 'support' ? '想求助时，心里有哪些顾虑' : '是什么让你没法好好休息', support: '说出需要，也保留自己的空间',
-    available: '有没有人愿意听你说', asking: '开口求助，也允许别人帮忙', isolation: '在人群里，会不会仍觉得孤单'
-  };
   const domains = result.domains.map((domain) => {
     const resource = domain.kind === 'resource';
     let interpretation;
@@ -22,11 +11,12 @@ export function humanizeReport(result) {
     else interpretation = '你在这一部分选的都是“从不”或“很少”。这些事情最近可能不太打扰你。如果还有题目没问到的难处，你的感受依然值得被听见。';
     const example = domain.interpretable && domain.evidence.find(item => item.value >= 3);
     if (example) interpretation = `比如“${example.text}”，你选了“${example.response}”。${interpretation}`;
-    return { ...domain, label: ["fomo","loss","marketbound","execution"].includes(result.id) ? domain.label : labels[domain.key] || domain.label, interpretation, reflection: resource ? '这里面，哪一件事曾让你稍微轻松一点？' : '如果只想聊一件事，你现在最想让别人理解什么？' };
+    interpretation = `${domain.meaning} ${interpretation}`;
+    return { ...domain, label: domain.label, interpretation, reflection: resource ? '这里面，哪一件事曾让你稍微轻松一点？' : '如果只想聊一件事，你现在最想让别人理解什么？' };
   });
   const frequent = domains.filter(d => d.interpretable && d.kind === 'burden' && d.frequent);
   const understood = domains.some(d => d.interpretable && d.kind === 'burden');
-  const summary = !result.answered
+  const summaryBase = !result.answered
     ? '你还没有选择具体的发生频率，现在还不能从这些回答了解你的近况。留白也没关系，你仍然可以查看支持建议。'
     : !domains.some(d => d.interpretable)
       ? '你已经分享了一些感受，不过现在的信息还不多。我们先看看你愿意说的部分，不急着给你下结论。'
@@ -35,14 +25,20 @@ export function humanizeReport(result) {
         : understood
           ? '在回答比较完整的部分，你没有提到经常出现的困扰。如果这和你的感受相符，可以留意哪些日常安排让你舒服一些；如果你仍然难受，也不用让这份结果替你否定自己。'
           : '你分享了一些平时怎样照顾自己、获得支持的情况。关于让你难受的部分，我们还了解得不多，所以先不判断你过得轻不轻松。';
+  const missingBurden = domains.filter(d => d.kind === 'burden' && !d.interpretable);
+  const summary = summaryBase + (missingBurden.length && domains.some(d => d.interpretable) ? ` “${missingBurden.map(d=>d.label).join('、')}”回答不足，暂不能概括；上述描述不代表全部方面。` : '');
   const urgent = result.context.some(e => ['work', 'care', 'relations'].includes(e.id) && e.value === 'substantial' || e.id === 'intensity' && e.value === 'overwhelming');
-  const ongoing = result.context.some(e => e.value === 'clear' || e.value === 'worse' || ['weeks', 'months', 'long'].includes(e.value));
+  const ongoing = result.context.some(e => e.value === 'clear' || e.value === 'worse' || e.id === 'intensity' && e.value === 'distressing' || ['weeks', 'months', 'long'].includes(e.value));
+  const supportBasis = result.context.filter(e => urgent
+    ? ['work', 'care', 'relations'].includes(e.id) && e.value === 'substantial' || e.id === 'intensity' && e.value === 'overwhelming'
+    : e.value === 'clear' || e.value === 'worse' || e.id === 'intensity' && e.value === 'distressing' || ['weeks', 'months', 'long'].includes(e.value));
   const support = { ...result.support,
+    reasons: supportBasis.length ? supportBasis.map(e=>`${e.question}：${e.label}`) : result.support.reasons,
     title: urgent ? '现在，先找个人陪你一起面对' : ongoing ? '这段路，可以请别人陪你走一段' : '想找人聊聊，不需要先证明自己够难受',
     text: urgent
       ? '你提到最近的感受很难承受，或已经明显影响到日常生活。请尽快联系心理健康专业人员或医生，也可以先告诉一个你信任的人：“我最近有些撑不住，能陪我一起找帮助吗？”不用等到情况更严重。如果你现在无法保证自己的安全，请立即联系当地紧急服务或去急诊。'
       : ongoing
-        ? '你提到有些困扰持续了一段时间、变得更难受，或已经影响生活。可以找心理健康专业人员或医生聊聊。你不用先想好所有答案，带着“最近哪里最难熬”这个问题去，就可以开始。'
+        ? '你提供的信息中，有值得进一步了解的难受程度、持续时间、变化或生活影响。可以找心理健康专业人员或医生聊聊。你不用先想好所有答案，带着“最近哪里最难熬”这个问题去，就可以开始。'
         : '如果你想被听一听，可以联系一个让你安心的人，也可以直接找专业人士。这份自查不能判断你是否需要治疗；偶尔才出现的难受，也不需要独自忍着。'
   };
   return { ...result, summary, domains, support,

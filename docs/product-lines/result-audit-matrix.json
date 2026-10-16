@@ -1,0 +1,182 @@
+[
+  {
+    "id": "quick",
+    "title": "近期状态自查",
+    "items": 12,
+    "dimensions": 4,
+    "namedResults": 4,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "mood",
+    "title": "情绪状态觉察",
+    "items": 17,
+    "dimensions": 4,
+    "namedResults": 4,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "anxiety",
+    "title": "担心与紧张自查",
+    "items": 17,
+    "dimensions": 4,
+    "namedResults": 4,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "stress",
+    "title": "压力与恢复自查",
+    "items": 17,
+    "dimensions": 4,
+    "namedResults": 4,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "sleep",
+    "title": "睡眠与日间精力",
+    "items": 18,
+    "dimensions": 4,
+    "namedResults": 4,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "trading",
+    "title": "交易心理自查",
+    "items": 50,
+    "dimensions": 7,
+    "namedResults": 7,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "recovery",
+    "title": "恢复资源自查",
+    "items": 16,
+    "dimensions": 4,
+    "namedResults": 4,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "support",
+    "title": "关系与支持自查",
+    "items": 14,
+    "dimensions": 4,
+    "namedResults": 4,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "fomo",
+    "title": "FOMO 与比较压力",
+    "items": 12,
+    "dimensions": 4,
+    "namedResults": 4,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "loss",
+    "title": "亏损后的反应",
+    "items": 12,
+    "dimensions": 4,
+    "namedResults": 4,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "marketbound",
+    "title": "看盘与生活边界",
+    "items": 12,
+    "dimensions": 4,
+    "namedResults": 4,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "execution",
+    "title": "决策与执行习惯",
+    "items": 12,
+    "dimensions": 4,
+    "namedResults": 4,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "workbound",
+    "title": "工作与休息边界",
+    "items": 24,
+    "dimensions": 6,
+    "namedResults": 21,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "digital",
+    "title": "信息与注意力空间",
+    "items": 24,
+    "dimensions": 6,
+    "namedResults": 21,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "decisions",
+    "title": "决定与行动节奏",
+    "items": 24,
+    "dimensions": 6,
+    "namedResults": 21,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "boundaries",
+    "title": "关系表达与边界",
+    "items": 24,
+    "dimensions": 6,
+    "namedResults": 21,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "selfview",
+    "title": "自我评价与比较",
+    "items": 24,
+    "dimensions": 6,
+    "namedResults": 21,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  },
+  {
+    "id": "adjustment",
+    "title": "变化中的适应",
+    "items": 24,
+    "dimensions": 6,
+    "namedResults": 21,
+    "guide": "reflection-20261016-v2",
+    "evidenceCoverage": true,
+    "status": "PASS: source rules and browser desktop/mobile across garden/prism/night"
+  }
+]
