@@ -1,3 +1,4 @@
+import { createAccountApi } from './account-api.mjs';
 import { createServer } from "node:http";
 import { createHash, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -4428,7 +4429,7 @@ async function serveStatic(req, res, pathname) {
     if (!fileStat.isFile()) throw new Error("not a file");
     const body = await readFile(target);
     const ext = extname(target);
-    const cacheControl = target.endsWith("index.html") || ext === ".css" || ext === ".js"
+    const cacheControl = (target.endsWith("index.html") || target.endsWith("callback.html")) || ext === ".css" || ext === ".js"
       ? "no-store"
       : "public, max-age=3600";
     res.writeHead(200, {
@@ -4446,8 +4447,10 @@ async function serveStatic(req, res, pathname) {
   }
 }
 
+const accountApi = createAccountApi();
 const server = createServer(async (req, res) => {
   const url = new URL(req.url || "/", `http://${req.headers.host || "127.0.0.1"}`);
+  if (await accountApi.handle(req, res, url.pathname, url.searchParams)) return;
   if (url.pathname.startsWith("/xiaojing/api/")) {
     await handleXiaojingApi(req, res, url.pathname);
     return;

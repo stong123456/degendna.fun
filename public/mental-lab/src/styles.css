@@ -483,3 +483,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .insight-exercise { margin-top:24px;padding:20px;border:1px solid var(--line);border-radius:8px; }
 .insight-card p,.insight-exercise p { margin:10px 0; }
 @media(max-width:700px) { .insight-grid {grid-template-columns:1fr;} .insight-exercise{padding:16px;} }
+
+.account-form {display:grid;gap:18px;max-width:560px;padding:24px;border:1px solid var(--line);border-radius:10px;background:var(--panel);}
+.account-field {display:grid;gap:8px;}
+.account-field input {width:100%;box-sizing:border-box;font:inherit;font-size:16px;padding:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;}
+.account-consent {display:flex;gap:10px;align-items:flex-start;line-height:1.8;}
+.account-user {border-top:1px solid var(--line);padding:16px 0;overflow-wrap:anywhere;}
+.account-workspace{overflow-wrap:anywhere;}
+@media(max-width:760px){.account-form{padding:16px;}.icon-rail nav{min-width:0;}.rail-button{flex-shrink:0;}}
+
+.workspace-toolbar{flex-wrap:wrap;}
+.account-entry{font-size:12px;margin-left:auto;}
+.account-workspace .workspace-head,.version-workspace .workspace-head{display:block;}
+.account-workspace .workspace-head p,.version-workspace .workspace-head p{margin-top:12px;}
+@media(min-width:761px){.theme-garden .icon-rail nav,.theme-prism .icon-rail nav{max-height:calc(100vh - 160px);overflow-y:auto;min-height:0;}}

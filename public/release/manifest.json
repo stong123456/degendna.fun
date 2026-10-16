@@ -1,0 +1,246 @@
+{
+  "format": "degendna-public-release-v1",
+  "mode": "web",
+  "sourceRevision": "public-files:4ef115f7967acd08190adaecc010e7a2e7ad77143d0ac78765495a64fca039c5",
+  "interpretationVersion": "reflection-20261016-v2",
+  "typeVersion": "types-20261016-v2",
+  "stateVersion": "current-state-20260927",
+  "modules": [
+    {
+      "id": "quick",
+      "title": "近期状态自查",
+      "version": "2.0-content-review",
+      "scope": "过去两周"
+    },
+    {
+      "id": "mood",
+      "title": "情绪状态觉察",
+      "version": "2.0-content-review",
+      "scope": "过去两周"
+    },
+    {
+      "id": "anxiety",
+      "title": "担心与紧张自查",
+      "version": "2.0-content-review",
+      "scope": "过去两周"
+    },
+    {
+      "id": "stress",
+      "title": "压力与恢复自查",
+      "version": "2.0-content-review",
+      "scope": "过去一个月"
+    },
+    {
+      "id": "sleep",
+      "title": "睡眠与日间精力",
+      "version": "2.0-content-review",
+      "scope": "过去两周"
+    },
+    {
+      "id": "trading",
+      "title": "交易心理自查",
+      "version": "2.0-content-review",
+      "scope": "最近 30 天"
+    },
+    {
+      "id": "recovery",
+      "title": "恢复资源自查",
+      "version": "2.0-content-review",
+      "scope": "过去两周"
+    },
+    {
+      "id": "support",
+      "title": "关系与支持自查",
+      "version": "2.0-content-review",
+      "scope": "过去一个月"
+    },
+    {
+      "id": "fomo",
+      "title": "FOMO 与比较压力",
+      "version": "topics-20261016-v1",
+      "scope": "过去 7 天"
+    },
+    {
+      "id": "loss",
+      "title": "亏损后的反应",
+      "version": "topics-20261016-v1",
+      "scope": "过去 7 天"
+    },
+    {
+      "id": "marketbound",
+      "title": "看盘与生活边界",
+      "version": "topics-20261016-v1",
+      "scope": "过去 7 天"
+    },
+    {
+      "id": "execution",
+      "title": "决策与执行习惯",
+      "version": "topics-20261016-v1",
+      "scope": "过去 7 天"
+    },
+    {
+      "id": "workbound",
+      "title": "工作与休息边界",
+      "version": "3.0-scenes-20260926",
+      "scope": "过去两周"
+    },
+    {
+      "id": "digital",
+      "title": "信息与注意力空间",
+      "version": "3.0-scenes-20260926",
+      "scope": "过去两周"
+    },
+    {
+      "id": "decisions",
+      "title": "决定与行动节奏",
+      "version": "3.0-scenes-20260926",
+      "scope": "过去两周"
+    },
+    {
+      "id": "boundaries",
+      "title": "关系表达与边界",
+      "version": "3.0-scenes-20260926",
+      "scope": "过去两周"
+    },
+    {
+      "id": "selfview",
+      "title": "自我评价与比较",
+      "version": "3.0-scenes-20260926",
+      "scope": "过去两周"
+    },
+    {
+      "id": "adjustment",
+      "title": "变化中的适应",
+      "version": "3.0-scenes-20260926",
+      "scope": "过去一个月"
+    }
+  ],
+  "files": [
+    {
+      "path": "/index.html",
+      "bytes": 735,
+      "sha256": "3975ec0b47b6b8ba99786510a8be867bcb7636e32150c3b8e1ca39f62de62a45"
+    },
+    {
+      "path": "/mental-lab/assets/garden.png",
+      "bytes": 1678844,
+      "sha256": "57d10eab5901582b60a0e6e96e3b121234858d2384676874fde797fa1075bb3d"
+    },
+    {
+      "path": "/mental-lab/assets/night.png",
+      "bytes": 2241352,
+      "sha256": "7030502e557be5c9b54965a931fa26641bfd7deb2d40361f18af540d50d370c3"
+    },
+    {
+      "path": "/mental-lab/assets/prism.png",
+      "bytes": 1794518,
+      "sha256": "a814077ec97aee015cd6284e8eabaf3743addd71f34b6962e80bc90beb9f843a"
+    },
+    {
+      "path": "/mental-lab/src/account.js",
+      "bytes": 7744,
+      "sha256": "544769d1ef984f883195e5231f47c68a1701658398dcf192c2d8d5db200e2528"
+    },
+    {
+      "path": "/mental-lab/src/app.js",
+      "bytes": 49952,
+      "sha256": "6348702c883839d6f4c9792d73a8184805bd8134214bc2f6f4c9e09b02dd578b"
+    },
+    {
+      "path": "/mental-lab/src/assessments.js",
+      "bytes": 27254,
+      "sha256": "2b446d4d5377586f609fd87bec6d938c0ef573a542f324425153cdf66a0cc427"
+    },
+    {
+      "path": "/mental-lab/src/build-mode.js",
+      "bytes": 248,
+      "sha256": "e70e206e5cb955a2795c46c7c5ff2a1119ec7f855314e1a1f9344571482e96d8"
+    },
+    {
+      "path": "/mental-lab/src/care-tools.js",
+      "bytes": 6879,
+      "sha256": "32eb8b447c24e1350c6f93a12bc1fb7f30427f301bf4ba3985df2edc7035ea8b"
+    },
+    {
+      "path": "/mental-lab/src/current-state.js",
+      "bytes": 13211,
+      "sha256": "f79c21f118fb2c0c2d9a7867e96003240379a5d21374141142a78ff0a32497f1"
+    },
+    {
+      "path": "/mental-lab/src/play.js",
+      "bytes": 12721,
+      "sha256": "11b36105e8410a150975917873cf2f13cdcfea54d5c1cfb8363a0a64f2208e8f"
+    },
+    {
+      "path": "/mental-lab/src/privacy.js",
+      "bytes": 18664,
+      "sha256": "3bf337c07a4fe1288121ac856765f5ce9a11af929fcbb76a28968db24135c9b7"
+    },
+    {
+      "path": "/mental-lab/src/recent-type.js",
+      "bytes": 9583,
+      "sha256": "4882329c93ab941f087e94295e1d6f3b3ac6b17a4ad730f663e5aa2bd9bc96f0"
+    },
+    {
+      "path": "/mental-lab/src/report-copy.js",
+      "bytes": 7227,
+      "sha256": "8591d6691d0e55cbaaab51c130c3cb8e887941d24832629456cb145094a8c55b"
+    },
+    {
+      "path": "/mental-lab/src/report-text.js",
+      "bytes": 1610,
+      "sha256": "12ae93d9b233d71c4f116df21396c1fd0bd4f93ddbbbe3ebbb74c06adc67c13a"
+    },
+    {
+      "path": "/mental-lab/src/reset.js",
+      "bytes": 11433,
+      "sha256": "78befed11d90f1da88d044f9477d63db73ee326f0e5eab9d23628d7e59a0d7e8"
+    },
+    {
+      "path": "/mental-lab/src/result-insights.js",
+      "bytes": 16319,
+      "sha256": "80a23c5b18dc854818c6c81a88327118f525050c73d3729f639266bcbfde9457"
+    },
+    {
+      "path": "/mental-lab/src/scene-assessments.js",
+      "bytes": 27734,
+      "sha256": "7c7ecb6144f5fb32f6f227aa475ee1e7a519405c9e1677b3498d43ad7a13ed24"
+    },
+    {
+      "path": "/mental-lab/src/scoring.js",
+      "bytes": 19181,
+      "sha256": "61aced806c9a7659377e4f47564120b0978f14135d9e9613647233d40937f9a8"
+    },
+    {
+      "path": "/mental-lab/src/storage.js",
+      "bytes": 396,
+      "sha256": "e8c1ffc255085b60d513b82e28ba2186df61e2243a5f500bfc8d06a6db71944f"
+    },
+    {
+      "path": "/mental-lab/src/styles.css",
+      "bytes": 40452,
+      "sha256": "c2e9025b5eb72c941d5b91e0a7919645f57bead63bb698f2b4bedd3667d759d4"
+    },
+    {
+      "path": "/mental-lab/src/trading-topics.js",
+      "bytes": 16148,
+      "sha256": "03aa75824c0052b5ba27df63f009ac7bd0805dbe4fb2a2ab3cd59d4edf329413"
+    },
+    {
+      "path": "/mental-lab/src/version.js",
+      "bytes": 4549,
+      "sha256": "dad3376cdce844f371e4fbf5547e098f0e871f99d342371bba88b881a5a33252"
+    },
+    {
+      "path": "/mental-lab/vendor/lucide-LICENSE",
+      "bytes": 3208,
+      "sha256": "b495047bd93a9b06913511076f504daba17d5bbeb3e0650f3bb53a4220329c57"
+    },
+    {
+      "path": "/mental-lab/vendor/lucide.min.js",
+      "bytes": 429464,
+      "sha256": "fc3ec2766fddfbe26905acbd3a46e2bad7a8f8ac7ef5f30e3707b5abb750cf9a"
+    }
+  ],
+  "releaseId": "0dee604cad9b2063b04a8cd81ac7559d36233136b4c6c291fa876980aea9afec"
+}

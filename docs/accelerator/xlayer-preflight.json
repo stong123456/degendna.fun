@@ -1,0 +1,51 @@
+{
+  "format": "degendna-xlayer-preflight-v1",
+  "checkedAt": "2026-10-16T10:09:38.593Z",
+  "source": "https://github.com/TapeOutProtocol/TapeKit/blob/40994bd65baedbda4df72cb0985031a5f082f606/kernel/src/config.js",
+  "chainId": 196,
+  "status": "PASS",
+  "readOnly": true,
+  "transactionsSent": 0,
+  "checks": [
+    {
+      "name": "factory",
+      "address": "0x1f09daefa827f02cbb40967cc91b259763760761",
+      "codeBytes": 130,
+      "codeSha256": "d5e534164f234bee90da236f5e4fd09d4333dfbecd0591d4f93af1ee1713dd31",
+      "status": "PASS"
+    },
+    {
+      "name": "opener",
+      "address": "0x536add8f30f03b69f6fbf29d425a816a0dc50106",
+      "codeBytes": 2604,
+      "codeSha256": "9eaf91857f20892a847a4adaede6c7d7c8ec76c10d79392ee2e8df6cb2bc60e6",
+      "status": "PASS"
+    },
+    {
+      "name": "registry",
+      "address": "0xd6efb7adcc9c83dc4924ad56f6a8e4e969b9adb6",
+      "codeBytes": 176,
+      "codeSha256": "abf5cf38090dfee533685e0f6f69e82905c63b3ddc28fd1cfcbb4e2c0c738b99",
+      "status": "PASS"
+    },
+    {
+      "name": "binding",
+      "address": "0x68809fd2fb343aa57d0aeb7f33defe477c9666f9",
+      "codeBytes": 176,
+      "codeSha256": "abf5cf38090dfee533685e0f6f69e82905c63b3ddc28fd1cfcbb4e2c0c738b99",
+      "status": "PASS"
+    },
+    {
+      "name": "registry implementation",
+      "address": "0xa85c4143d1d4a77f54b8e4ecc9e6d1418afea45f",
+      "status": "PASS"
+    },
+    {
+      "name": "binding implementation",
+      "address": "0x5ebf29b80789e548907c707530c3c7607c4347df",
+      "status": "PASS"
+    }
+  ],
+  "block": "0x45fa253",
+  "blockHash": "0x4b5a9f5fde16f95f4abcca90195182e017503b46c180f0b2b88804552e556d80"
+}

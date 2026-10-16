@@ -12,7 +12,10 @@ import { resetView, resetTools, clearResetMemory } from './reset.js';
 import { playView, clearPlayMemory } from './play.js';
 import { privacyView, writeDraft, readDraft, DRAFT_KEY, downloadFile, validateBackup, REPORT_KEY } from './privacy.js';
 import { clearCareMemory } from './care-tools.js';
-const routes = ['home','about','library','trading','care','scenes','play','reset','privacy','records','safety','method'];
+import { productBuild } from "./build-mode.js";
+import { versionView } from "./version.js";
+import { accountView } from "./account.js";
+const routes = ['account','version','home','about','library','trading','care','scenes','play','reset','privacy','records','safety','method'];
 
 const storageKey = "degendna-mental-lab-records";
 const themeKey = "degendna-mental-lab-theme";
@@ -44,6 +47,8 @@ const state = {
 
 const navItems = [
   ["home", "首页", "house"],
+  ["account", "我的账号", "circle-user-round"],
+  ["version", "核对解读版本", "file-check-2"],
   ["play", "Play 趣味风格", "sparkles"],
   ["reset", "Reset 缓冲工具", "leaf"],
   ["library", "自测库", "layout-grid"],
@@ -108,6 +113,7 @@ function saveRecord(result) {
 }
 
 function setRoute(route) {
+  if (route === 'xiaojing' && productBuild.mode==='deweb') { state.route='external-ai';render();return; }
   if (route === 'xiaojing') { location.href = `/xiaojing/?theme=${state.theme}`; return; }
   state.route = route;
   const url = new URL(location.href);
@@ -142,7 +148,7 @@ function shell(content) {
     sideIntro(),
     el("main", { class: "workspace", id: "main-content" }, [
       el("header", { class: "workspace-toolbar" }, [
-        el("span", { class: "breadcrumb" }, state.route === "play" ? "PLAY / 趣味探索" : state.route === "reset" ? "RESET / 给自己一点缓冲" : "MENTAL LAB / 个人觉察空间"), compactThemeSwitch()
+        el("span", { class: "breadcrumb" }, state.route === "play" ? "PLAY / 趣味探索" : state.route === "reset" ? "RESET / 给自己一点缓冲" : "MENTAL LAB / 个人觉察空间"), compactThemeSwitch(), el("button",{class:"ghost-action account-entry",onclick:()=>setRoute("account")},"注册 / 我的账号")
       ]), ...content,
       el("footer", { class: "workspace-footer" }, [
         el("span", {}, "你不是账户余额，也不是一次交易结果。"),
@@ -203,7 +209,7 @@ function statusRail() {
       el("span", { class: "shield-dot" }, icon("shield-check")),
       el("span", {}, [
         el("strong", {}, "你的私人空间"),
-        el("small", {}, "不登录 · 答案不上传")
+        el("small", {}, "可匿名使用 · 答案不上传")
       ]),
       el("i", {})
     ]),
@@ -766,6 +772,9 @@ function render() {
 }
 
 function routeView() {
+  if (state.route === "version") return shell([versionView(el)]);
+  if (state.route === "external-ai" || state.route === "account" && productBuild.mode==='deweb') return shell([el('section',{class:'care-card'},[el('h2',{},state.route==='account'?'前往账号服务':'可选的链外 AI 服务'),el('p',{},'这个功能需要离开公开链上核心包，在 DegenDNA 正式域名使用。不会自动携带你的自查答案或本地记录；不同站点的本地存储彼此独立。'),el('a',{href:state.route==='account'?productBuild.accountPortal:productBuild.aiPortal,target:'_blank',rel:'noopener noreferrer'},'了解并前往正式网站')])]);
+  if (state.route === "account") return shell([accountView(el)]);
   if (state.route === 'play') return shell([playView(el)]);
   if (state.route === 'reset') return shell([resetView(el,state.resetTool,()=>setRoute('safety'))]);
   if (state.route === 'privacy') return shell([privacyView(el,()=>{state.answers={};state.context={};state.lastResult=null;state.savedThisRun=false;clearCareMemory();clearResetMemory();clearPlayMemory();})]);
