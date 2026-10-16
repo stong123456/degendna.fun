@@ -4,6 +4,7 @@ import { resolve,join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';import {promisify} from 'node:util';
 import { Interface,getAddress } from 'ethers';
+import {allowedContentType} from './file-types.mjs';
 const exec=promisify(execFile),root=resolve(new URL('../..',import.meta.url).pathname);
 const args=process.argv.slice(2);const value=name=>args[args.indexOf(name)+1];
 if(!args.includes('--processor-index')||!args.includes('--circuit-id'))throw Error('Use --processor-index <number> --circuit-id <positive number>. No wallet key is used.');
@@ -25,7 +26,7 @@ const files=[];
 for(const file of manifest.files){if(!/^\/(?:index\.html|mental-lab\/[a-zA-Z0-9_./-]+\.(?:js|css|png)|mental-lab\/vendor\/lucide-LICENSE)$/.test(file.path)||file.path.includes('..'))throw Error('Unexpected release path');
  const storePath=file.path.slice(1);
  const local=await readFile(join(dir,storePath));if(hash(local)!==file.sha256||local.length!==file.bytes)throw Error('Local file changed: '+file.path);
- const info=await call(cfg.registry,'fileInfo',[container,storePath]);if(Number(info[0])!==file.bytes||info[2].slice(2)!==file.sha256||Number(info[4])===0)throw Error('On-chain file metadata differs or is incomplete: '+file.path);
+ const info=await call(cfg.registry,'fileInfo',[container,storePath]);if(!allowedContentType(storePath,info[1])||Number(info[0])!==file.bytes||info[2].slice(2)!==file.sha256||Number(info[4])===0)throw Error('On-chain file metadata differs or is incomplete: '+file.path);
  let data;if(file.bytes<=96000){const [bytes]=await call(cfg.registry,'read',[container,storePath]);data=Buffer.from(bytes.slice(2),'hex');}else{const chunks=[];for(let offset=0;offset<file.bytes;offset+=96000){const [bytes]=await call(cfg.registry,'readRange',[container,storePath,offset,Math.min(96000,file.bytes-offset)]);chunks.push(Buffer.from(bytes.slice(2),'hex'));}data=Buffer.concat(chunks);}
  if(data.length!==file.bytes||hash(data)!==file.sha256)throw Error('On-chain bytes differ: '+file.path);files.push({path:file.path,sha256:file.sha256,bytes:file.bytes,status:'verified'});console.log('Verified '+file.path);
 }

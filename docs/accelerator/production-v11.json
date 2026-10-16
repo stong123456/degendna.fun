@@ -1,0 +1,83 @@
+{
+  "checkedAt": "2026-10-16T11:58:52.338Z",
+  "results": [
+    {
+      "path": "/api/health",
+      "status": 200,
+      "frontend": "account-link-20261016-v3"
+    },
+    {
+      "path": "/api/account/status",
+      "status": 200,
+      "ready": true,
+      "method": "email-link"
+    },
+    {
+      "path": "/api/account/me",
+      "status": 200,
+      "anonymousUserIsNull": true
+    },
+    {
+      "path": "/api/account/users",
+      "status": 401
+    },
+    {
+      "path": "/mental-lab/src/account.js",
+      "status": 200,
+      "exactSourceMatch": true,
+      "sha256": "7bb7d9966752a8b2228cea7da0f7477bf761625ea95ab602f452f2225124a77a"
+    },
+    {
+      "path": "/mental-lab/src/styles.css",
+      "status": 200,
+      "exactSourceMatch": true,
+      "sha256": "af28c0c228827760c28a3e3abe840511a8de5ac0d3987b82830f9b8542b1120b"
+    },
+    {
+      "path": "/auth/callback.html",
+      "status": 200,
+      "exactSourceMatch": true,
+      "sha256": "30fa78343430c83c774806c166df9137df71806de089fc2de747ba18e3f296f7"
+    },
+    {
+      "path": "/auth/callback.js",
+      "status": 200,
+      "exactSourceMatch": true,
+      "sha256": "bdafb678eca5c110ca4ebd081d4d3f300b580f3ea39a79f110ee530e41f2d4ff"
+    },
+    {
+      "path": "/release/manifest.json",
+      "status": 200,
+      "exactSourceMatch": true,
+      "sha256": "cd866d20fa77e86b1c2ea13441be50049cf395965c2df0204e61b0eb396157d9"
+    },
+    {
+      "check": "cross-origin send rejected before mail provider",
+      "status": 403
+    }
+  ],
+  "app": "degendna-fun-web",
+  "flyVersion": 11,
+  "sourceCommit": "8af6448688bcdff82d929854b4584dff0fa115e5",
+  "sourceTree": "4d31ecf23986045e1284ab7bec3e582d350cdff6",
+  "image": "registry.fly.io/degendna-fun-web:deployment-01M52950T7YF7RGAF40Z0BKS41",
+  "imageDigest": "sha256:17c1b32a13e72c1f8639b2ec4142715140d437fdd4f3c2caec7766bff3c0e9b9",
+  "browser": {
+    "status": "PASS",
+    "base": "https://degendna.fun",
+    "themes": 3,
+    "sizes": 2,
+    "checks": [
+      "live account enabled",
+      "email link UI",
+      "no horizontal overflow",
+      "full public file verification",
+      "expired link error and query clearing"
+    ],
+    "errors": [],
+    "realProductionEmailClick": "pending user verification"
+  },
+  "realLocalEmailLogin": "User reported success; verified owner email confirmed in Auth",
+  "realProductionEmailLogin": "Pending user verification",
+  "onchainDeployment": "Not published; no transactions sent"
+}

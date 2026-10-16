@@ -12,3 +12,13 @@ test('unsigned upload plan includes exact public bytes and rejects a changed rel
  await writeFile(join(temp,'site/index.html'),'tampered');assert.throws(()=>execFileSync(process.execPath,['scripts/tapeout/prepare-upload.mjs','--directory',join(temp,'site'),'--output',join(temp,'bad-plan.json')],{stdio:'pipe'}));
  }finally{await rm(temp,{recursive:true,force:true});}
 });
+
+test('chain verifier rejects non-executable MIME types even when public file bytes match',async()=>{
+ const {allowedContentType}=await import('../scripts/tapeout/file-types.mjs');
+ assert.equal(allowedContentType('index.html','text/html; charset=utf-8'),true);
+ assert.equal(allowedContentType('mental-lab/src/app.js','application/javascript'),true);
+ assert.equal(allowedContentType('mental-lab/src/app.js','text/javascript; charset=utf-8'),true);
+ assert.equal(allowedContentType('index.html','application/octet-stream'),false);
+ assert.equal(allowedContentType('mental-lab/src/app.js','text/plain'),false);
+ assert.equal(allowedContentType('unknown.exe','application/octet-stream'),false);
+});
