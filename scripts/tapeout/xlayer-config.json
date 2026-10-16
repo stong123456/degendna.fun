@@ -1,0 +1,14 @@
+{
+  "source": "https://github.com/TapeOutProtocol/TapeKit/blob/40994bd65baedbda4df72cb0985031a5f082f606/kernel/src/config.js",
+  "sourceCommit": "40994bd65baedbda4df72cb0985031a5f082f606",
+  "chainId": 196,
+  "rpcs": ["https://rpc.xlayer.tech", "https://xlayer.drpc.org"],
+  "factory": "0x1f09daefa827f02cbb40967cc91b259763760761",
+  "opener": "0x536add8f30f03b69f6fbf29d425a816a0dc50106",
+  "registry": "0xd6efb7adcc9c83dc4924ad56f6a8e4e969b9adb6",
+  "binding": "0x68809fd2fb343aa57d0aeb7f33defe477c9666f9",
+  "implementations": {
+    "registry": "0xa85c4143d1d4a77f54b8e4ecc9e6d1418afea45f",
+    "binding": "0x5ebf29b80789e548907c707530c3c7607c4347df"
+  }
+}

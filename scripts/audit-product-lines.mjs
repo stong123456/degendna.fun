@@ -63,6 +63,7 @@ for (const name of [
   "current-state.js",
   "result-insights.js",
   "report-text.js",
+  "build-mode.js",
 ]) {
   const source = await readFile(
     new URL(`../public/mental-lab/src/${name}`, import.meta.url),
@@ -76,6 +77,10 @@ for (const name of [
     ),
   );
 }
+const accountSource = await readFile(new URL("../public/mental-lab/src/account.js", import.meta.url),"utf8");
+check("account transport is isolated from private local records",()=>assert.ok(!/localStorage|localStore|readDraft|getRecords|scoreAssessment|JSON\.parse\(.*storage/.test(accountSource)));
+const versionSource = await readFile(new URL("../public/mental-lab/src/version.js", import.meta.url),"utf8");
+check("public version verifier never reads private local records",()=>assert.ok(!/localStorage|localStore|readDraft|getRecords/.test(versionSource)));
 const html = await readFile(
   new URL("../public/index.html", import.meta.url),
   "utf8",
