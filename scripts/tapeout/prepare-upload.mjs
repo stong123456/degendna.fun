@@ -1,8 +1,9 @@
 // Produces an unsigned, public-file upload inventory. No keys, RPC or transactions.
 import {readFile,writeFile,mkdir,readdir,lstat} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
 import {resolve,join,relative,extname} from 'node:path';
 import {createHash} from 'node:crypto';
-const root=resolve(new URL('../..',import.meta.url).pathname),args=process.argv.slice(2);
+const root=fileURLToPath(new URL('../..',import.meta.url)),args=process.argv.slice(2);
 const dir=resolve(args.includes('--directory')?args[args.indexOf('--directory')+1]:join(root,'dist/deweb'));
 const output=resolve(args.includes('--output')?args[args.indexOf('--output')+1]:join(root,'docs/accelerator/upload-plan.json'));
 const hash=b=>createHash('sha256').update(b).digest('hex');
