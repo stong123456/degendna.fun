@@ -5,5 +5,5 @@ export function allowedContentType(path,type){
  const expected={'.html':['text/html'],'.js':['text/javascript','application/javascript'],'.css':['text/css'],'.json':['application/json'],'.png':['image/png'],'.ico':['image/x-icon','image/vnd.microsoft.icon','application/octet-stream']};
  // This extensionless license is a download, never executable app content.
  // The external publisher assigns unknown extensions application/octet-stream.
- return (expected[extname(path)]||(path==='mental-lab/vendor/lucide-LICENSE'?['text/plain','application/octet-stream']:[])).includes(base);
+ return (expected[extname(path)]||(/^mental-lab\/(?:v[0-9]{8}-[a-z0-9-]{1,32}\/)?vendor\/lucide-LICENSE$/.test(path)?['text/plain','application/octet-stream']:[])).includes(base);
 }

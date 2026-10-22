@@ -25,4 +25,18 @@ test('chain verifier rejects non-executable MIME types even when public file byt
  assert.equal(allowedContentType('index.html','application/octet-stream'),false);
  assert.equal(allowedContentType('mental-lab/src/app.js','text/plain'),false);
  assert.equal(allowedContentType('unknown.exe','application/octet-stream'),false);
+ assert.equal(allowedContentType('mental-lab/v20261022-plain3/vendor/lucide-LICENSE','application/octet-stream'),true);
+});
+
+test('versioned DeWEB resources preserve old paths and switch one small entry',async()=>{
+ const namespace='v20261022-plain3',releaseDir=`release/${namespace}`;
+ execFileSync(process.execPath,['scripts/build-public-release.mjs','--deweb','--namespace',namespace]);
+ const manifestPath=`dist/deweb/${releaseDir}/manifest.json`,first=await readFile(manifestPath,'utf8'),m=JSON.parse(first);
+ execFileSync(process.execPath,['scripts/build-public-release.mjs','--deweb','--namespace',namespace]);assert.equal(await readFile(manifestPath,'utf8'),first);
+ assert.equal(m.releaseDirectory,releaseDir);assert.ok(m.files.every(f=>['/index.html','/favicon.ico'].includes(f.path)||f.path.startsWith(`/mental-lab/${namespace}/`)));
+ const index=await readFile('dist/deweb/index.html','utf8');assert.ok(index.includes(`/mental-lab/${namespace}/src/app.js`));assert.ok(Buffer.byteLength(index)<24000);
+ const version=await readFile(`dist/deweb/mental-lab/${namespace}/src/version.js`,'utf8');assert.ok(version.includes(`/${releaseDir}/manifest.json`));assert.ok(version.includes(`/${releaseDir}/deployment.json`));
+ for(const f of m.files){const b=await readFile('dist/deweb'+f.path);assert.equal(hash(b),f.sha256);}
+ const {mkdtemp,rm}=await import('node:fs/promises'),{tmpdir}=await import('node:os'),{join}=await import('node:path'),temp=await mkdtemp(join(tmpdir(),'versioned-deweb-'));
+ try{execFileSync(process.execPath,['scripts/tapeout/prepare-upload.mjs','--directory','dist/deweb','--release-dir',releaseDir,'--output',join(temp,'plan.json')]);const plan=JSON.parse(await readFile(join(temp,'plan.json'),'utf8'));assert.equal(plan.fileCount,m.files.length+2);assert.ok(plan.files.some(f=>f.path===`${releaseDir}/manifest.json`));assert.ok(!plan.files.some(f=>f.path==='release/deployment.json'));}finally{await rm(temp,{recursive:true,force:true});}
 });
