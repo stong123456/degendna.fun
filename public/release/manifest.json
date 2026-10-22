@@ -1,7 +1,7 @@
 {
   "format": "degendna-public-release-v1",
   "mode": "web",
-  "sourceRevision": "public-files:3401c17c14a5771d06cf62164a8cad263b6a2105e337866b800ab66513586cd1",
+  "sourceRevision": "public-files:3a481707336be46de0f51db88421e939a6ec5962d23bfd6c955db0768d50ba7d",
   "interpretationVersion": "reflection-20261016-v2",
   "typeVersion": "types-20261016-v2",
   "stateVersion": "current-state-20260927",
@@ -118,8 +118,13 @@
   "files": [
     {
       "path": "/index.html",
-      "bytes": 933,
-      "sha256": "ead401251829d260faf97ffb3989cd96be23747d1d9e7e11c6d3ee7289ed9185"
+      "bytes": 914,
+      "sha256": "8f4f826280ecd90720dff804670b9ae17455959682452f2588a4f34c9d29053a"
+    },
+    {
+      "path": "/favicon.ico",
+      "bytes": 1376,
+      "sha256": "e80041bcd4acdc9649131d4709401462a49be77d3b2a02cd821513c8f573ca4f"
     },
     {
       "path": "/mental-lab/assets/apple-touch-icon.png",
@@ -148,28 +153,28 @@
     },
     {
       "path": "/mental-lab/src/account.js",
-      "bytes": 11737,
-      "sha256": "227949956c738fc596f98d32fe13c0f5fdf8ab03b5b1287c6a9047714423a4e0"
+      "bytes": 11638,
+      "sha256": "7f05bace40bd518552be9c2ad004b6720f1f4f67c9daf0b383b0ec9316fe7f94"
     },
     {
       "path": "/mental-lab/src/app.js",
-      "bytes": 54409,
-      "sha256": "cda6389f23c553a506d49ca88e21344526c793bd8d5a6a92c5a5e77f4a625260"
+      "bytes": 53579,
+      "sha256": "73b3df5bb78c7fd406141e673f736d22e15ff982a268ce02c43782f656353a32"
     },
     {
       "path": "/mental-lab/src/assessments.js",
-      "bytes": 27421,
-      "sha256": "9f3c09308a17be61e88b35755f2a1a78d47cfb845949788fe58658d7169852bd"
+      "bytes": 27254,
+      "sha256": "2b446d4d5377586f609fd87bec6d938c0ef573a542f324425153cdf66a0cc427"
     },
     {
       "path": "/mental-lab/src/build-mode.js",
-      "bytes": 250,
-      "sha256": "28a1e555142d7a24f9b49f244258bb69d8d5de3d4a18de77ecc5eab8858fe538"
+      "bytes": 248,
+      "sha256": "e70e206e5cb955a2795c46c7c5ff2a1119ec7f855314e1a1f9344571482e96d8"
     },
     {
       "path": "/mental-lab/src/care-tools.js",
-      "bytes": 6933,
-      "sha256": "8534bd5f345bb7ba40628e4bbff55715459138466343de95468ee662f04a8394"
+      "bytes": 6879,
+      "sha256": "32eb8b447c24e1350c6f93a12bc1fb7f30427f301bf4ba3985df2edc7035ea8b"
     },
     {
       "path": "/mental-lab/src/current-state.js",
@@ -178,38 +183,38 @@
     },
     {
       "path": "/mental-lab/src/play.js",
-      "bytes": 13010,
-      "sha256": "9a639b1461fd934c176c6636204098397b3d72a4d5a68d49b09677f74be9b16c"
+      "bytes": 12721,
+      "sha256": "11b36105e8410a150975917873cf2f13cdcfea54d5c1cfb8363a0a64f2208e8f"
     },
     {
       "path": "/mental-lab/src/privacy.js",
-      "bytes": 19227,
-      "sha256": "bbba172872231b5b8256f786515b3c8764884513aba4c370a1850ef568d76b03"
+      "bytes": 18664,
+      "sha256": "3bf337c07a4fe1288121ac856765f5ce9a11af929fcbb76a28968db24135c9b7"
     },
     {
       "path": "/mental-lab/src/recent-type.js",
-      "bytes": 9654,
-      "sha256": "e76c2c5e75a0e1935fc50c6a5c7ef0669e8bbb3f55f0ef546fcf0156029c6eac"
+      "bytes": 9583,
+      "sha256": "4882329c93ab941f087e94295e1d6f3b3ac6b17a4ad730f663e5aa2bd9bc96f0"
     },
     {
       "path": "/mental-lab/src/report-copy.js",
-      "bytes": 7277,
-      "sha256": "ab0893d98d0ed3c7019da35b54b528b310d629ce07862572e3f3129be08307bf"
+      "bytes": 7227,
+      "sha256": "8591d6691d0e55cbaaab51c130c3cb8e887941d24832629456cb145094a8c55b"
     },
     {
       "path": "/mental-lab/src/report-text.js",
-      "bytes": 1630,
-      "sha256": "c54d574e108e508a5b5d7e901bcbd5ed8035902fb26d33d74d46bddcb364d449"
+      "bytes": 1610,
+      "sha256": "12ae93d9b233d71c4f116df21396c1fd0bd4f93ddbbbe3ebbb74c06adc67c13a"
     },
     {
       "path": "/mental-lab/src/reset.js",
-      "bytes": 11760,
-      "sha256": "03ddd2866b3826681fc8b73273f7b6ba0ae589043ca0f3a7c602d1d2651ad84a"
+      "bytes": 11433,
+      "sha256": "78befed11d90f1da88d044f9477d63db73ee326f0e5eab9d23628d7e59a0d7e8"
     },
     {
       "path": "/mental-lab/src/result-insights.js",
-      "bytes": 16397,
-      "sha256": "65021c2fe1e464055995c5c2f82b148e71d2c762bfcb7c3062d133fb4a836c7f"
+      "bytes": 16319,
+      "sha256": "80a23c5b18dc854818c6c81a88327118f525050c73d3729f639266bcbfde9457"
     },
     {
       "path": "/mental-lab/src/scene-assessments.js",
@@ -218,28 +223,28 @@
     },
     {
       "path": "/mental-lab/src/scoring.js",
-      "bytes": 20007,
-      "sha256": "5fef3b99b97bafbae5d3ddf68398eea7b59458c63a1f930504d95931ff6e62ce"
+      "bytes": 19806,
+      "sha256": "ff7564a75efd759a11c4c7d909c5cb833a8fa448a929236fdb1aa7dcf96b0af7"
     },
     {
       "path": "/mental-lab/src/storage.js",
-      "bytes": 409,
-      "sha256": "14c5f3ba50590e4dc7b41f0f913e001eb73f77f6d78e33b0b35e1c1fa2d32a0d"
+      "bytes": 396,
+      "sha256": "e8c1ffc255085b60d513b82e28ba2186df61e2243a5f500bfc8d06a6db71944f"
     },
     {
       "path": "/mental-lab/src/styles.css",
-      "bytes": 45152,
-      "sha256": "b99470fc8cc440ea97fea13642e8c8694f7c0bacff10a6f8f44877c494848464"
+      "bytes": 44619,
+      "sha256": "aae13b06a6117f64cb015a7226f5a853f3973f23d3cc7eaa64fb252df46a909a"
     },
     {
       "path": "/mental-lab/src/trading-topics.js",
-      "bytes": 16624,
-      "sha256": "40022faf1bb5588f081089e3843bc2f4f9541ffdab7c6d9159751d89ecf89bc2"
+      "bytes": 16148,
+      "sha256": "03aa75824c0052b5ba27df63f009ac7bd0805dbe4fb2a2ab3cd59d4edf329413"
     },
     {
       "path": "/mental-lab/src/version.js",
-      "bytes": 4582,
-      "sha256": "801ac5275151e4ce09c0a0564455c44fdc0023e8f988f46b24f66a6ee8cb126c"
+      "bytes": 4562,
+      "sha256": "edb28c84d01b6346c421949facdd9e4df8021702d318e345bf2f3ead9f5f184f"
     },
     {
       "path": "/mental-lab/vendor/lucide-LICENSE",
@@ -252,5 +257,5 @@
       "sha256": "fc3ec2766fddfbe26905acbd3a46e2bad7a8f8ac7ef5f30e3707b5abb750cf9a"
     }
   ],
-  "releaseId": "00de8afa876fa876f9b4abec1a372e1e6e7676bf25493c9fc6ba3cca4125e06a"
+  "releaseId": "9c92c33f4fbaffcf3173eac262e33e9edfc7908cd29e61ab53dcfc25f0e05aad"
 }
