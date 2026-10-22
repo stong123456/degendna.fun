@@ -1,4 +1,5 @@
 import { isCurrentRecord } from './scoring.js';
+import { plainFacet } from './plain-reflections.js';
 import { tradingTopics } from './trading-topics.js';
 import { sceneAssessments } from './scene-assessments.js';
 
@@ -40,7 +41,7 @@ function facetProfile(result) {
   return result.domains.map(d => ({
     key: d.key, label: d.label, kind: d.kind, answered: d.answered, total: d.total,
     state: !d.interpretable ? 'incomplete' : d.frequent >= 2 && d.frequent / d.answered >= 0.5 ? 'prominent' : d.frequent || d.occasional ? 'sometimes' : 'infrequent',
-    description: !d.interpretable ? '回答还不够，先不概括。' : d.frequent >= 2 && d.frequent / d.answered >= 0.5 ? (d.kind === 'resource' ? '你较常提到的支持或做法。' : '你较常提到、值得照顾的感受。') : d.frequent || d.occasional ? '有些回答提到过，暂不作为突出特点。' : '这部分主要选了从不或很少，不代表其他方面没有困难。',
+    description: plainFacet(result.id,d)?.reading, humanTitle: plainFacet(result.id,d)?.title,
     frequent: d.frequent, occasional: d.occasional, infrequent: d.infrequent, evidence: d.evidence, action: d.action
   }));
 }
@@ -53,7 +54,7 @@ export function recentType(result) {
   const candidates = catalog[result.id].flatMap(t => {
     const groups = t.keys.map(key => result.domains.find(d => d.key === key));
     if (!groups.every(d => d?.interpretable && d.frequent >= 2 && d.frequent / d.answered >= 0.5)) return [];
-    return [{ ...t, strength: Math.min(...groups.map(d => d.frequent / d.answered)), evidence: groups.flatMap(d => d.evidence.filter(e => e.value >= 3)), action: groups[0].action }];
+    return [{ ...t, text: groups.map(d=>{const p=plainFacet(result.id,d);return `${p.reading} ${p.care}`;}).join(' '), strength: Math.min(...groups.map(d => d.frequent / d.answered)), evidence: groups.flatMap(d => d.evidence.filter(e => e.value >= 3)), action: plainFacet(result.id,groups[0]).step }];
   }).sort((a, b) => b.strength - a.strength);
   if (!candidates.length) return { ...base, state: 'none', text: '这次没有特别突出的类型。我们不把“没有类型”当成健康证明，也不需要给每个人都贴一个名字。' };
   const scene = sceneAssessments.find(s => s.id === result.id);
@@ -61,7 +62,7 @@ export function recentType(result) {
   if (close.length === 2 && scene) {
     const pair = typeOptions(result.id).find(t => t.keys.length === 2 && close.every(c => t.keys.includes(c.keys[0])));
     return { ...base, ...pair, state: 'matched', composite: true,
-      text: '这两种特点在本次回答中都比较突出。它们可以同时存在，我们不把其中一种当成另一种的原因，也不把支持当成抵消困难的分数。',
+      text: close.map(c=>c.text).join(' ') + ' 两种经历可以同时存在，不用强迫自己只选一面；这里也不能认定它们互为原因。',
       evidence: close.flatMap(c => c.evidence), action: close.map(c => c.action).join(' 或者：') };
   }
   if (close.length > 1) return { ...base, state: 'mixed', text: '几种特点同时出现，现在不急着选一个主类型。下面分开呈现它们，你可以看看哪一部分最贴近自己。' };

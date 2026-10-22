@@ -531,3 +531,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .record-actions{display:flex;flex-wrap:wrap;gap:10px;max-width:310px;justify-content:flex-end;}.record-actions button{margin:0;min-height:44px;}
 @media(max-width:700px){.record-card{align-items:stretch;flex-direction:column;gap:12px;}.record-actions{justify-content:flex-start;max-width:none;}.records-toolbar{display:grid;gap:10px;}.records-toolbar label{min-width:0;}.report-jumps a{flex:1 1 40%;justify-content:center;}}
 .records-head{flex-wrap:wrap;align-items:flex-start;}.records-head>div{flex:1 1 280px;min-width:0;}.records-head>.ghost-action{flex-shrink:0;min-height:44px;white-space:nowrap;}
+
+/* Plain-language reflections: readable process, care and one concrete step. */
+.insight-reading{line-height:1.95}.insight-care{border-left:3px solid var(--accent,#68867d);padding:10px 14px;background:var(--panel-soft,rgba(128,150,140,.07));line-height:1.9}.insight-boundary{margin-bottom:20px}.insight-card>h4{font-size:1.12rem;line-height:1.65}.insight-card>p:last-child{font-weight:500;line-height:1.95}

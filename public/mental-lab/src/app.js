@@ -517,6 +517,7 @@ function resultPanel(result) {
   if (!isCurrentRecord(result)) return el("p", {}, "旧版结果不作新版解释，请重新自查。旧记录仍保留在本地。" );
   result = humanizeReport(result);
   const status = currentState(result);
+  const leadWithSupport = ['support-now','daily-impact','worsening','specific-concern','struggling'].includes(status.kind);
   const previous = previousComparableRecord(result, getRecords());
   const comparison = previous ? compareRecords(result, previous) : [];
   return el("section", { id: "result", class: "reflection-report", "aria-label": "多维回答报告" }, [
@@ -531,6 +532,7 @@ function resultPanel(result) {
     el('nav',{class:'report-jumps','aria-label':'报告内容导航'},[
       ['report-actions','行动建议'],['report-insights','优势与消耗'],['report-evidence','完整回答依据'],['report-review','前后回看']
     ].map(([id,label])=>el('a',{href:'#'+id,onclick:e=>{e.preventDefault();const target=document.getElementById(id);target?.scrollIntoView({block:'start'});target?.focus({preventScroll:true});}},label))),
+    !leadWithSupport ? insightsPanel(result) : null,
     el('div',{id:'report-actions',tabindex:'-1'},reportSection('接下来怎么改善：按这个顺序开始', status.steps.map(step=>el('article',{class:'state-step'},[el('small',{},step.when),el('h3',{},step.title),el('p',{},step.text)])))),
     el('details',{class:'report-section'},[el('summary',{},'怎样知道调整有没有帮助？什么时候需要更多支持？'),el('p',{},status.checkpoint),el('p',{},status.escalation)]),
     el('details', {class:'report-section'}, [el('summary',{},'回看本次回答摘要'),el('p',{class:'report-summary'},result.summary)]),
@@ -543,7 +545,7 @@ function resultPanel(result) {
       el('p',{},'先选一个用得上的动作。工具不会自动接收你的自查答案；不想做也可以。'),
       el('div',{class:'care-options'},recommendedTools(result).map(t=>el('button',{class:'secondary',onclick:()=>{state.resetTool=t.id;setRoute('reset');}},t.title)))
     ]),
-    insightsPanel(result),
+    leadWithSupport ? insightsPanel(result) : null,
     recentTypePanel(result),
     ...result.warnings.map((text) => el("p", { class: "note-band" }, text)),
     el('div',{id:'report-evidence',tabindex:'-1'},reportSection("01 / 从你愿意分享的事情说起", [el("p", {}, "下面既有让你费心的事，也有可能帮到你的事。回答还少的地方，我们先不猜。你可以只看现在最关心的一部分。"), ...result.domains.map(domainPanel)])),
@@ -572,16 +574,16 @@ function insightsPanel(result) {
   const profile = resultInsights(result);
   if (!profile) return null;
   const card = (d) => el('article', {class:'insight-card', 'data-domain':d.key}, [
-    el('h4',{},d.label),el('p',{},d.reading),
-    el('details',{},[el('summary',{},'哪些回答支持这一点？'),evidenceList(d.evidence)]),
-    el('p',{},`${d.kind==='resource'?'保留与使用':'可尝试的一步'}：${d.action}`)
+    el('h4',{},d.humanTitle),el('p',{class:'insight-reading'},d.reading),el('p',{class:'insight-care'},d.care),
+    el('details',{},[el('summary',{},'看看依据，也核对这段话像不像我'),evidenceList(d.evidence),d.hypothesis?el('p',{},d.hypothesis):null]),
+    el('p',{},`${d.kind==='resource'?'这份力量，可以这样留住':'今天先试这一小步'}：${d.nextStep}`)
   ]);
   const exercise = profile.exercise;
   return el('div',{id:'report-insights',tabindex:'-1'},reportSection('了解自己的不同侧面：优势、消耗与调整方向',[
-    el('p',{},profile.lens),el('p',{class:'coverage-note'},profile.boundary),
+    el('p',{},'先看看有没有说中你的心事，再选一件今天做得到的小事。不贴近的理解，可以不接受。'),el('details',{class:'insight-boundary'},[el('summary',{},'这些理解怎么用'),el('p',{},profile.boundary)]),
     el('div',{class:'insight-grid'},[
-      el('section',{},[el('h3',{},'已有优势与资源'),...(profile.strengths.length?profile.strengths.map(card):[el('p',{},profile.strengthsEmpty)])]),
-      el('section',{},[el('h3',{},'值得留意的消耗与盲点'),...(profile.costs.length?profile.costs.map(card):[el('p',{},profile.costsEmpty)])])
+      el('section',{},[el('h3',{},'值得留意的消耗与盲点'),...(profile.costs.length?profile.costs.map(card):[el('p',{},profile.costsEmpty)])]),
+      el('section',{},[el('h3',{},'已有优势与资源'),...(profile.strengths.length?profile.strengths.map(card):[el('p',{},profile.strengthsEmpty)])])
     ]),
     profile.bridge?el('p',{class:'note-band'},profile.bridge):null,
     profile.unknown.length?el('p',{class:'note-band'},`暂不能概括：${profile.unknown.join('、')}。未答不会当作没有困难。`):null,
@@ -610,7 +612,7 @@ function recentTypePanel(result) {
     el('h3', {}, '不只看一个名字：分开看你的不同侧面'),
     el('p', {}, '下面描述的是回答出现的频率。困难与支持可以并存，不相互加减，也不是能力排名。'),
     el('div', {class:'facet-grid'}, (profile.facets || []).map(facet => el('article', {class:`facet-card ${facet.kind}`, 'data-facet':facet.key}, [
-      el('small', {}, facet.kind === 'resource' ? '已有的做法与支持' : '值得照顾的处境'), el('h3', {}, facet.label), el('p', {}, facet.description),
+      el('small', {}, facet.kind === 'resource' ? '已有的做法与支持' : '值得照顾的处境'), el('h3', {}, facet.humanTitle || facet.label), el('p', {}, facet.description),
       el('details', {}, [el('summary', {}, `查看这方面的 ${facet.answered}/${facet.total} 个回答`), evidenceList(facet.evidence)])
     ]))),
     el("p", { class: "coverage-note" }, "这是近期回答的概括，会随生活变化，不是诊断。代号只是名字的编号，不是分数或排名。"),
@@ -624,12 +626,12 @@ function evidenceList(evidence) {
 
 function domainPanel(domain) {
   return el("article", { class: `domain-report kind-${domain.kind}` }, [
-    el("div", { class: "domain-heading" }, [el("h3", {}, domain.label), el("span", {}, domain.kind === "resource" ? "可能帮到你的事" : "值得照顾的感受")]),
-    el("p", { class: "domain-interpretation" }, domain.interpretation),
+    el("div", { class: "domain-heading" }, [el("h3", {}, domain.humanTitle || domain.label), el("span", {}, domain.kind === "resource" ? "可能帮到你的事" : "值得照顾的感受")]),
+    el("p", { class: "domain-interpretation" }, domain.interpretation),domain.care?el("p",{class:"insight-care"},domain.care):null,
     el("details", {}, [el("summary", {}, `看看我在这里怎么回答的（${domain.answered}/${domain.total}）`), el("div", { class: "frequency-distribution" }, [
       el("span", {}, `从不 / 很少 ${domain.infrequent} 项`), el("span", {}, `有时 ${domain.occasional} 项`), el("span", {}, `经常 / 几乎总是 ${domain.frequent} 项`)
     ]), evidenceList(domain.evidence)]),
-    el("p", {}, `可以尝试的一步：${domain.action}`),
+    el("p", {}, `今天先试这一小步：${domain.nextStep || domain.action}`),
     el("p", {}, `如果愿意，可以想一想：${domain.reflection}`),
     el("details", {}, [el("summary", {}, "这一部分还不能说明什么？"), el("p", {}, domain.limit)])
   ]);

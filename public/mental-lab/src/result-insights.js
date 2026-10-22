@@ -1,8 +1,9 @@
 import { assessmentMap } from './assessments.js';
 import { isCurrentRecord } from './scoring.js';
+import { plainFacet, plainIntros } from './plain-reflections.js';
 
 // Presentation rules only. No new trait score, clinical cut-off or saved-answer schema.
-export const insightVersion = 'reflection-20261016-v2';
+export const insightVersion = 'reflection-20261022-v3';
 const guide = (lens, exercise, example, trap, checkpoint, question) => ({ lens, exercise, example, trap, checkpoint, question });
 export const moduleGuides = {
   quick: guide('把精力、情绪、日常恢复和支持空间分开看，了解最近的负担与支点。', '选最近一次最费力的时刻，写下事件、身体或情绪反应、需要的帮助，各一句。', '例如：消息堆积 → 很累、难集中 → 今天请人协助一件必要小事。', '别把疲惫直接解释为懒惰，也别因为仍能做事就忽略休息需要。', '看一件必要的生活任务是否更容易完成，以及有没有获得实际帮助。', '你现在最需要减少什么，又希望保留什么？'),
@@ -36,19 +37,10 @@ export function resultInsights(result) {
     const resource = d.kind === 'resource';
     const evidence = d.evidence.filter(e => e.value >= 3);
     const state = !d.interpretable ? 'incomplete' : d.frequent ? 'frequent' : d.occasional ? 'occasional' : 'infrequent';
-    const reading = state === 'incomplete'
-      ? `只有 ${d.answered}/${d.total} 项有效回答，暂不推断这一侧面的倾向。`
-      : resource && d.frequent
-        ? `在“${definition.label}”方面，${d.frequent}/${d.answered} 项做法或支持较常出现。这是你已经报告的可用支点，是否有帮助仍要看实际感受。`
-        : resource
-          ? `“${definition.label}”${d.occasional ? '有些做法偶尔出现' : '近期较少被报告'}。这不能说明你缺少能力，也可能没有相应需要、机会或条件。`
-          : d.frequent
-            ? `在“${definition.label}”方面，${d.frequent}/${d.answered} 项体验较常出现。先看具体条目，不能把整组每一种体验都认定为你的特点。`
-            : d.occasional
-              ? `“${definition.label}”有 ${d.occasional}/${d.answered} 项选择“有时”。可以留意对应场景和影响，不把偶发体验定为固定缺点。`
-              : `“${definition.label}”已答项目都为从不或很少；仅描述本次观察期，不能反推出稳定性格或能力。`;
+    const plain = plainFacet(result.id,d);
+    const reading = plain.reading;
     return { key: d.key, kind: d.kind, label: definition.label, answered: d.answered, total: d.total, frequent: d.frequent, occasional: d.occasional,
-      state, reading, meaning: definition.meaning, action: definition.action, limit: definition.limit,
+      state, reading, humanTitle: plain.title, care: plain.care, nextStep: plain.step, hypothesis: plain.hypothesis, grounded: plain.grounded, meaning: definition.meaning, action: definition.action, limit: definition.limit,
       evidence: state === 'incomplete' ? [] : evidence.length ? evidence : d.evidence.filter(e => e.value === 2),
       // One high-frequency item is shown specifically; it does not qualify the whole domain as a strength.
       strength: resource && d.interpretable && d.frequent >= 2 && d.frequent / d.answered >= .5 };
@@ -56,21 +48,21 @@ export function resultInsights(result) {
   const strengths = facets.filter(d => d.strength).sort(byFrequency);
   const costs = facets.filter(d => d.kind === 'burden' && ['frequent', 'occasional'].includes(d.state)).sort(byFrequency);
   const unknown = facets.filter(d => d.state === 'incomplete').map(d => d.label);
-  const bridge = costs.length && strengths.length ? `你既报告了“${costs[0].label}”中的消耗，也报告了“${strengths[0].label}”中的支点。可以核对：下一次遇到前一种情境时，后一种做法是否用得上？如果用不上，缺少什么条件？这只是反思方向，不说明两者有因果关系。` : null;
-  return { version: insightVersion, lens: g.lens, facets, strengths, costs, unknown, bridge,
+  const bridge = costs.length && strengths.length ? `你可以一边遇到这些难处，一边仍保有照顾自己的办法。先保留真正帮过你的一小件事，不用拿它证明自己不该难受；做不到的时候，也可以请别人搭把手。` : null;
+  return { version: insightVersion, lens: plainIntros[result.id], facets, strengths, costs, unknown, bridge,
     strengthsEmpty: '目前没有足够回答支持概括一项较常使用的优势或资源。这不是“没有优点”；这套题也没有测量你的全部能力。',
     costsEmpty: '回答充分的部分没有报告有时或更常出现的困扰。未回答、未问到的困难仍未知，不能据此说你没有盲点。',
     exercise: { ...g, matched: costs.length > 0 || strengths.length > 0,
-      focus: costs[0]?.label || strengths[0]?.label || null,
-      firstStep: costs[0]?.action || strengths[0]?.action || '如果愿意，从一次具体经历开始，描述发生了什么、当时的反应和需要；也可以保留空白。' },
-    boundary: '这里描述的是本次观察期中的行为、感受与支持条件，不是终身性格测量。优势与困扰可以并存，不能相互抵消；建议是可选择的自我观察练习，不是个体化治疗处方。' };
+      focus: costs[0]?.humanTitle || strengths[0]?.humanTitle || null,
+      firstStep: costs[0]?.nextStep || strengths[0]?.nextStep || '如果愿意，从一次具体经历开始，描述发生了什么、当时的反应和需要；也可以保留空白。' },
+    boundary: '下面试着理解你最近的经历，不是在读心、诊断或给性格定型。可能的原因请用自己的经历核对，不贴近的部分可以不接受；有支持，也仍然可以难受。' };
 }
 
 export function insightsText(result) {
   const p = resultInsights(result);
   if (!p) return [];
-  return [`解读版本：${p.version}`, p.lens, '已有优势与资源', ...(p.strengths.length ? p.strengths.flatMap(d => [d.reading, ...d.evidence.map(e => `依据：${e.text}：${e.response}`), `保留方式：${d.action}`]) : [p.strengthsEmpty]),
-    '值得留意的消耗与盲点', ...(p.costs.length ? p.costs.flatMap(d => [d.reading, ...d.evidence.map(e => `依据：${e.text}：${e.response}`), `可尝试：${d.action}`]) : [p.costsEmpty]),
+  return [`解读版本：${p.version}`, p.lens, '已有优势与资源', ...(p.strengths.length ? p.strengths.flatMap(d => [d.humanTitle, d.reading, d.care, ...(d.hypothesis ? [d.hypothesis] : []), ...d.evidence.map(e => `依据：${e.text}：${e.response}`), `保留方式：${d.nextStep}`]) : [p.strengthsEmpty]),
+    '值得留意的消耗与盲点', ...(p.costs.length ? p.costs.flatMap(d => [d.humanTitle, d.reading, d.care, ...(d.hypothesis ? [d.hypothesis] : []), ...d.evidence.map(e => `依据：${e.text}：${e.response}`), `可尝试：${d.nextStep}`]) : [p.costsEmpty]),
     ...(p.bridge ? [p.bridge] : []),
     ...(p.unknown.length ? [`暂不能概括：${p.unknown.join('、')}`] : []),
     p.exercise.matched ? '与你的回答对应的一步' : '可选的一般场景练习（尚无足够个体依据）', p.exercise.firstStep,
