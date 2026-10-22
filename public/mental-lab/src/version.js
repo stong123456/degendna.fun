@@ -13,7 +13,7 @@ export function versionView(el) {
       el('details',{},[el('summary',{},'各测评题库版本'),el('ul',{},manifest.modules.map(m=>el('li',{},`${m.title}：${m.version}，${m.scope}`)))]),
       el('button',{class:'primary',disabled:busy,onclick:async()=>{busy=true;error='';checks=[];render();try{
         if(!Array.isArray(manifest.files)||manifest.files.length>128)throw Error('清单范围异常。');
-        for(const f of manifest.files){if(!/^\/(?:index\.html|mental-lab\/[a-zA-Z0-9_./-]+\.(?:js|css|png)|mental-lab\/vendor\/lucide-LICENSE)$/.test(f.path)||f.path.includes('..')||!Number.isInteger(f.bytes)||f.bytes>8400000)throw Error('文件路径或大小不受支持。');
+        for(const f of manifest.files){if(!/^\/(?:index\.html|favicon\.ico|mental-lab\/[a-zA-Z0-9_./-]+\.(?:js|css|png)|mental-lab\/vendor\/lucide-LICENSE)$/.test(f.path)||f.path.includes('..')||!Number.isInteger(f.bytes)||f.bytes>8400000)throw Error('文件路径或大小不受支持。');
           const r=await fetch(f.path,{cache:'no-store',credentials:'omit'});if(!r.ok)throw Error('未能读取公开文件。');const bytes=await r.arrayBuffer();checks.push({path:f.path,match:bytes.byteLength===f.bytes&&await digest(bytes)===f.sha256});
         }
         message=checks.every(c=>c.match)?`已核对 ${checks.length} 个公开文件，均与本清单一致。清单本身的可信来源仍需你独立核对。`:'部分文件与清单不一致，请暂缓使用并核对更新状态。';

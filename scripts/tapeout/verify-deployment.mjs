@@ -23,7 +23,7 @@ for(const name of ['registry','binding']){const impl=await agreed('eth_getStorag
 async function call(address,method,values){const data=abi.encodeFunctionData(method,values),raw=await agreed('eth_call',[{to:address,data},block]);return abi.decodeFunctionResult(method,raw);}
 const [processor]=await call(cfg.factory,'cpuAt',[index]);const [container]=await call(cfg.opener,'accountOf',[processor,id]);const [owner]=await call(processor,'ownerOf',[id]);const [opened]=await call(cfg.opener,'isOpened',[processor,id]);if(!opened)throw Error('Container has not been opened');const [live]=await call(cfg.binding,'isContainerLive',[container]);if(!live)throw Error('Container not activated according to current binding');
 const files=[];
-for(const file of manifest.files){if(!/^\/(?:index\.html|mental-lab\/[a-zA-Z0-9_./-]+\.(?:js|css|png)|mental-lab\/vendor\/lucide-LICENSE)$/.test(file.path)||file.path.includes('..'))throw Error('Unexpected release path');
+for(const file of manifest.files){if(!/^\/(?:index\.html|favicon\.ico|mental-lab\/[a-zA-Z0-9_./-]+\.(?:js|css|png)|mental-lab\/vendor\/lucide-LICENSE)$/.test(file.path)||file.path.includes('..'))throw Error('Unexpected release path');
  const storePath=file.path.slice(1);
  const local=await readFile(join(dir,storePath));if(hash(local)!==file.sha256||local.length!==file.bytes)throw Error('Local file changed: '+file.path);
  const info=await call(cfg.registry,'fileInfo',[container,storePath]);if(!allowedContentType(storePath,info[1])||Number(info[0])!==file.bytes||info[2].slice(2)!==file.sha256||Number(info[4])===0)throw Error('On-chain file metadata differs or is incomplete: '+file.path);

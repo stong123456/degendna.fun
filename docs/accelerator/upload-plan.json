@@ -1,21 +1,42 @@
 {
   "format": "degendna-unsigned-upload-plan-v1",
   "chainId": 196,
-  "releaseId": "8fd32c10b69dce975a349704b519c9822577866287c3e54feb0a4d756fb27323",
+  "releaseId": "b176ee2d0caa361bcb1f66826bb7dc91807249d0f4d01a0cd7a24bd20901d757",
   "chunkBytes": 24000,
   "fallback": "index.html",
   "status": "ready-not-published",
   "transactionsSent": 0,
-  "totalBytes": 744291,
-  "fileCount": 24,
-  "chunkWrites": 46,
+  "totalBytes": 757840,
+  "fileCount": 27,
+  "chunkWrites": 49,
   "fees": "Not estimated; user must review current chain-196 wallet estimates before signing",
   "files": [
     {
+      "path": "favicon.ico",
+      "contentType": "image/x-icon",
+      "bytes": 1376,
+      "sha256": "e80041bcd4acdc9649131d4709401462a49be77d3b2a02cd821513c8f573ca4f",
+      "chunks": 1
+    },
+    {
       "path": "index.html",
       "contentType": "text/html; charset=utf-8",
-      "bytes": 735,
-      "sha256": "3975ec0b47b6b8ba99786510a8be867bcb7636e32150c3b8e1ca39f62de62a45",
+      "bytes": 914,
+      "sha256": "8f4f826280ecd90720dff804670b9ae17455959682452f2588a4f34c9d29053a",
+      "chunks": 1
+    },
+    {
+      "path": "mental-lab/assets/apple-touch-icon.png",
+      "contentType": "image/png",
+      "bytes": 9365,
+      "sha256": "ba06f9de588adc9b7a86f88f13792f7fcc614609cad26ff63acf82faa6c45778",
+      "chunks": 1
+    },
+    {
+      "path": "mental-lab/assets/favicon-48.png",
+      "contentType": "image/png",
+      "bytes": 2127,
+      "sha256": "d299a949970c9c049f1ccd6e4bae8ee60d6af9088bc9448145a725ace023d9a2",
       "chunks": 1
     },
     {
@@ -147,8 +168,8 @@
     {
       "path": "mental-lab/src/version.js",
       "contentType": "text/javascript; charset=utf-8",
-      "bytes": 4549,
-      "sha256": "dad3376cdce844f371e4fbf5547e098f0e871f99d342371bba88b881a5a33252",
+      "bytes": 4562,
+      "sha256": "edb28c84d01b6346c421949facdd9e4df8021702d318e345bf2f3ead9f5f184f",
       "chunks": 1
     },
     {
@@ -169,14 +190,14 @@
       "path": "release/deployment.json",
       "contentType": "application/json",
       "bytes": 206,
-      "sha256": "7878a11986db4a9902c8a64f714603714dda03d6238784e2dc234e4d1d13e673",
+      "sha256": "c24f79bae75431fa5b715181e171805beead5e58427296ba497a0801c7c14ba5",
       "chunks": 1
     },
     {
       "path": "release/manifest.json",
       "contentType": "application/json",
-      "bytes": 6628,
-      "sha256": "6c03c82b21401b82d5a52c892600fd503e3e833efd35cb54b277d43b4ba9500c",
+      "bytes": 7117,
+      "sha256": "390e6f69d1cb196f1ac5fb35e5eca12121d89ae748e9d5119dddef8a597d54a1",
       "chunks": 1
     }
   ]
