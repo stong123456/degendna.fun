@@ -1,6 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {createDewebGateway,createChainReader,published} from '../deweb-gateway.mjs';
 import {Interface} from 'ethers';
+import {createHash} from 'node:crypto';
 const host='degendna-fun-web.fly.dev';
 function response(){return {writeHead(code,headers){this.code=code;this.headers=headers;},end(body){this.body=body;}};}
 const req=(method='GET',hostname=host)=>({method,headers:{host:hostname,cookie:'must-not-be-forwarded'}});
@@ -39,4 +40,31 @@ test('chain reader rejects inactive binding, wrong chain and missing safe blocks
  await assert.rejects(createChainReader(rpc).gate(),/not activated/);
  await assert.rejects(createChainReader(async()=> '0x38').gate(),/Wrong chain/);
  await assert.rejects(createChainReader(async(u,m)=>m==='eth_chainId'?'0xc4':null).gate(),/Safe height/);
+});
+
+test('versioned snapshot loads its own manifest and receipt and rejects corrupted public bytes',async()=>{
+ const cfg=JSON.parse(await (await import('node:fs/promises')).readFile(new URL('../scripts/tapeout/xlayer-config.json',import.meta.url),'utf8'));
+ const sha=b=>createHash('sha256').update(b).digest('hex'),directory='release/v20261022-plain3';
+ const bodies=new Map([['index.html',Buffer.from('<h1>versioned</h1>')],['mental-lab/v20261022-plain3/vendor/lucide-LICENSE',Buffer.from('license')]]);
+ const rows=[...bodies].map(([p,b])=>({path:'/'+p,bytes:b.length,sha256:sha(b)}));
+ const payload={format:'degendna-public-release-v1',mode:'deweb',releaseDirectory:directory,files:rows},releaseId=sha(JSON.stringify(payload));
+ bodies.set(directory+'/manifest.json',Buffer.from(JSON.stringify({...payload,releaseId})));
+ bodies.set(directory+'/deployment.json',Buffer.from(JSON.stringify({format:'degendna-tapeout-deployment-v1',status:'verified',chainId:196,sourceReleaseId:releaseId,deployments:[{container:published.container,files:rows.map(r=>({...r,status:'verified'}))}]})));
+ const publication={...published,releaseId,releaseDirectory:directory,fileCount:2},iface=new Interface(['function fileInfo(address,string) view returns(uint256,string,bytes32,uint256,uint256)','function readRange(address,string,uint256,uint256) view returns(bytes)','function isContainerLive(address) view returns(bool)']);
+ let corrupt=false;
+ const rpc=async(url,method,params)=>{
+  if(method==='eth_chainId')return '0xc4';
+  if(method==='eth_getBlockByNumber')return {number:publication.block,hash:publication.blockHash};
+  if(method==='eth_getStorageAt'){const key=params[0]===cfg.binding?'binding':'registry';return '0x'+'0'.repeat(24)+cfg.implementations[key].slice(2);}
+  if(method==='eth_call'){
+   const call=iface.parseTransaction(params[0]);if(call.name==='isContainerLive')return iface.encodeFunctionResult(call.name,[true]);
+   const p=call.args[1],b=bodies.get(p);assert.ok(b,'unexpected public path '+p);
+   if(call.name==='fileInfo')return iface.encodeFunctionResult(call.name,[b.length,p.endsWith('.html')?'text/html':p.endsWith('.json')?'application/json':'text/plain','0x'+sha(b),1,1]);
+   const data=corrupt&&p==='index.html'?Buffer.from('wrong'):b;return iface.encodeFunctionResult(call.name,[data.subarray(Number(call.args[2]),Number(call.args[2]+call.args[3]))]);
+  }
+  throw Error('Unexpected RPC');
+ };
+ const files=await createChainReader(rpc,publication).snapshot();assert.equal(files.size,4);assert.ok(files.has('/'+directory+'/manifest.json'));assert.ok(files.has('/'+directory+'/deployment.json'));assert.equal(files.get('/index.html').bytes.toString(),'<h1>versioned</h1>');
+ corrupt=true;await assert.rejects(createChainReader(rpc,publication).snapshot(),/bytes mismatch/);
+ assert.throws(()=>createChainReader(rpc,{...publication,releaseDirectory:'release/../private'}),/Invalid pinned/);
 });
