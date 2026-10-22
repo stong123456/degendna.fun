@@ -9,6 +9,7 @@ primary_region = "sin"
   PORT = "8080"
   PUBLIC_SITE_URL = "https://degendna.fun"
   PUBLIC_SITE_HOST = "degendna.fun"
+  DEWEB_GATEWAY_HOST = "degendna-fun-web.fly.dev"
 
 [http_service]
   internal_port = 8080
