@@ -1,8 +1,8 @@
 {
   "format": "degendna-public-release-v1",
   "mode": "web",
-  "sourceRevision": "public-files:3a481707336be46de0f51db88421e939a6ec5962d23bfd6c955db0768d50ba7d",
-  "interpretationVersion": "reflection-20261016-v2",
+  "sourceRevision": "public-files:42bf01a766ff0574abe347e9f0e4f7efa1b16b6ec7b4c525ff541ff49457e865",
+  "interpretationVersion": "reflection-20261022-v3",
   "typeVersion": "types-20261016-v2",
   "stateVersion": "current-state-20260927",
   "modules": [
@@ -158,8 +158,8 @@
     },
     {
       "path": "/mental-lab/src/app.js",
-      "bytes": 53579,
-      "sha256": "73b3df5bb78c7fd406141e673f736d22e15ff982a268ce02c43782f656353a32"
+      "bytes": 54223,
+      "sha256": "3a50b1d43256acdc51cb8cabd6eab9f6b9be3a15215a21b59061cd77b21b0c05"
     },
     {
       "path": "/mental-lab/src/assessments.js",
@@ -178,13 +178,18 @@
     },
     {
       "path": "/mental-lab/src/current-state.js",
-      "bytes": 13211,
-      "sha256": "f79c21f118fb2c0c2d9a7867e96003240379a5d21374141142a78ff0a32497f1"
+      "bytes": 13533,
+      "sha256": "f5b48920a2e903c8e28fc494221a2cba366becfae09cba6c263e905937507706"
+    },
+    {
+      "path": "/mental-lab/src/plain-reflections.js",
+      "bytes": 42040,
+      "sha256": "c824f658f62da7cfcfca83ee5259ad3b07e349f8c69df9400dfbaaf15784574b"
     },
     {
       "path": "/mental-lab/src/play.js",
-      "bytes": 12721,
-      "sha256": "11b36105e8410a150975917873cf2f13cdcfea54d5c1cfb8363a0a64f2208e8f"
+      "bytes": 13429,
+      "sha256": "ec55ee14c96cd9d7995b5b3d4dc408cf730c76d9e7170bfa8482396891557414"
     },
     {
       "path": "/mental-lab/src/privacy.js",
@@ -193,18 +198,18 @@
     },
     {
       "path": "/mental-lab/src/recent-type.js",
-      "bytes": 9583,
-      "sha256": "4882329c93ab941f087e94295e1d6f3b3ac6b17a4ad730f663e5aa2bd9bc96f0"
+      "bytes": 9414,
+      "sha256": "d0f88a1781286dc97f79fcbf02426606876794a79d8cf9f83cb3aaecc1cc6868"
     },
     {
       "path": "/mental-lab/src/report-copy.js",
-      "bytes": 7227,
-      "sha256": "8591d6691d0e55cbaaab51c130c3cb8e887941d24832629456cb145094a8c55b"
+      "bytes": 5771,
+      "sha256": "3a0dae0c061fe477a26754220c17df56431acf59f6eb144f7865286074f945b4"
     },
     {
       "path": "/mental-lab/src/report-text.js",
-      "bytes": 1610,
-      "sha256": "12ae93d9b233d71c4f116df21396c1fd0bd4f93ddbbbe3ebbb74c06adc67c13a"
+      "bytes": 1702,
+      "sha256": "edd7a5c930b7ec9524ebaf4fc1f63e58f1fd1be1caccc6f16059fc10639b617b"
     },
     {
       "path": "/mental-lab/src/reset.js",
@@ -213,8 +218,8 @@
     },
     {
       "path": "/mental-lab/src/result-insights.js",
-      "bytes": 16319,
-      "sha256": "80a23c5b18dc854818c6c81a88327118f525050c73d3729f639266bcbfde9457"
+      "bytes": 15512,
+      "sha256": "63687a5d14b5d722ee69acd669fd40b458eccb247641c387d40ff6814bbe475a"
     },
     {
       "path": "/mental-lab/src/scene-assessments.js",
@@ -233,8 +238,8 @@
     },
     {
       "path": "/mental-lab/src/styles.css",
-      "bytes": 44619,
-      "sha256": "aae13b06a6117f64cb015a7226f5a853f3973f23d3cc7eaa64fb252df46a909a"
+      "bytes": 45027,
+      "sha256": "f2799b9c680528406cee944e45ff194526cdfa9148a7a626eb0f95dd469d1aab"
     },
     {
       "path": "/mental-lab/src/trading-topics.js",
@@ -257,5 +262,5 @@
       "sha256": "fc3ec2766fddfbe26905acbd3a46e2bad7a8f8ac7ef5f30e3707b5abb750cf9a"
     }
   ],
-  "releaseId": "9c92c33f4fbaffcf3173eac262e33e9edfc7908cd29e61ab53dcfc25f0e05aad"
+  "releaseId": "a23af5f9ec7bb0d09d17c85d8a7b24265639e41468c712f5890c016b2ec5a409"
 }

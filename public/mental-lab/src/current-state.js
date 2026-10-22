@@ -1,4 +1,5 @@
 import { isCurrentRecord } from './scoring.js';
+import { plainFacet } from './plain-reflections.js';
 
 // A transparent reading of reported experiences and functioning, not a clinical scale.
 export const stateRuleVersion = 'current-state-20260927';
@@ -37,6 +38,7 @@ export function currentState(result) {
   const someImpact = impact.some(e => e.value === 'some');
   const persistent = ['weeks', 'months', 'long'].includes(ctx.duration);
   const notice = result.notices[0];
+  const plainFocus = focus ? plainFacet(result.id,focus) : null;
   let kind, title, description, basis = [];
   if (urgent) {
     kind = 'support-now';
@@ -71,11 +73,11 @@ export function currentState(result) {
     description = focus ? `已答内容里，“${focus.label}”值得先留意。其他方面还没了解充分，下面的动作只针对你已经分享的部分。` : '你还没有提供足够的困扰频率回答。可以补充最关心的题目，或直接说明生活受到什么影响；不想回答的内容仍可留白。';
     if (ctx.intensity === 'manageable') description += '你也提到有些难受、尚能承受，这部分感受仍值得照顾。';
   } else if (frequent.length) {
-    kind = 'recurring'; title = moduleCopy[result.id]?.[0] || '有些困扰反复出现，先针对一件事调整';
-    description = `本次最值得先看的方面是“${focus.label}”。先用下面的一个动作减少这部分消耗；频率本身不能说明对生活的影响有多大。`;
+    kind = 'recurring'; title = (plainFocus?.grounded ? plainFocus.title : null) || moduleCopy[result.id]?.[0] || '有些困扰反复出现，先针对一件事调整';
+    description = plainFocus?.grounded ? `${plainFocus.reading} ${plainFocus.care}` : '有些具体时刻让你费心，但还不足以概括整个方面。先看最在意的一次，不急着给自己下结论。';
   } else if (occasional.length || ctx.intensity === 'manageable') {
-    kind = 'occasional'; title = '有些困扰已经出现，先做针对性调整';
-    description = '本次回答没有经常出现的困扰条目，但偶尔的难受也值得处理。先从一个具体场景着手，观察它是否继续打扰日常。';
+    kind = 'occasional'; title = '有些时候会难受，先照顾最在意的一次';
+    description = plainFocus?.tentative ? `${plainFocus.reading} ${plainFocus.care}` : '即使不常发生，那一次的难受也值得照顾。不用先证明它足够严重，才允许自己停一下或找人说说。';
   } else {
     kind = 'infrequent'; title = '本次回答中的困扰出现较少，先保留有帮助的安排';
     description = '回答充分的困扰题都选择了“从不”或“很少”。这次可以先维持对你有帮助的安排；这不代表未问到的方面没有困难，也不是健康证明。';
@@ -92,8 +94,8 @@ export function currentState(result) {
   if (ctx.intensity === 'none' && frequent.length) caveats.push('你也选择了“没有相应困扰”。这与较常出现的体验可能指向不同处境，请结合原题确认；这里不会替你修改答案。');
 
   const professional = urgent || affected || persistent || ctx.change === 'worse' || ctx.intensity === 'distressing';
-  const priority = urgent ? '先获得现实支持，帮助维持眼前的基本生活' : notice ? notice.title : focus ? `先处理：${focus.label}` : professional ? '先减轻眼前的负担，并安排一次支持对话' : kind === 'incomplete' ? '先说清最影响你的一件事' : resources.length ? '先保留一项已经有帮助的安排' : '先照顾一项必要的生活安排';
-  const action = focus?.action || resources[0]?.action || '选一件今天必要的生活小事，看看需要什么时间、精力或实际帮助；不必为了完成建议增加新负担。';
+  const priority = urgent ? '先获得现实支持，帮助维持眼前的基本生活' : notice ? notice.title : focus ? `先照顾：${plainFocus?.title || focus.label}` : professional ? '先减轻眼前的负担，并安排一次支持对话' : kind === 'incomplete' ? '先说清最影响你的一件事' : resources.length ? '先保留一项已经有帮助的安排' : '先照顾一项必要的生活安排';
+  const action = plainFocus?.step || (resources[0] ? plainFacet(result.id,resources[0])?.step : null) || '选一件今天必要的生活小事，看看需要什么时间、精力或实际帮助；不必为了完成建议增加新负担。';
   const steps = urgent ? [
     { when: '现在', title: '联系一个可信任的人，并尽快安排专业帮助', text: '可以直接说：“我最近很难应付，能陪我一起联系医生或心理健康专业人员吗？”若此刻可能伤害自己或无法保证安全，立即联系当地紧急服务或去急诊。' },
     { when: '今天', title: '把一项必要安排交给别人一起处理', text: notice ? notice.text : '从进餐、出行、必要职责里选一项最难维持的事，提出具体协助请求；暂缓可以延后的额外任务。' },

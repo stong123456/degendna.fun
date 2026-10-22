@@ -1,18 +1,10 @@
+import { plainFacet } from './plain-reflections.js';
 // Presentation only: keep saved answers, scoring rules and comparisons unchanged.
 export function humanizeReport(result) {
   const domains = result.domains.map((domain) => {
-    const resource = domain.kind === 'resource';
-    let interpretation;
-    if (!domain.interpretable) interpretation = '这一部分回答还不多，我还不能了解你的情况。你可以按自己的节奏补充，也可以留白，不用勉强自己。';
-    else if (resource && domain.frequent) interpretation = '你提到，这里有一些事情是你经常能做到或感受到的。可以留意其中哪一件真的帮到了你，给它留一点位置。有这些支持，也不意味着你就不该难受。';
-    else if (resource) interpretation = '这段时间，这些能帮你缓一缓的事情似乎不常出现。也许是没有需要，也许是时间、精力或身边的条件不允许。这不是你不够努力，不必因此责备自己。';
-    else if (domain.frequent) interpretation = '你提到，这一方面有些感受经常出现。它们可能让你费心，也值得被认真听见。可以先看一眼下面的回答，选出最让你在意的那件事，不用一次处理所有问题。';
-    else if (domain.occasional) interpretation = '这一方面有些感受偶尔会来。即使不常发生，如果当时很难受，也值得照顾，不必拿次数说服自己忍一忍。';
-    else interpretation = '你在这一部分选的都是“从不”或“很少”。这些事情最近可能不太打扰你。如果还有题目没问到的难处，你的感受依然值得被听见。';
-    const example = domain.interpretable && domain.evidence.find(item => item.value >= 3);
-    if (example) interpretation = `比如“${example.text}”，你选了“${example.response}”。${interpretation}`;
-    interpretation = `${domain.meaning} ${interpretation}`;
-    return { ...domain, label: domain.label, interpretation, reflection: resource ? '这里面，哪一件事曾让你稍微轻松一点？' : '如果只想聊一件事，你现在最想让别人理解什么？' };
+    const plain = plainFacet(result.id,domain);
+    return { ...domain, humanTitle: plain.title, interpretation: plain.reading, care: plain.care, nextStep: plain.step,
+      hypothesis: plain.hypothesis, reflection: plain.hypothesis || (domain.kind === 'resource' ? '哪一种做法真的帮过你，今天想留住哪一点？' : '哪一句贴近你？如果不贴近，你更愿意怎样描述自己？') };
   });
   const frequent = domains.filter(d => d.interpretable && d.kind === 'burden' && d.frequent);
   const understood = domains.some(d => d.interpretable && d.kind === 'burden');

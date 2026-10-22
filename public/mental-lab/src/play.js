@@ -23,10 +23,10 @@ export const playStyles = [
 ];
 // Editorial reflections on these choices, never a psychometric personality result.
 const styleGuides = {
-  research: { trait:'遇到不确定时，先找证据和出处。', strength:'这种选择可以为讨论提供可核对的事实，减少只凭单一说法作决定。', blindSpot:'信息越多未必越清楚。可以核对自己是否一直补材料，却没有明确要解决的问题。', action:'下次研究前写一个问题、两类必要信息和结束条件；分开记录事实与猜测。', question:'什么新事实真的会改变你的判断？' },
-  plan: { trait:'先对照已有安排，再考虑是否改变方向。', strength:'这种选择可以保留决定依据，让之后的复盘有清楚的参照。', blindSpot:'原来的条件可能已变化。可以核对自己是在保持一致，还是忽略了值得更新的新事实。', action:'为一个计划写下适用条件、允许调整的事实和下一次回看时点；变化时记录理由。', question:'你守住的是重要条件，还是已经不适用的旧安排？' },
-  social: { trait:'通过听取和交流不同观点来整理想法。', strength:'这种选择可以让讨论看见单一视角遗漏的信息，也更容易表达疑问。', blindSpot:'一致意见并不自动成为证据。可以核对谁有不同经历，以及你自己的判断依据是什么。', action:'交流后独立写三行：对方的事实、对方的解释、你仍需要确认的部分。', question:'如果没有群体赞同，你仍认同哪些理由？' },
-  space: { trait:'先给自己留时间，再决定是否参与。', strength:'这种选择可以保护注意力，让眼前的生活安排也有位置。', blindSpot:'等待也需要回看点。可以核对自己是在主动留白，还是因为不清楚下一步而一直拖延。', action:'为一件在意的小事约定回看时间和一个可逆的下一步；允许最后决定不参与。', question:'留白之后，你想带着什么信息回来？' }
+  research: { trait:'在这些想象情境里，你更愿意先弄清楚，再决定要不要动。可能你需要的不是更多热闹，而是一点能说清理由的踏实。这只是娱乐解读，不是在断定你的动机。', strength:'别人急着往前时，你愿意多问一句“依据是什么”，能给讨论带来值得核对的信息。', blindSpot:'也看看自己是否在等一个完全确定的答案。材料越来越多，却还没想清要回答哪个问题时，可以先停。', action:'下次搜索前写一个问题和够用的条件，查到后先回到原本要处理的事。', question:'你还缺一条重要事实，还是只是有点不敢结束搜索？' },
+  plan: { trait:'在这些想象情境里，你会先把原来的安排拿出来看一眼。它可能在提醒你：别因为眼前热闹，就忘了自己原本要做什么。这只是娱乐解读。', strength:'愿意保留当时的理由，让之后的复盘不至于只剩“早知道”。', blindSpot:'有时原来的条件真的变了，守计划不等于不能改。关键是有没有新事实，而不是必须显得坚定。', action:'给一个计划补一句“出现什么新事实时，我会重新看”，调整时记下理由。', question:'你在守住重要的需要，还是只是不想承认旧方法不合适了？' },
+  social: { trait:'在这些想象情境里，你把想法带到对话里慢慢理清。有人回应可能让问题更好想，但赞同不一定就是证据。这只是娱乐解读。', strength:'你愿意听听别人怎么经历同一件事，也给自己的疑问找一个能说出口的位置。', blindSpot:'一群人都赞同，容易让人暂时放心；但也要看看有没有遗漏不同经历，以及自己究竟认同什么。', action:'聊完以后独立写三行：听到了什么事实、哪些是对方的解释、自己还需要确认什么。', question:'如果没人给这个想法点赞，你还认同哪些理由？' },
+  space: { trait:'在这些想象情境里，你愿意先不急着加入。给自己一点时间，也是在把选择权留在自己手上。这只是娱乐解读。', strength:'你让眼前的生活也有位置，不必每一次热闹都立刻参与。', blindSpot:'留白和一直不敢开始有时很像。可以看看休息后有没有更清楚，还是下一步始终没被说出来。', action:'给一件在意的小事留一个回看时间，到时只决定一个可撤回的小步骤；也允许最终不参与。', question:'这一段时间是在帮你恢复，还是需要有人陪你把第一步说清楚？' }
 };
 export const playQuestions = [
   [
@@ -107,7 +107,7 @@ export function playResult(answers) {
         ? top[0].text
         : "几种选择同样常出现，不强选一种风格。你可以在不同情境里使用不同方式。",
     version: "play-20261016-v1",
-    interpretationVersion: "play-reflection-20261016-v2",
+    interpretationVersion: "play-reflection-20261022-v3",
     distribution: counts.map(({id,name,count})=>({id,name,count})),
     perspectives: top.map(style=>({ id:style.id, name:style.name, count:style.count, ...styleGuides[style.id],
       evidence:playQuestions.flatMap((q,i)=>answers[i]===playStyles.findIndex(s=>s.id===style.id)?[{question:q.text,answer:q.options[answers[i]]}]:[]) })),
@@ -190,7 +190,7 @@ export function playView(el) {
               el("p", {}, "这些只是本次情境选择的概括，不是固定人格。优势是这些选择可能带来的帮助，盲点是值得核对的问题，并不表示你一定存在这些缺点。"),
               el('p',{},`本次分布：${result.distribution.map(s=>`${s.name} ${s.count}/8`).join('；')}。次数是本次选项数，不是能力分或百分位。`),
               ...result.perspectives.map(style=>el('article',{class:'insight-card'},[
-                el('h4',{},style.name),el('p',{},`本次选择反映的倾向：${style.trait}`),
+                el('h4',{},style.name),el('p',{},`像不像你的一个小习惯：${style.trait}`),
                 el('h4',{},'可能的优势'),el('p',{},style.strength),el('h4',{},'值得核对的盲点'),el('p',{},style.blindSpot),
                 el('h4',{},'下一次可以试试'),el('p',{},style.action),el('p',{},style.question),
                 el('details',{},[el('summary',{},'对应哪些选择？'),el('ul',{},style.evidence.map(e=>el('li',{},`${e.question} → ${e.answer}`)))])

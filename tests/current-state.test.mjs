@@ -1,3 +1,4 @@
+import { plainReflections } from '../public/mental-lab/src/plain-reflections.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { assessments, assessmentMap } from '../public/mental-lab/src/assessments.js';
@@ -40,7 +41,7 @@ test('actions follow the actual domain, rare notices remain visible, contradicti
  const a=assessmentMap.workbound;
  for(const d of a.domains.filter(d=>d.kind==='burden')){
    const s=currentState(scoreAssessment(a,Object.fromEntries(a.items.map(i=>[i.id,i.dimension===d.key?3:0]))));
-   assert.equal(s.steps[0].text,d.action);assert.ok(s.priority.includes(d.label));
+   assert.equal(s.steps[0].text,plainReflections.workbound[d.key].step);assert.ok(s.priority.includes(plainReflections.workbound[d.key].title));
  }
  const financial=currentState(scoreAssessment(assessmentMap.trading,{tr41:1}));
  assert.equal(financial.kind,'specific-concern');assert.ok(financial.evidence.some(e=>e.id==='tr41'));

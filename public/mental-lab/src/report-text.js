@@ -13,7 +13,7 @@ export function privateReportText(raw) {
     ...status.steps.map(s=>`${s.when} · ${s.title}\n${s.text}`),status.checkpoint,status.escalation,
     ...(type ? [`近期类型：${type.name || '暂不选主类型'}`,type.text] : []),
     ...insightsText(result),result.summary,...result.warnings,
-    ...result.domains.flatMap(d=>[d.label,d.interpretation,...d.evidence.map(e=>`${e.text}：${e.response}`),`可尝试：${d.action}`,`边界：${d.limit}`]),
+    ...result.domains.flatMap(d=>[d.humanTitle || d.label,d.interpretation,d.care,...(d.hypothesis ? [d.hypothesis] : []),...d.evidence.map(e=>`${e.text}：${e.response}`),`今天先试这一小步：${d.nextStep || d.action}`,`边界：${d.limit}`]),
     ...result.context.map(e=>`${e.question}：${e.label}`),
     ...result.notices.flatMap(n=>[n.title,n.text,...n.evidence.map(e=>`${e.text}：${e.response}`)]),
     ...result.patterns.map(p=>`${p.title}：${p.text}`),result.support.title,result.support.text,...result.support.reasons,...result.limitations].join('\n\n');
