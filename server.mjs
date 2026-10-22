@@ -1,4 +1,5 @@
 import { createAccountApi } from './account-api.mjs';
+import { createDewebGateway } from './deweb-gateway.mjs';
 import { createServer } from "node:http";
 import { createHash, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -4449,8 +4450,11 @@ async function serveStatic(req, res, pathname) {
 }
 
 const accountApi = createAccountApi();
+const dewebGateway = createDewebGateway();
+if (process.env.DEWEB_GATEWAY_HOST) dewebGateway.warm();
 const server = createServer(async (req, res) => {
   const url = new URL(req.url || "/", `http://${req.headers.host || "127.0.0.1"}`);
+  if (await dewebGateway.handle(req, res, url.pathname)) return;
   if (await accountApi.handle(req, res, url.pathname, url.searchParams)) return;
   if (url.pathname.startsWith("/xiaojing/api/")) {
     await handleXiaojingApi(req, res, url.pathname);
