@@ -1,7 +1,7 @@
 {
   "format": "degendna-public-release-v1",
   "mode": "web",
-  "sourceRevision": "public-files:42bf01a766ff0574abe347e9f0e4f7efa1b16b6ec7b4c525ff541ff49457e865",
+  "sourceRevision": "public-files:e2976aa2069f7e2223ff352ec107dba3f05e9484355505367f0bd7a21918b303",
   "interpretationVersion": "reflection-20261022-v3",
   "typeVersion": "types-20261016-v2",
   "stateVersion": "current-state-20260927",
@@ -248,8 +248,8 @@
     },
     {
       "path": "/mental-lab/src/version.js",
-      "bytes": 4562,
-      "sha256": "edb28c84d01b6346c421949facdd9e4df8021702d318e345bf2f3ead9f5f184f"
+      "bytes": 7556,
+      "sha256": "eb6abd4a0213cf64ad3c7280286502a10768d07f892856771bc72b2c7f2c54fb"
     },
     {
       "path": "/mental-lab/vendor/lucide-LICENSE",
@@ -262,5 +262,5 @@
       "sha256": "fc3ec2766fddfbe26905acbd3a46e2bad7a8f8ac7ef5f30e3707b5abb750cf9a"
     }
   ],
-  "releaseId": "a23af5f9ec7bb0d09d17c85d8a7b24265639e41468c712f5890c016b2ec5a409"
+  "releaseId": "38b0b564679d30c64e7af9f107df3a1defccb945cd1d2e637982c7f00aa4cef3"
 }
